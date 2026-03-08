@@ -1,0 +1,77 @@
+<template>
+  <div class="page-card">
+    <h2 class="page-title">物资信息管理</h2>
+    <el-space style="margin-bottom:12px">
+      <el-input v-model="keyword" placeholder="名称/编码" style="width:220px" clearable />
+      <el-button @click="load">查询</el-button>
+      <el-button type="primary" @click="openCreate">新增物资</el-button>
+    </el-space>
+
+    <el-table :data="list" border>
+      <el-table-column prop="materialCode" label="物资编码" width="120" />
+      <el-table-column prop="materialName" label="物资名称" />
+      <el-table-column prop="categoryId" label="分类ID" width="90" />
+      <el-table-column prop="unit" label="单位" width="80" />
+      <el-table-column prop="safetyStock" label="安全库存" width="100" />
+      <el-table-column prop="supplier" label="供应商" />
+      <el-table-column label="操作" width="170">
+        <template #default="scope">
+          <el-space>
+            <el-button size="small" @click="openEdit(scope.row)">编辑</el-button>
+            <el-popconfirm title="确定删除？" @confirm="remove(scope.row.id)">
+              <template #reference><el-button size="small" type="danger">删除</el-button></template>
+            </el-popconfirm>
+          </el-space>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <el-dialog v-model="visible" title="物资信息" width="700">
+      <el-form :model="form" label-width="110px">
+        <el-row :gutter="12">
+          <el-col :span="12"><el-form-item label="物资编码"><el-input v-model="form.materialCode" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="物资名称"><el-input v-model="form.materialName" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="分类"><el-select v-model="form.categoryId" style="width:100%"><el-option v-for="c in categories" :key="c.id" :label="c.categoryName" :value="c.id" /></el-select></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="规格"><el-input v-model="form.spec" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="单位"><el-input v-model="form.unit" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="安全库存"><el-input-number v-model="form.safetyStock" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="保质期(天)"><el-input-number v-model="form.shelfLifeDays" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="供应商"><el-input v-model="form.supplier" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="单价"><el-input-number v-model="form.unitPrice" :min="0" :precision="2" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="24"><el-form-item label="备注"><el-input v-model="form.remark" /></el-form-item></el-col>
+        </el-row>
+      </el-form>
+      <template #footer>
+        <el-button @click="visible = false">取消</el-button>
+        <el-button type="primary" @click="save">保存</el-button>
+      </template>
+    </el-dialog>
+  </div>
+</template>
+
+<script setup>
+import { onMounted, reactive, ref } from 'vue'
+import { apiDelete, apiGet, apiPost } from '../../api'
+
+const list = ref([])
+const categories = ref([])
+const keyword = ref('')
+const visible = ref(false)
+const form = reactive({
+  id: null,
+  materialCode: '', materialName: '', categoryId: null, spec: '', unit: '',
+  safetyStock: 0, shelfLifeDays: 0, supplier: '', unitPrice: 0, remark: ''
+})
+
+const load = async () => { list.value = await apiGet('/api/material/info', { keyword: keyword.value }) }
+const loadCategory = async () => { categories.value = await apiGet('/api/material/category') }
+const openCreate = () => {
+  Object.assign(form, { id: null, materialCode: '', materialName: '', categoryId: null, spec: '', unit: '', safetyStock: 0, shelfLifeDays: 0, supplier: '', unitPrice: 0, remark: '' })
+  visible.value = true
+}
+const openEdit = (row) => { Object.assign(form, row); visible.value = true }
+const save = async () => { await apiPost('/api/material/info', form); visible.value = false; await load() }
+const remove = async (id) => { await apiDelete(`/api/material/info/${id}`); await load() }
+
+onMounted(async () => { await loadCategory(); await load() })
+</script>

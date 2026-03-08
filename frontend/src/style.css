@@ -1,0 +1,40 @@
+:root {
+  --bg: #f4f7fb;
+  --panel: #ffffff;
+  --primary: #0f6b63;
+  --primary-soft: #e3f4f2;
+  --text: #1b2430;
+  --subtext: #5f6b7a;
+  --danger: #d64545;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  background: radial-gradient(circle at 10% 5%, #def4f1 0%, #f4f7fb 40%, #edf2fa 100%);
+  color: var(--text);
+  font-family: "Source Han Sans CN", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+a {
+  color: inherit;
+}
+
+.page-card {
+  background: var(--panel);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 8px 22px rgba(27, 36, 48, 0.08);
+}
+
+.page-title {
+  margin: 0 0 16px;
+  font-size: 20px;
+  font-weight: 700;
+}
