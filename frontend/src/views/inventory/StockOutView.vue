@@ -1,48 +1,40 @@
 <template>
   <div class="page-card">
-    <h2 class="page-title">出库管理（FEFO）</h2>
-    <el-form :model="form" inline>
-      <el-form-item label="关联申请ID"><el-input-number v-model="form.applyOrderId" :min="1" /></el-form-item>
-      <el-form-item label="仓库">
-        <el-select v-model="form.warehouseId" style="width:180px">
-          <el-option v-for="w in warehouses" :key="w.id" :label="w.warehouseName" :value="w.id" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="备注"><el-input v-model="form.remark" style="width:260px" /></el-form-item>
-    </el-form>
+    <h2 class="page-title">出库管理</h2>
+    <el-button type="primary" @click="openCreate" style="margin-bottom:12px">新建出库单</el-button>
 
-    <el-table :data="form.items" border style="margin-top:8px">
-      <el-table-column label="物资" min-width="180">
-        <template #default="scope">
-          <el-select v-model="scope.row.materialId" filterable style="width:100%">
-            <el-option v-for="m in materials" :key="m.id" :label="m.materialName" :value="m.id" />
-          </el-select>
-        </template>
-      </el-table-column>
-      <el-table-column label="数量" width="120">
-        <template #default="scope"><el-input-number v-model="scope.row.quantity" :min="1" style="width:100%" /></template>
-      </el-table-column>
-      <el-table-column label="推荐批次" min-width="220">
-        <template #default="scope">
-          <el-button size="small" @click="checkRecommend(scope.row)">查看推荐</el-button>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="80">
-        <template #default="scope"><el-button link type="danger" @click="remove(scope.$index)">删除</el-button></template>
-      </el-table-column>
+    <el-table :data="list" border>
+      <el-table-column prop="id" label="ID" width="70" />
+      <el-table-column prop="applyOrderId" label="申领单ID" width="100" />
+      <el-table-column prop="warehouseId" label="仓库ID" width="90" />
+      <el-table-column prop="operatorId" label="操作人ID" width="100" />
+      <el-table-column prop="remark" label="备注" show-overflow-tooltip />
+      <el-table-column prop="createdAt" label="创建时间" width="170" />
     </el-table>
 
-    <el-space style="margin-top:12px">
-      <el-button @click="add">新增明细</el-button>
-      <el-button type="primary" @click="submit">提交出库</el-button>
-    </el-space>
-
-    <el-dialog v-model="showRec" title="近效期优先推荐批次" width="700">
-      <el-table :data="recommendBatches" border>
-        <el-table-column prop="batchNo" label="批次号" />
-        <el-table-column prop="remainQty" label="剩余数量" width="120" />
-        <el-table-column prop="expireDate" label="过期日期" width="140" />
-      </el-table>
+    <el-dialog v-model="visible" title="新建出库单" width="650">
+      <el-form :model="form" label-width="100px">
+        <el-form-item label="申领单ID"><el-input-number v-model="form.applyOrderId" :min="0" style="width:100%" placeholder="可选" /></el-form-item>
+        <el-form-item label="出库仓库">
+          <el-select v-model="form.warehouseId" placeholder="请选择仓库" style="width:100%">
+            <el-option v-for="w in warehouses" :key="w.id" :label="w.warehouseName" :value="w.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注"><el-input v-model="form.remark" type="textarea" /></el-form-item>
+        <el-divider>出库明细</el-divider>
+        <div v-for="(item, idx) in form.items" :key="idx" style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+          <el-select v-model="item.materialId" placeholder="物资" style="width:200px">
+            <el-option v-for="m in materials" :key="m.id" :label="m.materialName" :value="m.id" />
+          </el-select>
+          <el-input-number v-model="item.quantity" :min="1" placeholder="数量" style="width:140px" />
+          <el-button type="danger" size="small" @click="form.items.splice(idx, 1)">删除</el-button>
+        </div>
+        <el-button @click="form.items.push({ materialId: null, quantity: 1 })">添加明细</el-button>
+      </el-form>
+      <template #footer>
+        <el-button @click="visible = false">取消</el-button>
+        <el-button type="primary" @click="save">提交出库</el-button>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -52,44 +44,28 @@ import { onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { apiGet, apiPost } from '../../api'
 
+const list = ref([])
 const warehouses = ref([])
 const materials = ref([])
-const showRec = ref(false)
-const recommendBatches = ref([])
-
-const form = reactive({
-  applyOrderId: null,
-  warehouseId: null,
-  remark: '',
-  items: [{ materialId: null, quantity: 1 }]
-})
+const visible = ref(false)
+const form = reactive({ applyOrderId: null, warehouseId: null, remark: '', items: [{ materialId: null, quantity: 1 }] })
 
 const loadBase = async () => {
   warehouses.value = await apiGet('/api/warehouse/list')
   materials.value = await apiGet('/api/material/info')
 }
-
-const add = () => form.items.push({ materialId: null, quantity: 1 })
-const remove = (i) => form.items.splice(i, 1)
-
-const checkRecommend = async (row) => {
-  if (!row.materialId || !form.warehouseId) {
-    ElMessage.warning('请先选择仓库和物资')
-    return
-  }
-  recommendBatches.value = await apiGet('/api/inventory/recommend-outbound', { materialId: row.materialId, warehouseId: form.warehouseId })
-  showRec.value = true
-}
-
-const submit = async () => {
-  if (!form.warehouseId || form.items.length === 0) {
-    ElMessage.warning('请填写仓库和明细')
-    return
-  }
-  await apiPost('/api/inventory/stock-out', form)
-  ElMessage.success('出库完成')
+const load = async () => { list.value = await apiGet('/api/inventory/stock-out') }
+const openCreate = () => {
+  form.applyOrderId = null; form.warehouseId = null; form.remark = ''
   form.items = [{ materialId: null, quantity: 1 }]
+  visible.value = true
+}
+const save = async () => {
+  await apiPost('/api/inventory/stock-out', form)
+  ElMessage.success('出库成功')
+  visible.value = false
+  await load()
 }
 
-onMounted(loadBase)
+onMounted(async () => { await loadBase(); await load() })
 </script>

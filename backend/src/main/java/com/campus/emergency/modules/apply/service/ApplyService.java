@@ -60,7 +60,7 @@ public class ApplyService {
             orderItem.setActualQty(0);
             applyOrderItemMapper.insert(orderItem);
         }
-        operationLogService.log(AuthUtil.currentUserId(), "APPLY", "CREATE", "申请单:" + order.getId());
+        operationLogService.log(AuthUtil.currentUserId(), "APPLY", "CREATE", "创建申领单:" + order.getId());
         return detail(order.getId());
     }
 
@@ -68,55 +68,55 @@ public class ApplyService {
     public void submit(Long orderId) {
         ApplyOrder order = mustGet(orderId);
         if (!OrderStatus.DRAFT.equals(order.getStatus())) {
-            throw new BizException("仅草稿状态可提交");
+            throw new BizException("当前状态不允许提交");
         }
         if (order.getUrgencyLevel() != null && order.getUrgencyLevel() >= 2) {
             order.setFastTrack(1);
             order.setStatus(OrderStatus.APPROVED);
             order.setApproverId(AuthUtil.currentUserId());
-            order.setApproveRemark("紧急申请快速审批通过");
+            order.setApproveRemark("紧急申领自动审批通过");
             order.setApproveTime(LocalDateTime.now());
         } else {
             order.setStatus(OrderStatus.SUBMITTED);
         }
         applyOrderMapper.updateById(order);
-        operationLogService.log(AuthUtil.currentUserId(), "APPLY", "SUBMIT", "申请单:" + orderId);
+        operationLogService.log(AuthUtil.currentUserId(), "APPLY", "SUBMIT", "提交申领单:" + orderId);
     }
 
     public void approve(Long orderId, String remark) {
         ApplyOrder order = mustGet(orderId);
         if (!OrderStatus.SUBMITTED.equals(order.getStatus())) {
-            throw new BizException("当前状态不可审批通过");
+            throw new BizException("当前状态不允许审批");
         }
         order.setStatus(OrderStatus.APPROVED);
         order.setApproverId(AuthUtil.currentUserId());
         order.setApproveRemark(remark);
         order.setApproveTime(LocalDateTime.now());
         applyOrderMapper.updateById(order);
-        operationLogService.log(AuthUtil.currentUserId(), "APPLY", "APPROVE", "申请单:" + orderId);
+        operationLogService.log(AuthUtil.currentUserId(), "APPLY", "APPROVE", "审批通过申领单:" + orderId);
     }
 
     public void reject(Long orderId, String remark) {
         ApplyOrder order = mustGet(orderId);
         if (!OrderStatus.SUBMITTED.equals(order.getStatus())) {
-            throw new BizException("当前状态不可驳回");
+            throw new BizException("当前状态不允许驳回");
         }
         order.setStatus(OrderStatus.REJECTED);
         order.setApproverId(AuthUtil.currentUserId());
         order.setApproveRemark(remark);
         order.setApproveTime(LocalDateTime.now());
         applyOrderMapper.updateById(order);
-        operationLogService.log(AuthUtil.currentUserId(), "APPLY", "REJECT", "申请单:" + orderId);
+        operationLogService.log(AuthUtil.currentUserId(), "APPLY", "REJECT", "驳回申领单:" + orderId);
     }
 
     public void receive(Long orderId) {
         ApplyOrder order = mustGet(orderId);
         if (!OrderStatus.OUTBOUND.equals(order.getStatus())) {
-            throw new BizException("仅已出库状态可签收");
+            throw new BizException("当前状态不允许签收");
         }
         order.setStatus(OrderStatus.RECEIVED);
         applyOrderMapper.updateById(order);
-        operationLogService.log(AuthUtil.currentUserId(), "APPLY", "RECEIVE", "申请单:" + orderId);
+        operationLogService.log(AuthUtil.currentUserId(), "APPLY", "RECEIVE", "签收申领单:" + orderId);
     }
 
     public Map<String, Object> detail(Long orderId) {
@@ -131,7 +131,7 @@ public class ApplyService {
     private ApplyOrder mustGet(Long orderId) {
         ApplyOrder order = applyOrderMapper.selectById(orderId);
         if (order == null) {
-            throw new BizException("申请单不存在");
+            throw new BizException("申领单不存在");
         }
         return order;
     }

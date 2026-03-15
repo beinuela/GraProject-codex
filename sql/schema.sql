@@ -4,6 +4,13 @@ USE campus_emergency;
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS notification;
+DROP TABLE IF EXISTS login_log;
+DROP TABLE IF EXISTS system_config;
+DROP TABLE IF EXISTS emergency_event;
+DROP TABLE IF EXISTS supplier;
+DROP TABLE IF EXISTS storage_location;
+DROP TABLE IF EXISTS campus;
 DROP TABLE IF EXISTS operation_log;
 DROP TABLE IF EXISTS warning_record;
 DROP TABLE IF EXISTS transfer_order_item;
@@ -278,6 +285,128 @@ CREATE TABLE operation_log (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_log_operator (operator_id),
     INDEX idx_log_module (module)
+);
+
+-- ===================== 校区管理 =====================
+CREATE TABLE campus (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    campus_name VARCHAR(100) NOT NULL,
+    address VARCHAR(255),
+    manager VARCHAR(100),
+    contact_phone VARCHAR(50),
+    remark VARCHAR(255),
+    deleted TINYINT NOT NULL DEFAULT 0,
+    version INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- ===================== 库位管理 =====================
+CREATE TABLE storage_location (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    location_code VARCHAR(50) NOT NULL,
+    location_name VARCHAR(100) NOT NULL,
+    warehouse_id BIGINT NOT NULL,
+    capacity INT NOT NULL DEFAULT 0,
+    used_qty INT NOT NULL DEFAULT 0,
+    status VARCHAR(30) NOT NULL DEFAULT 'NORMAL',
+    remark VARCHAR(255),
+    deleted TINYINT NOT NULL DEFAULT 0,
+    version INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_location_warehouse (warehouse_id)
+);
+
+-- ===================== 供应商管理 =====================
+CREATE TABLE supplier (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    supplier_name VARCHAR(100) NOT NULL,
+    contact_person VARCHAR(100),
+    contact_phone VARCHAR(50),
+    email VARCHAR(100),
+    address VARCHAR(255),
+    supply_scope VARCHAR(500),
+    remark VARCHAR(255),
+    deleted TINYINT NOT NULL DEFAULT 0,
+    version INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- ===================== 应急事件管理 =====================
+CREATE TABLE emergency_event (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    event_title VARCHAR(200) NOT NULL,
+    event_type VARCHAR(50) NOT NULL,
+    event_level VARCHAR(30) NOT NULL DEFAULT 'NORMAL',
+    campus_id BIGINT,
+    location VARCHAR(255),
+    description TEXT,
+    status VARCHAR(30) NOT NULL DEFAULT 'OPEN',
+    reporter_id BIGINT,
+    handler_id BIGINT,
+    handle_result TEXT,
+    event_time DATETIME NOT NULL,
+    close_time DATETIME,
+    deleted TINYINT NOT NULL DEFAULT 0,
+    version INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_event_status (status),
+    INDEX idx_event_type (event_type),
+    INDEX idx_event_level (event_level)
+);
+
+-- ===================== 系统配置 =====================
+CREATE TABLE system_config (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    config_key VARCHAR(100) NOT NULL UNIQUE,
+    config_value VARCHAR(500) NOT NULL,
+    config_name VARCHAR(200) NOT NULL,
+    config_group VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
+    remark VARCHAR(255),
+    deleted TINYINT NOT NULL DEFAULT 0,
+    version INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_config_group (config_group)
+);
+
+-- ===================== 登录日志 =====================
+CREATE TABLE login_log (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT,
+    username VARCHAR(50),
+    login_ip VARCHAR(100),
+    login_status VARCHAR(20) NOT NULL DEFAULT 'SUCCESS',
+    login_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_agent VARCHAR(500),
+    remark VARCHAR(255),
+    deleted TINYINT NOT NULL DEFAULT 0,
+    version INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_login_log_user (user_id),
+    INDEX idx_login_log_time (login_time)
+);
+
+-- ===================== 通知消息 =====================
+CREATE TABLE notification (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(200) NOT NULL,
+    content VARCHAR(500) NOT NULL,
+    msg_type VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
+    target_user_id BIGINT,
+    is_read TINYINT NOT NULL DEFAULT 0,
+    biz_type VARCHAR(50),
+    biz_id BIGINT,
+    deleted TINYINT NOT NULL DEFAULT 0,
+    version INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_notification_user (target_user_id),
+    INDEX idx_notification_read (is_read)
 );
 
 SET FOREIGN_KEY_CHECKS = 1;

@@ -97,6 +97,14 @@ public class InventoryService {
                 .orderByAsc(InventoryBatch::getId));
     }
 
+    public List<StockIn> listStockIn() {
+        return stockInMapper.selectList(new LambdaQueryWrapper<StockIn>().orderByDesc(StockIn::getId));
+    }
+
+    public List<StockOut> listStockOut() {
+        return stockOutMapper.selectList(new LambdaQueryWrapper<StockOut>().orderByDesc(StockOut::getId));
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public void stockIn(StockInRequest request) {
         StockIn stockIn = new StockIn();
@@ -150,7 +158,7 @@ public class InventoryService {
                     .eq(Inventory::getWarehouseId, request.getWarehouseId())
                     .last("limit 1"));
             if (inventory == null || inventory.getCurrentQty() < item.getQuantity()) {
-                createLowStockWarning(item.getMaterialId(), request.getWarehouseId(), "出库失败，库存不足");
+                createLowStockWarning(item.getMaterialId(), request.getWarehouseId(), "出库时库存不足");
                 throw new BizException("物资ID " + item.getMaterialId() + " 库存不足");
             }
 
@@ -173,7 +181,7 @@ public class InventoryService {
                 remain -= use;
             }
             if (remain > 0) {
-                throw new BizException("可用库存批次不足（已排除过期批次）");
+                throw new BizException("批次库存不足，无法完成出库操作");
             }
 
             inventory.setCurrentQty(inventory.getCurrentQty() - item.getQuantity());
@@ -218,7 +226,7 @@ public class InventoryService {
         }
         inventory.setCurrentQty(request.getActualQty());
         inventoryMapper.updateById(inventory);
-        operationLogService.log(AuthUtil.currentUserId(), "INVENTORY", "CHECK", "盘点调整库存ID:" + request.getInventoryId());
+        operationLogService.log(AuthUtil.currentUserId(), "INVENTORY", "CHECK", "库存盘点ID:" + request.getInventoryId());
     }
 
     public List<InventoryBatch> recommendOutbound(Long materialId, Long warehouseId) {
@@ -258,7 +266,7 @@ public class InventoryService {
             return;
         }
         if (material.getSafetyStock() != null && inventory.getCurrentQty() < material.getSafetyStock()) {
-            createLowStockWarning(materialId, warehouseId, "库存低于安全库存");
+            createLowStockWarning(materialId, warehouseId, "库存低于安全库存阈值");
         }
     }
 

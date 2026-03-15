@@ -69,7 +69,7 @@ public class WarningService {
         warningRecord.setHandlerId(AuthUtil.currentUserId());
         warningRecord.setHandleRemark(remark);
         warningRecordMapper.updateById(warningRecord);
-        operationLogService.log(AuthUtil.currentUserId(), "WARNING", "HANDLE", "预警:" + id);
+        operationLogService.log(AuthUtil.currentUserId(), "WARNING", "HANDLE", "处理预警:" + id);
     }
 
     private void scanLowStock() {
@@ -81,7 +81,7 @@ public class WarningService {
             }
             if (inventory.getCurrentQty() < material.getSafetyStock()) {
                 createWarningIfAbsent(WarningType.STOCK_LOW, inventory.getMaterialId(), inventory.getWarehouseId(),
-                        "库存低于安全库存，当前:" + inventory.getCurrentQty() + " 安全库存:" + material.getSafetyStock());
+                        "库存低于安全库存阈值，当前库存:" + inventory.getCurrentQty() + " 安全库存:" + material.getSafetyStock());
             }
         }
     }
@@ -95,7 +95,7 @@ public class WarningService {
             }
             if (inventory.getCurrentQty() > material.getSafetyStock() * 3) {
                 createWarningIfAbsent(WarningType.STOCK_BACKLOG, inventory.getMaterialId(), inventory.getWarehouseId(),
-                        "库存积压风险，当前库存高于安全库存3倍");
+                        "库存积压预警，当前库存量超过安全库存3倍");
             }
         }
     }
@@ -109,7 +109,7 @@ public class WarningService {
                 .le(InventoryBatch::getExpireDate, threshold));
         for (InventoryBatch batch : batches) {
             createWarningIfAbsent(WarningType.EXPIRING_SOON, batch.getMaterialId(), batch.getWarehouseId(),
-                    "批次临期提醒，批次:" + batch.getBatchNo() + " 过期日:" + batch.getExpireDate());
+                    "物资即将过期，批次号:" + batch.getBatchNo() + " 过期日期:" + batch.getExpireDate());
         }
     }
 
@@ -120,7 +120,7 @@ public class WarningService {
                 .lt(InventoryBatch::getExpireDate, today));
         for (InventoryBatch batch : batches) {
             createWarningIfAbsent(WarningType.EXPIRED, batch.getMaterialId(), batch.getWarehouseId(),
-                    "批次已过期，批次:" + batch.getBatchNo() + " 过期日:" + batch.getExpireDate());
+                    "物资已过期，批次号:" + batch.getBatchNo() + " 过期日期:" + batch.getExpireDate());
         }
     }
 
@@ -139,7 +139,7 @@ public class WarningService {
             double avgWeek = monthSum / 4.0;
             if (avgWeek > 0 && weekSum > avgWeek * 1.5) {
                 createWarningIfAbsent(WarningType.ABNORMAL_USAGE, materialId, null,
-                        "近7日领用异常偏高，7日领用:" + weekSum + "，历史周均:" + String.format("%.2f", avgWeek));
+                        "近7天出库量异常，本周出库:" + weekSum + " 月均周出库:" + String.format("%.2f", avgWeek));
             }
         });
     }

@@ -1,106 +1,100 @@
 <template>
-  <div>
-    <h2 class="page-title">首页仪表盘</h2>
-    <div class="cards">
-      <el-card v-for="item in cardItems" :key="item.key" class="kpi">
-        <div class="kpi-title">{{ item.label }}</div>
-        <div class="kpi-value">{{ overview[item.key] || 0 }}</div>
-      </el-card>
+  <div class="dashboard">
+    <h2 class="page-title">仪表盘</h2>
+    <div class="kpi-row">
+      <div class="kpi-card" v-for="item in kpiList" :key="item.label">
+        <div class="kpi-value">{{ item.value }}</div>
+        <div class="kpi-label">{{ item.label }}</div>
+      </div>
     </div>
-
-    <div class="chart-grid">
-      <el-card class="page-card">
-        <h3>库存占比</h3>
-        <div ref="ratioRef" class="chart"></div>
-      </el-card>
-      <el-card class="page-card">
-        <h3>月度出入库趋势</h3>
-        <div ref="trendRef" class="chart"></div>
-      </el-card>
+    <div class="ratio-layout">
+      <div class="page-card">
+        <h3>最近操作日志</h3>
+        <el-table :data="recentLogs" border size="small">
+          <el-table-column prop="module" label="模块" width="100" />
+          <el-table-column prop="action" label="操作" width="120" />
+          <el-table-column prop="detail" label="详情" show-overflow-tooltip />
+          <el-table-column prop="createdAt" label="时间" width="170" />
+        </el-table>
+      </div>
+      <div class="page-card">
+        <h3>未处理预警</h3>
+        <el-table :data="unhandledWarnings" border size="small">
+          <el-table-column prop="warningType" label="类型" width="120" />
+          <el-table-column prop="content" label="内容" show-overflow-tooltip />
+          <el-table-column prop="createdAt" label="时间" width="170" />
+        </el-table>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
-import * as echarts from 'echarts'
+import { onMounted, ref } from 'vue'
 import { apiGet } from '../api'
 
-const ratioRef = ref()
-const trendRef = ref()
-const overview = reactive({})
-
-const cardItems = [
-  { key: 'userCount', label: '系统用户' },
-  { key: 'materialCount', label: '物资种类' },
-  { key: 'warehouseCount', label: '仓库数量' },
-  { key: 'unhandledWarningCount', label: '待处理预警' },
-  { key: 'pendingApplyCount', label: '待审申请' },
-  { key: 'pendingTransferCount', label: '待审调拨' }
-]
+const kpiList = ref([])
+const recentLogs = ref([])
+const unhandledWarnings = ref([])
 
 const load = async () => {
-  Object.assign(overview, await apiGet('/api/analytics/overview'))
-
-  const ratio = await apiGet('/api/analytics/inventory-ratio')
-  const ratioChart = echarts.init(ratioRef.value)
-  ratioChart.setOption({
-    tooltip: { trigger: 'item' },
-    series: [{ type: 'pie', radius: ['35%', '65%'], data: ratio }]
-  })
-
-  const trend = await apiGet('/api/analytics/inbound-outbound-trend')
-  const trendChart = echarts.init(trendRef.value)
-  trendChart.setOption({
-    tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: trend.map(i => i.month_key || i.monthKey) },
-    yAxis: { type: 'value' },
-    series: [
-      { name: '入库', type: 'bar', data: trend.map(i => i.inQty || i.inqty || 0) },
-      { name: '出库', type: 'line', smooth: true, data: trend.map(i => i.outQty || i.outqty || 0) }
+  try {
+    const inv = await apiGet('/api/inventory/list')
+    const warnings = await apiGet('/api/warning/list?status=UNHANDLED')
+    const materials = await apiGet('/api/material/info')
+    const warehouses = await apiGet('/api/warehouse/list')
+    kpiList.value = [
+      { label: '物资种类', value: materials.length },
+      { label: '仓库数量', value: warehouses.length },
+      { label: '库存记录', value: inv.length },
+      { label: '未处理预警', value: warnings.length }
     ]
-  })
+    unhandledWarnings.value = warnings.slice(0, 10)
+  } catch {
+    kpiList.value = []
+  }
+  try {
+    const logs = await apiGet('/api/log/list')
+    recentLogs.value = logs.slice(0, 10)
+  } catch {
+    recentLogs.value = []
+  }
 }
 
 onMounted(load)
 </script>
 
 <style scoped>
-.cards {
+.kpi-row {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 12px;
-  margin-bottom: 12px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
 }
-
-.kpi {
+.kpi-card {
+  background: var(--bg-card, #fff);
   border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
 }
-
-.kpi-title {
-  color: #5f6b7a;
-}
-
 .kpi-value {
-  margin-top: 8px;
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
-  color: #0f6b63;
+  color: var(--primary, #2563EB);
 }
-
-.chart-grid {
+.kpi-label {
+  margin-top: 8px;
+  color: var(--text-regular, #666);
+  font-size: 14px;
+}
+.ratio-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 16px;
 }
-
-.chart {
-  height: 320px;
-}
-
-@media (max-width: 980px) {
-  .chart-grid {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 640px) {
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .ratio-layout { grid-template-columns: 1fr; }
 }
 </style>

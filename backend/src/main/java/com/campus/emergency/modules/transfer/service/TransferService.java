@@ -49,7 +49,7 @@ public class TransferService {
     @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> create(TransferCreateRequest request) {
         if (request.getFromWarehouseId().equals(request.getToWarehouseId())) {
-            throw new BizException("调出仓库与调入仓库不能相同");
+            throw new BizException("调出仓库和调入仓库不能相同");
         }
         TransferOrder order = new TransferOrder();
         order.setFromWarehouseId(request.getFromWarehouseId());
@@ -66,59 +66,59 @@ public class TransferService {
             orderItem.setQuantity(item.getQuantity());
             transferOrderItemMapper.insert(orderItem);
         }
-        operationLogService.log(AuthUtil.currentUserId(), "TRANSFER", "CREATE", "调拨单:" + order.getId());
+        operationLogService.log(AuthUtil.currentUserId(), "TRANSFER", "CREATE", "创建调拨单:" + order.getId());
         return detail(order.getId());
     }
 
     public void submit(Long id) {
         TransferOrder order = mustGet(id);
         if (!OrderStatus.DRAFT.equals(order.getStatus())) {
-            throw new BizException("仅草稿状态可提交");
+            throw new BizException("当前状态不允许提交");
         }
         order.setStatus(OrderStatus.SUBMITTED);
         transferOrderMapper.updateById(order);
-        operationLogService.log(AuthUtil.currentUserId(), "TRANSFER", "SUBMIT", "调拨单:" + id);
+        operationLogService.log(AuthUtil.currentUserId(), "TRANSFER", "SUBMIT", "提交调拨单:" + id);
     }
 
     public void approve(Long id, String remark) {
         TransferOrder order = mustGet(id);
         if (!OrderStatus.SUBMITTED.equals(order.getStatus())) {
-            throw new BizException("当前状态不可审批通过");
+            throw new BizException("当前状态不允许审批");
         }
         order.setStatus(OrderStatus.APPROVED);
         order.setApproverId(AuthUtil.currentUserId());
         order.setApproveRemark(remark);
         order.setApproveTime(LocalDateTime.now());
         transferOrderMapper.updateById(order);
-        operationLogService.log(AuthUtil.currentUserId(), "TRANSFER", "APPROVE", "调拨单:" + id);
+        operationLogService.log(AuthUtil.currentUserId(), "TRANSFER", "APPROVE", "审批通过调拨单:" + id);
     }
 
     public void reject(Long id, String remark) {
         TransferOrder order = mustGet(id);
         if (!OrderStatus.SUBMITTED.equals(order.getStatus())) {
-            throw new BizException("当前状态不可驳回");
+            throw new BizException("当前状态不允许驳回");
         }
         order.setStatus(OrderStatus.REJECTED);
         order.setApproverId(AuthUtil.currentUserId());
         order.setApproveRemark(remark);
         order.setApproveTime(LocalDateTime.now());
         transferOrderMapper.updateById(order);
-        operationLogService.log(AuthUtil.currentUserId(), "TRANSFER", "REJECT", "调拨单:" + id);
+        operationLogService.log(AuthUtil.currentUserId(), "TRANSFER", "REJECT", "驳回调拨单:" + id);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void execute(Long id) {
         TransferOrder order = mustGet(id);
         if (!OrderStatus.APPROVED.equals(order.getStatus())) {
-            throw new BizException("仅审批通过状态可执行调拨");
+            throw new BizException("当前状态不允许执行调拨");
         }
-        List<TransferOrderItem> items = transferOrderItemMapper.selectList(new LambdaQueryWrapper<TransferOrderItem>()
-                .eq(TransferOrderItem::getTransferOrderId, id));
+        List<TransferOrderItem> items = transferOrderItemMapper.selectList(
+                new LambdaQueryWrapper<TransferOrderItem>().eq(TransferOrderItem::getTransferOrderId, id));
 
         for (TransferOrderItem item : items) {
             Inventory sourceInventory = mustGetInventory(item.getMaterialId(), order.getFromWarehouseId());
             if (sourceInventory.getCurrentQty() < item.getQuantity()) {
-                throw new BizException("调拨库存不足，物资ID:" + item.getMaterialId());
+                throw new BizException("调拨物资库存不足，物资ID:" + item.getMaterialId());
             }
             List<InventoryBatch> sourceBatches = batchMapper.selectList(new LambdaQueryWrapper<InventoryBatch>()
                     .eq(InventoryBatch::getMaterialId, item.getMaterialId())
@@ -131,9 +131,7 @@ public class TransferService {
             int remain = item.getQuantity();
             int index = 1;
             for (InventoryBatch sourceBatch : sourceBatches) {
-                if (remain <= 0) {
-                    break;
-                }
+                if (remain <= 0) break;
                 int transferQty = Math.min(remain, sourceBatch.getRemainQty());
                 sourceBatch.setRemainQty(sourceBatch.getRemainQty() - transferQty);
                 batchMapper.updateById(sourceBatch);
@@ -151,7 +149,7 @@ public class TransferService {
                 remain -= transferQty;
             }
             if (remain > 0) {
-                throw new BizException("调拨失败，来源批次可用量不足");
+                throw new BizException("调拨物资批次库存不足，无法完成调拨");
             }
 
             sourceInventory.setCurrentQty(sourceInventory.getCurrentQty() - item.getQuantity());
@@ -164,23 +162,23 @@ public class TransferService {
 
         order.setStatus(OrderStatus.OUTBOUND);
         transferOrderMapper.updateById(order);
-        operationLogService.log(AuthUtil.currentUserId(), "TRANSFER", "EXECUTE", "调拨单:" + id);
+        operationLogService.log(AuthUtil.currentUserId(), "TRANSFER", "EXECUTE", "执行调拨单:" + id);
     }
 
     public void receive(Long id) {
         TransferOrder order = mustGet(id);
         if (!OrderStatus.OUTBOUND.equals(order.getStatus())) {
-            throw new BizException("仅已调出状态可确认调入");
+            throw new BizException("当前状态不允许签收");
         }
         order.setStatus(OrderStatus.RECEIVED);
         transferOrderMapper.updateById(order);
-        operationLogService.log(AuthUtil.currentUserId(), "TRANSFER", "RECEIVE", "调拨单:" + id);
+        operationLogService.log(AuthUtil.currentUserId(), "TRANSFER", "RECEIVE", "签收调拨单:" + id);
     }
 
     public Map<String, Object> detail(Long id) {
         TransferOrder order = mustGet(id);
-        List<TransferOrderItem> items = transferOrderItemMapper.selectList(new LambdaQueryWrapper<TransferOrderItem>()
-                .eq(TransferOrderItem::getTransferOrderId, id));
+        List<TransferOrderItem> items = transferOrderItemMapper.selectList(
+                new LambdaQueryWrapper<TransferOrderItem>().eq(TransferOrderItem::getTransferOrderId, id));
         Map<String, Object> map = new HashMap<>();
         map.put("order", order);
         map.put("items", items);
@@ -196,24 +194,22 @@ public class TransferService {
     }
 
     private Inventory mustGetInventory(Long materialId, Long warehouseId) {
-        Inventory inventory = inventoryMapper.selectOne(new LambdaQueryWrapper<Inventory>()
+        Inventory inv = inventoryMapper.selectOne(new LambdaQueryWrapper<Inventory>()
                 .eq(Inventory::getMaterialId, materialId)
                 .eq(Inventory::getWarehouseId, warehouseId)
                 .last("limit 1"));
-        if (inventory == null) {
-            throw new BizException("无可用库存，物资ID:" + materialId);
+        if (inv == null) {
+            throw new BizException("指定仓库无此物资库存记录，物资ID:" + materialId);
         }
-        return inventory;
+        return inv;
     }
 
     private Inventory getOrInitInventory(Long materialId, Long warehouseId) {
-        Inventory inventory = inventoryMapper.selectOne(new LambdaQueryWrapper<Inventory>()
+        Inventory inv = inventoryMapper.selectOne(new LambdaQueryWrapper<Inventory>()
                 .eq(Inventory::getMaterialId, materialId)
                 .eq(Inventory::getWarehouseId, warehouseId)
                 .last("limit 1"));
-        if (inventory != null) {
-            return inventory;
-        }
+        if (inv != null) return inv;
         Inventory created = new Inventory();
         created.setMaterialId(materialId);
         created.setWarehouseId(warehouseId);

@@ -40,7 +40,7 @@ public class RbacService {
     public SysUser saveUser(SysUser user) {
         if (user.getId() == null) {
             if (user.getPassword() == null || user.getPassword().isBlank()) {
-                throw new BizException("新建用户必须填写密码");
+                throw new BizException("新增用户时密码不能为空");
             }
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             userMapper.insert(user);

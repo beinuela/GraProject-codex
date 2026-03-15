@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.campus.emergency.common.BizException;
 import com.campus.emergency.modules.auth.dto.LoginRequest;
 import com.campus.emergency.modules.auth.dto.LoginResponse;
+import com.campus.emergency.modules.log.service.LoginLogService;
 import com.campus.emergency.modules.rbac.entity.SysRole;
 import com.campus.emergency.modules.rbac.entity.SysUser;
 import com.campus.emergency.modules.rbac.mapper.SysRoleMapper;
@@ -26,25 +27,34 @@ public class AuthService {
     private final SysRoleMapper roleMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final LoginLogService loginLogService;
 
-    public AuthService(SysUserMapper userMapper, SysRoleMapper roleMapper, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
+    public AuthService(SysUserMapper userMapper, SysRoleMapper roleMapper, PasswordEncoder passwordEncoder,
+                       JwtTokenProvider jwtTokenProvider, LoginLogService loginLogService) {
         this.userMapper = userMapper;
         this.roleMapper = roleMapper;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.loginLogService = loginLogService;
     }
 
     public LoginResponse login(LoginRequest request) {
-        SysUser user = userMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getUsername, request.getUsername()));
+        String username = request.getUsername() == null ? null : request.getUsername().trim();
+        SysUser user = userMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getUsername, username));
         if (user == null || !passwordMatched(request.getPassword(), user.getPassword())) {
+            // 记录登录失败日志
+            loginLogService.record(null, username, "", "0", "");
             throw new BizException(401, "用户名或密码错误");
         }
         if (user.getStatus() == null || user.getStatus() != 1) {
-            throw new BizException(403, "账号已禁用");
+            loginLogService.record(user.getId(), user.getUsername(), "", "0", "");
+            throw new BizException(403, "账号已被禁用");
         }
         SysRole role = roleMapper.selectById(user.getRoleId());
         String roleCode = role == null ? "DEPT_USER" : role.getRoleCode();
         String token = jwtTokenProvider.generateToken(user.getId(), user.getUsername(), roleCode);
+        // 记录登录成功日志
+        loginLogService.record(user.getId(), user.getUsername(), "", "1", "");
         return LoginResponse.builder()
                 .token(token)
                 .tokenType("Bearer")
@@ -81,42 +91,54 @@ public class AuthService {
 
     private List<Map<String, String>> buildMenusByRole(String role) {
         List<Map<String, String>> all = new ArrayList<>();
-        addMenu(all, "dashboard", "首页仪表盘", "/dashboard");
+        addMenu(all, "dashboard", "仪表盘", "/dashboard");
         if ("ADMIN".equals(role)) {
             addMenu(all, "users", "用户管理", "/rbac/users");
             addMenu(all, "depts", "部门管理", "/rbac/depts");
+            addMenu(all, "campus", "校区管理", "/campus/list");
             addMenu(all, "category", "物资分类", "/material/category");
             addMenu(all, "material", "物资信息", "/material/info");
+            addMenu(all, "supplier", "供应商管理", "/supplier/list");
             addMenu(all, "warehouse", "仓库管理", "/warehouse/list");
+            addMenu(all, "location", "库位管理", "/warehouse/location");
             addMenu(all, "inventory", "库存查询", "/inventory/list");
             addMenu(all, "stockin", "入库管理", "/inventory/stock-in");
             addMenu(all, "stockout", "出库管理", "/inventory/stock-out");
-            addMenu(all, "apply", "申请审批", "/apply/list");
+            addMenu(all, "apply", "申领审批", "/apply/list");
             addMenu(all, "transfer", "调拨管理", "/transfer/list");
-            addMenu(all, "warning", "预警中心", "/warning/list");
-            addMenu(all, "analytics", "数据分析", "/analytics/charts");
+            addMenu(all, "warning", "预警管理", "/warning/list");
+            addMenu(all, "event", "应急事件", "/event/list");
+            addMenu(all, "analytics", "统计分析", "/analytics/charts");
+            addMenu(all, "oplog", "操作日志", "/log/operation");
+            addMenu(all, "loginlog", "登录日志", "/log/login");
+            addMenu(all, "notification", "消息通知", "/notification/list");
+            addMenu(all, "sysconfig", "系统配置", "/config/list");
             return all;
         }
         if ("WAREHOUSE_ADMIN".equals(role)) {
             addMenu(all, "material", "物资信息", "/material/info");
+            addMenu(all, "supplier", "供应商管理", "/supplier/list");
             addMenu(all, "warehouse", "仓库管理", "/warehouse/list");
+            addMenu(all, "location", "库位管理", "/warehouse/location");
             addMenu(all, "inventory", "库存查询", "/inventory/list");
             addMenu(all, "stockin", "入库管理", "/inventory/stock-in");
             addMenu(all, "stockout", "出库管理", "/inventory/stock-out");
             addMenu(all, "transfer", "调拨管理", "/transfer/list");
-            addMenu(all, "warning", "预警中心", "/warning/list");
-            addMenu(all, "analytics", "数据分析", "/analytics/charts");
+            addMenu(all, "warning", "预警管理", "/warning/list");
+            addMenu(all, "event", "应急事件", "/event/list");
+            addMenu(all, "analytics", "统计分析", "/analytics/charts");
+            addMenu(all, "notification", "消息通知", "/notification/list");
             return all;
         }
         if ("APPROVER".equals(role)) {
-            addMenu(all, "apply", "申请审批", "/apply/list");
+            addMenu(all, "apply", "申领审批", "/apply/list");
             addMenu(all, "transfer", "调拨管理", "/transfer/list");
-            addMenu(all, "warning", "预警中心", "/warning/list");
-            addMenu(all, "analytics", "数据分析", "/analytics/charts");
+            addMenu(all, "warning", "预警管理", "/warning/list");
+            addMenu(all, "analytics", "统计分析", "/analytics/charts");
             return all;
         }
-        addMenu(all, "apply", "申请审批", "/apply/list");
-        addMenu(all, "analytics", "数据分析", "/analytics/charts");
+        addMenu(all, "apply", "申领审批", "/apply/list");
+        addMenu(all, "analytics", "统计分析", "/analytics/charts");
         return all;
     }
 
@@ -129,12 +151,27 @@ public class AuthService {
     }
 
     private boolean passwordMatched(String raw, String encodedOrPlain) {
-        if (encodedOrPlain == null) {
+        if (raw == null || encodedOrPlain == null) {
             return false;
         }
-        if (encodedOrPlain.startsWith("$2a$") || encodedOrPlain.startsWith("$2b$") || encodedOrPlain.startsWith("$2y$")) {
-            return passwordEncoder.matches(raw, encodedOrPlain);
+
+        String stored = encodedOrPlain.trim();
+
+        // 兼容 DelegatingPasswordEncoder 存储格式: {bcrypt}$2a$...
+        if (stored.startsWith("{bcrypt}")) {
+            stored = stored.substring("{bcrypt}".length());
         }
-        return raw.equals(encodedOrPlain);
+
+        // 优先按加密密码匹配（支持 BCrypt 及后续可扩展编码器）
+        try {
+            if (passwordEncoder.matches(raw, stored)) {
+                return true;
+            }
+        } catch (IllegalArgumentException ignored) {
+            // 非 BCrypt 格式时回退到明文兼容
+        }
+
+        // 兼容演示环境中的明文密码
+        return raw.equals(stored) || raw.equals(encodedOrPlain);
     }
 }

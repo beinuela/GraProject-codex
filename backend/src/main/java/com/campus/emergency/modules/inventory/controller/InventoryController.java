@@ -5,6 +5,8 @@ import com.campus.emergency.modules.inventory.dto.InventoryAdjustRequest;
 import com.campus.emergency.modules.inventory.dto.StockInRequest;
 import com.campus.emergency.modules.inventory.dto.StockOutRequest;
 import com.campus.emergency.modules.inventory.entity.InventoryBatch;
+import com.campus.emergency.modules.inventory.entity.StockIn;
+import com.campus.emergency.modules.inventory.entity.StockOut;
 import com.campus.emergency.modules.inventory.service.InventoryService;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,6 +37,18 @@ public class InventoryController {
     public ApiResponse<List<InventoryBatch>> batches(@RequestParam(required = false) Long materialId,
                                                      @RequestParam(required = false) Long warehouseId) {
         return ApiResponse.ok(inventoryService.batches(materialId, warehouseId));
+    }
+
+    @GetMapping("/stock-in")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
+    public ApiResponse<List<StockIn>> listStockIn() {
+        return ApiResponse.ok(inventoryService.listStockIn());
+    }
+
+    @GetMapping("/stock-out")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
+    public ApiResponse<List<StockOut>> listStockOut() {
+        return ApiResponse.ok(inventoryService.listStockOut());
     }
 
     @PostMapping("/stock-in")

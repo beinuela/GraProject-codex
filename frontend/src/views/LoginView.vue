@@ -1,47 +1,47 @@
 <template>
-  <div class="login-wrap">
+  <div class="login-wrapper">
     <div class="hero">
-      <h1>校园应急物资智能管理系统</h1>
-      <p>校园场景 · 应急保障 · 智能决策</p>
+      <h1>校园应急物资管理系统</h1>
+      <p>Campus Emergency Material System</p>
     </div>
-    <el-card class="login-card">
-      <h2>登录系统</h2>
-      <el-form :model="form" @submit.prevent>
+    <div class="login-panel">
+      <h2>用户登录</h2>
+      <el-form :model="form" @submit.prevent="handleLogin" label-width="0">
         <el-form-item>
-          <el-input v-model="form.username" placeholder="用户名" />
+          <el-input v-model="form.username" placeholder="用户名" prefix-icon="User" size="large" />
         </el-form-item>
         <el-form-item>
-          <el-input v-model="form.password" type="password" show-password placeholder="密码" />
+          <el-input v-model="form.password" placeholder="密码" type="password" prefix-icon="Lock" size="large" show-password />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :loading="loading" style="width: 100%" @click="onLogin">登录</el-button>
+          <el-button type="primary" @click="handleLogin" :loading="loading" size="large" style="width:100%">登 录</el-button>
         </el-form-item>
       </el-form>
-      <div class="tips">演示账号：admin / warehouse / dept / approver，密码：123456</div>
-    </el-card>
+      <div class="tip" v-if="errorMsg">{{ errorMsg }}</div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../store/auth'
 
 const router = useRouter()
-const auth = useAuthStore()
+const authStore = useAuthStore()
+const form = reactive({ username: '', password: '' })
 const loading = ref(false)
-const form = reactive({ username: 'admin', password: '123456' })
+const errorMsg = ref('')
 
-const onLogin = async () => {
-  if (!form.username || !form.password) {
-    ElMessage.warning('请输入用户名和密码')
-    return
-  }
+const handleLogin = async () => {
+  if (loading.value) return
   loading.value = true
+  errorMsg.value = ''
   try {
-    await auth.login(form.username, form.password)
-    await router.push('/dashboard')
+    await authStore.login(form.username, form.password)
+    router.push('/dashboard')
+  } catch (e) {
+    errorMsg.value = e.message || '登录失败'
   } finally {
     loading.value = false
   }
@@ -49,48 +49,48 @@ const onLogin = async () => {
 </script>
 
 <style scoped>
-.login-wrap {
+.login-wrapper {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 24px;
-  align-items: center;
-  padding: 24px;
+  grid-template-columns: 1fr 1fr;
+  background: linear-gradient(135deg, #e0e7ff 0%, #f0f6ff 100%);
 }
-
 .hero {
-  border-radius: 24px;
-  padding: 42px;
-  color: #0f6b63;
-  background: linear-gradient(135deg, rgba(201, 246, 240, 0.9), rgba(232, 245, 255, 0.95));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 24px;
+  background: linear-gradient(135deg, var(--primary, #2563EB), #1e40af);
+  color: #fff;
 }
-
 .hero h1 {
-  margin: 0;
-  font-size: 40px;
+  font-size: 28px;
+  margin-bottom: 12px;
 }
-
 .hero p {
-  margin-top: 14px;
-  font-size: 20px;
+  opacity: .8;
+  font-size: 16px;
 }
-
-.login-card {
-  border-radius: 20px;
+.login-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 48px;
+  max-width: 420px;
+  margin: auto;
 }
-
-.tips {
-  color: #5f6b7a;
+.login-panel h2 {
+  margin-bottom: 28px;
+  font-size: 22px;
+}
+.tip {
+  color: #f56c6c;
   font-size: 13px;
+  margin-top: 8px;
 }
-
-@media (max-width: 900px) {
-  .login-wrap {
-    grid-template-columns: 1fr;
-  }
-
-  .hero h1 {
-    font-size: 28px;
-  }
+@media (max-width: 768px) {
+  .login-wrapper { grid-template-columns: 1fr; }
+  .hero { display: none; }
 }
 </style>
