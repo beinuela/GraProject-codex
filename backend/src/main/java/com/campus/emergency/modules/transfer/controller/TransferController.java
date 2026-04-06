@@ -73,4 +73,13 @@ public class TransferController {
         transferService.receive(id);
         return ApiResponse.ok(null);
     }
+
+    @GetMapping("/recommend")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN')")
+    public ApiResponse<List<Map<String, Object>>> recommend(
+            @RequestParam String targetCampus,
+            @RequestParam Long materialId,
+            @RequestParam Integer qty) {
+        return ApiResponse.ok(transferService.recommendTransfer(targetCampus, materialId, qty));
+    }
 }

@@ -28,18 +28,38 @@
     </el-table>
 
     <!-- 新建调拨 -->
-    <el-dialog v-model="createVisible" title="新建调拨" width="650">
+    <el-dialog append-to-body v-model="createVisible" title="新建调拨 / Smart Dispatch" width="650">
       <el-form :model="createForm" label-width="100px">
-        <el-form-item label="调出仓库">
-          <el-select v-model="createForm.fromWarehouseId" placeholder="请选择" style="width:100%">
-            <el-option v-for="w in warehouses" :key="w.id" :label="w.warehouseName" :value="w.id" />
-          </el-select>
-        </el-form-item>
         <el-form-item label="调入仓库">
-          <el-select v-model="createForm.toWarehouseId" placeholder="请选择" style="width:100%">
-            <el-option v-for="w in warehouses" :key="w.id" :label="w.warehouseName" :value="w.id" />
+          <el-select v-model="createForm.toWarehouseId" placeholder="应急事发地/缺货仓" style="width:100%">
+            <el-option v-for="w in warehouses" :key="w.id" :label="w.warehouseName + ' (' + w.campus + ')'" :value="w.id" />
           </el-select>
         </el-form-item>
+        <el-form-item label="调出仓库">
+          <div style="display:flex; width:100%; gap:10px;">
+            <el-select v-model="createForm.fromWarehouseId" placeholder="可手动指定或智能推荐" style="flex:1">
+              <el-option v-for="w in warehouses" :key="w.id" :label="w.warehouseName" :value="w.id" />
+            </el-select>
+            <el-button color="#22d3ee" style="color:#0f172a" @click="fetchRecommendation">
+               <el-icon><Guide /></el-icon> 智能推荐
+            </el-button>
+          </div>
+        </el-form-item>
+        
+        <div v-if="recommendations.length > 0" style="margin-bottom: 20px; background: #e0f2fe; border: 1px solid #bae6fd; padding:15px; border-radius: 6px;">
+          <h4 style="margin-top:0; color: #0369a1; display:flex; align-items:center; gap:5px;">
+            <el-icon><Check /></el-icon> AI 调度推荐方案
+          </h4>
+          <div v-for="(rec, idx) in recommendations" :key="rec.warehouseId" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div>
+              <span style="font-weight:bold; color: #0c4a6e;">NO.{{idx+1}} {{ rec.warehouseName }} ({{ rec.campus }})</span>
+              <br/>
+              <span style="font-size:12px; color: #0284c7;">预计路程：{{ rec.distance }} km | 当前库存：{{ rec.availableQty }} 件</span>
+            </div>
+            <el-button size="small" type="primary" plain @click="applyRecommendation(rec.warehouseId)">应用此仓</el-button>
+          </div>
+        </div>
+
         <el-form-item label="调拨原因"><el-input v-model="createForm.reason" type="textarea" /></el-form-item>
         <el-divider>调拨物资</el-divider>
         <div v-for="(item, idx) in createForm.items" :key="idx" style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
@@ -53,12 +73,12 @@
       </el-form>
       <template #footer>
         <el-button @click="createVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveCreate">保存</el-button>
+        <el-button type="primary" @click="saveCreate">提交申请</el-button>
       </template>
     </el-dialog>
 
     <!-- 详情 -->
-    <el-dialog v-model="detailVisible" title="调拨详情" width="600">
+    <el-dialog append-to-body v-model="detailVisible" title="调拨详情" width="600">
       <el-descriptions :column="2" border v-if="detailData.order">
         <el-descriptions-item label="ID">{{ detailData.order.id }}</el-descriptions-item>
         <el-descriptions-item label="状态">{{ detailData.order.status }}</el-descriptions-item>
@@ -77,6 +97,8 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import { apiGet, apiPost } from '../../api'
+import { ElMessage } from 'element-plus'
+import { Guide, Check } from '@element-plus/icons-vue'
 
 const list = ref([])
 const warehouses = ref([])
@@ -85,17 +107,51 @@ const createVisible = ref(false)
 const detailVisible = ref(false)
 const createForm = reactive({ fromWarehouseId: null, toWarehouseId: null, reason: '', items: [{ materialId: null, quantity: 1 }] })
 const detailData = reactive({ order: null, items: [] })
+const recommendations = ref([])
 
 const loadBase = async () => {
   warehouses.value = await apiGet('/api/warehouse/list')
   materials.value = await apiGet('/api/material/info')
 }
 const load = async () => { list.value = await apiGet('/api/transfer/list') }
+
 const openCreate = () => {
   createForm.fromWarehouseId = null; createForm.toWarehouseId = null; createForm.reason = ''
   createForm.items = [{ materialId: null, quantity: 1 }]
+  recommendations.value = []
   createVisible.value = true
 }
+
+const fetchRecommendation = async () => {
+  if (!createForm.toWarehouseId) return ElMessage.warning('请先选择调入仓库 (事发地)')
+  const firstItem = createForm.items[0]
+  if (!firstItem || !firstItem.materialId || !firstItem.quantity) {
+    return ElMessage.warning('请先指定至少一项调拨物资和数量')
+  }
+
+  const targetWh = warehouses.value.find(w => w.id === createForm.toWarehouseId)
+  if (!targetWh || !targetWh.campus) return ElMessage.error('调入仓库缺乏校区地理信息')
+
+  try {
+    const url = `/api/transfer/recommend?targetCampus=${encodeURIComponent(targetWh.campus)}&materialId=${firstItem.materialId}&qty=${firstItem.quantity}`
+    const result = await apiGet(url)
+    if (!result || result.length === 0) {
+      ElMessage.info('未找到符合库存条件的调出仓')
+      recommendations.value = []
+    } else {
+      recommendations.value = result.slice(0, 3) // Top 3
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const applyRecommendation = (whId) => {
+  createForm.fromWarehouseId = whId
+  recommendations.value = []
+  ElMessage.success('已自动填入推荐的调出仓！')
+}
+
 const saveCreate = async () => { await apiPost('/api/transfer', createForm); createVisible.value = false; await load() }
 const detail = async (id) => { const d = await apiGet(`/api/transfer/${id}`); Object.assign(detailData, d); detailVisible.value = true }
 const submitOrder = async (id) => { await apiPost(`/api/transfer/${id}/submit`); await load() }

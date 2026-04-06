@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="page-card">
     <h2 class="page-title">库存查询</h2>
     <el-space style="margin-bottom:12px">
@@ -19,7 +19,7 @@
       <el-table-column prop="safetyStock" label="安全库存" width="100" />
     </el-table>
 
-    <el-dialog v-model="batchVisible" title="批次明细" width="700">
+    <el-dialog append-to-body v-model="batchVisible" title="批次明细" width="700">
       <el-table :data="batches" border>
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column prop="batchNo" label="批次号" />

@@ -21,4 +21,11 @@ public class OperationLogService {
         record.setDetail(detail);
         operationLogMapper.insert(record);
     }
+
+    public java.util.List<OperationLog> getTimeline(String module, Long entityId) {
+        return operationLogMapper.selectList(new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<OperationLog>()
+                .eq(OperationLog::getModule, module)
+                .like(OperationLog::getDetail, ":" + entityId)
+                .orderByAsc(OperationLog::getId));
+    }
 }

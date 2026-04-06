@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,15 +32,18 @@ public class TransferService {
     private final InventoryMapper inventoryMapper;
     private final InventoryBatchMapper batchMapper;
     private final OperationLogService operationLogService;
+    private final com.campus.emergency.modules.warehouse.mapper.WarehouseMapper warehouseMapper;
 
     public TransferService(TransferOrderMapper transferOrderMapper, TransferOrderItemMapper transferOrderItemMapper,
                            InventoryMapper inventoryMapper, InventoryBatchMapper batchMapper,
-                           OperationLogService operationLogService) {
+                           OperationLogService operationLogService,
+                           com.campus.emergency.modules.warehouse.mapper.WarehouseMapper warehouseMapper) {
         this.transferOrderMapper = transferOrderMapper;
         this.transferOrderItemMapper = transferOrderItemMapper;
         this.inventoryMapper = inventoryMapper;
         this.batchMapper = batchMapper;
         this.operationLogService = operationLogService;
+        this.warehouseMapper = warehouseMapper;
     }
 
     public List<TransferOrder> list() {
@@ -183,6 +187,38 @@ public class TransferService {
         map.put("order", order);
         map.put("items", items);
         return map;
+    }
+
+    public List<Map<String, Object>> recommendTransfer(String targetCampus, Long materialId, Integer qty) {
+        // 1. 获取目标校区到所有校区的最短距离
+        Map<String, Double> distances = com.campus.emergency.modules.algorithm.DijkstraUtil.calculateShortestPaths(targetCampus);
+        
+        // 2. 获取所有包含该物资且库存足够的仓库
+        List<Inventory> invs = inventoryMapper.selectList(new LambdaQueryWrapper<Inventory>()
+                .eq(Inventory::getMaterialId, materialId)
+                .ge(Inventory::getCurrentQty, qty));
+        
+        List<Map<String, Object>> recommendations = new java.util.ArrayList<>();
+        for (Inventory inv : invs) {
+            com.campus.emergency.modules.warehouse.entity.Warehouse wh = warehouseMapper.selectById(inv.getWarehouseId());
+            if (wh == null) continue;
+            
+            Double dist = distances.getOrDefault(wh.getCampus(), Double.MAX_VALUE);
+            Map<String, Object> rec = new HashMap<>();
+            rec.put("warehouseId", wh.getId());
+            rec.put("warehouseName", wh.getWarehouseName());
+            rec.put("campus", wh.getCampus());
+            rec.put("distance", dist);
+            rec.put("availableQty", inv.getCurrentQty());
+            
+            // 简单的评分权重公式：1/距离。如果在本校区，距离设为极小值。不能完全基于距离，也要看库存是否非常充裕。
+            // 这里简单以距离优先升序。
+            recommendations.add(rec);
+        }
+        
+        // 根据距离从小到大排序
+        recommendations.sort(Comparator.comparingDouble(m -> (Double) m.get("distance")));
+        return recommendations;
     }
 
     private TransferOrder mustGet(Long id) {

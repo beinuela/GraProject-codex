@@ -40,15 +40,16 @@ public class EmergencyEventController {
 
     @PostMapping("/{id}/handle")
     @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN')")
-    public ApiResponse<Void> handle(@PathVariable Long id, @RequestParam Long handlerId,
-                                     @RequestParam String handleResult) {
-        eventService.handle(id, handlerId, handleResult);
+    public ApiResponse<Void> handle(@PathVariable Long id, @RequestBody(required = false) java.util.Map<String, String> body) {
+        String handleResult = body != null ? body.get("handleResult") : "";
+        eventService.handle(id, handleResult);
         return ApiResponse.ok(null);
     }
 
     @PostMapping("/{id}/close")
     @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER')")
-    public ApiResponse<Void> close(@PathVariable Long id, @RequestParam String handleResult) {
+    public ApiResponse<Void> close(@PathVariable Long id, @RequestBody(required = false) java.util.Map<String, String> body) {
+        String handleResult = body != null ? body.get("handleResult") : "";
         eventService.close(id, handleResult);
         return ApiResponse.ok(null);
     }

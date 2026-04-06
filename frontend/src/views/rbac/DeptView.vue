@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="page-card">
     <h2 class="page-title">部门管理</h2>
     <el-space style="margin-bottom:12px">
@@ -23,7 +23,7 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog v-model="visible" title="部门信息" width="480">
+    <el-dialog append-to-body v-model="visible" title="部门信息" width="480">
       <el-form :model="form" label-width="90px">
         <el-form-item label="部门名称"><el-input v-model="form.deptName" /></el-form-item>
         <el-form-item label="部门编码"><el-input v-model="form.deptCode" /></el-form-item>

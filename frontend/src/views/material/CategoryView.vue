@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="page-card">
     <h2 class="page-title">物资分类</h2>
     <el-space style="margin-bottom:12px">
@@ -23,7 +23,7 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog v-model="visible" title="物资分类" width="480">
+    <el-dialog append-to-body v-model="visible" title="物资分类" width="480">
       <el-form :model="form" label-width="90px">
         <el-form-item label="分类名称"><el-input v-model="form.categoryName" /></el-form-item>
         <el-form-item label="分类编码"><el-input v-model="form.categoryCode" /></el-form-item>

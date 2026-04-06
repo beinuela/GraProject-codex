@@ -52,12 +52,12 @@ public class EmergencyEventService {
         notificationService.send(null, "应急事件", event.getEventTitle() + " - 请及时处理", "EVENT", event.getId());
     }
 
-    public void handle(Long id, Long handlerId, String handleResult) {
+    public void handle(Long id, String handleResult) {
         EmergencyEvent event = eventMapper.selectById(id);
         if (event == null) return;
         event.setStatus("IN_PROGRESS");
-        event.setHandlerId(handlerId);
-        event.setHandleResult(handleResult);
+        event.setHandlerId(AuthUtil.currentUserId());
+        event.setHandleResult(handleResult == null ? "" : handleResult);
         eventMapper.updateById(event);
         logService.log(AuthUtil.currentUserId(), "EVENT", "HANDLE", "处理事件:" + id);
     }

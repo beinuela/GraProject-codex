@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="page-card">
     <h2 class="page-title">入库管理</h2>
     <el-button type="primary" @click="openCreate" style="margin-bottom:12px">新建入库单</el-button>
@@ -12,7 +12,7 @@
       <el-table-column prop="createdAt" label="创建时间" width="170" />
     </el-table>
 
-    <el-dialog v-model="visible" title="新建入库单" width="700">
+    <el-dialog append-to-body v-model="visible" title="新建入库单" width="700">
       <el-form :model="form" label-width="100px">
         <el-form-item label="目标仓库">
           <el-select v-model="form.warehouseId" placeholder="请选择仓库" style="width:100%">

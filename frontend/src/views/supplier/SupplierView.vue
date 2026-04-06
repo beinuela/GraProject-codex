@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="page-card">
     <h2 class="page-title">供应商管理</h2>
     <el-space style="margin-bottom:12px">
@@ -26,7 +26,7 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog v-model="visible" title="供应商信息" width="560">
+    <el-dialog append-to-body v-model="visible" title="供应商信息" width="560">
       <el-form :model="form" label-width="100px">
         <el-form-item label="供应商名称"><el-input v-model="form.supplierName" /></el-form-item>
         <el-form-item label="联系人"><el-input v-model="form.contactPerson" /></el-form-item>

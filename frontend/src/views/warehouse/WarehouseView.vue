@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="page-card">
     <h2 class="page-title">仓库管理</h2>
     <el-space style="margin-bottom:12px">
@@ -26,7 +26,7 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog v-model="visible" title="仓库信息" width="520">
+    <el-dialog append-to-body v-model="visible" title="仓库信息" width="520">
       <el-form :model="form" label-width="90px">
         <el-form-item label="仓库编码"><el-input v-model="form.warehouseCode" /></el-form-item>
         <el-form-item label="仓库名称"><el-input v-model="form.warehouseName" /></el-form-item>

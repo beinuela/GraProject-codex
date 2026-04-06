@@ -91,62 +91,69 @@ public class AuthService {
 
     private List<Map<String, String>> buildMenusByRole(String role) {
         List<Map<String, String>> all = new ArrayList<>();
-        addMenu(all, "dashboard", "仪表盘", "/dashboard");
+        addMenu(all, "dashboard", "仪表盘", "/dashboard", "首页");
         if ("ADMIN".equals(role)) {
-            addMenu(all, "users", "用户管理", "/rbac/users");
-            addMenu(all, "depts", "部门管理", "/rbac/depts");
-            addMenu(all, "campus", "校区管理", "/campus/list");
-            addMenu(all, "category", "物资分类", "/material/category");
-            addMenu(all, "material", "物资信息", "/material/info");
-            addMenu(all, "supplier", "供应商管理", "/supplier/list");
-            addMenu(all, "warehouse", "仓库管理", "/warehouse/list");
-            addMenu(all, "location", "库位管理", "/warehouse/location");
-            addMenu(all, "inventory", "库存查询", "/inventory/list");
-            addMenu(all, "stockin", "入库管理", "/inventory/stock-in");
-            addMenu(all, "stockout", "出库管理", "/inventory/stock-out");
-            addMenu(all, "apply", "申领审批", "/apply/list");
-            addMenu(all, "transfer", "调拨管理", "/transfer/list");
-            addMenu(all, "warning", "预警管理", "/warning/list");
-            addMenu(all, "event", "应急事件", "/event/list");
-            addMenu(all, "analytics", "统计分析", "/analytics/charts");
-            addMenu(all, "oplog", "操作日志", "/log/operation");
-            addMenu(all, "loginlog", "登录日志", "/log/login");
-            addMenu(all, "notification", "消息通知", "/notification/list");
-            addMenu(all, "sysconfig", "系统配置", "/config/list");
+            // 系统管理
+            addMenu(all, "users", "用户管理", "/rbac/users", "系统管理");
+            addMenu(all, "depts", "部门管理", "/rbac/depts", "系统管理");
+            // 基础数据
+            addMenu(all, "campus", "校区管理", "/campus/list", "基础数据");
+            addMenu(all, "category", "物资分类", "/material/category", "基础数据");
+            addMenu(all, "material", "物资信息", "/material/info", "基础数据");
+            addMenu(all, "supplier", "供应商管理", "/supplier/list", "基础数据");
+            // 仓储管理
+            addMenu(all, "warehouse", "仓库管理", "/warehouse/list", "仓储管理");
+            addMenu(all, "location", "库位管理", "/warehouse/location", "仓储管理");
+            addMenu(all, "inventory", "库存查询", "/inventory/list", "仓储管理");
+            addMenu(all, "stockin", "入库管理", "/inventory/stock-in", "仓储管理");
+            addMenu(all, "stockout", "出库管理", "/inventory/stock-out", "仓储管理");
+            // 业务操作
+            addMenu(all, "apply", "申领审批", "/apply/list", "业务操作");
+            addMenu(all, "transfer", "调拨管理", "/transfer/list", "业务操作");
+            // 安全监控
+            addMenu(all, "warning", "预警管理", "/warning/list", "安全监控");
+            addMenu(all, "event", "应急事件", "/event/list", "安全监控");
+            addMenu(all, "analytics", "统计分析", "/analytics/charts", "安全监控");
+            // 系统工具
+            addMenu(all, "oplog", "操作日志", "/log/operation", "系统工具");
+            addMenu(all, "loginlog", "登录日志", "/log/login", "系统工具");
+            addMenu(all, "notification", "消息通知", "/notification/list", "系统工具");
+            addMenu(all, "sysconfig", "系统配置", "/config/list", "系统工具");
             return all;
         }
         if ("WAREHOUSE_ADMIN".equals(role)) {
-            addMenu(all, "material", "物资信息", "/material/info");
-            addMenu(all, "supplier", "供应商管理", "/supplier/list");
-            addMenu(all, "warehouse", "仓库管理", "/warehouse/list");
-            addMenu(all, "location", "库位管理", "/warehouse/location");
-            addMenu(all, "inventory", "库存查询", "/inventory/list");
-            addMenu(all, "stockin", "入库管理", "/inventory/stock-in");
-            addMenu(all, "stockout", "出库管理", "/inventory/stock-out");
-            addMenu(all, "transfer", "调拨管理", "/transfer/list");
-            addMenu(all, "warning", "预警管理", "/warning/list");
-            addMenu(all, "event", "应急事件", "/event/list");
-            addMenu(all, "analytics", "统计分析", "/analytics/charts");
-            addMenu(all, "notification", "消息通知", "/notification/list");
+            addMenu(all, "material", "物资信息", "/material/info", "基础数据");
+            addMenu(all, "supplier", "供应商管理", "/supplier/list", "基础数据");
+            addMenu(all, "warehouse", "仓库管理", "/warehouse/list", "仓储管理");
+            addMenu(all, "location", "库位管理", "/warehouse/location", "仓储管理");
+            addMenu(all, "inventory", "库存查询", "/inventory/list", "仓储管理");
+            addMenu(all, "stockin", "入库管理", "/inventory/stock-in", "仓储管理");
+            addMenu(all, "stockout", "出库管理", "/inventory/stock-out", "仓储管理");
+            addMenu(all, "transfer", "调拨管理", "/transfer/list", "业务操作");
+            addMenu(all, "warning", "预警管理", "/warning/list", "安全监控");
+            addMenu(all, "event", "应急事件", "/event/list", "安全监控");
+            addMenu(all, "analytics", "统计分析", "/analytics/charts", "安全监控");
+            addMenu(all, "notification", "消息通知", "/notification/list", "系统工具");
             return all;
         }
         if ("APPROVER".equals(role)) {
-            addMenu(all, "apply", "申领审批", "/apply/list");
-            addMenu(all, "transfer", "调拨管理", "/transfer/list");
-            addMenu(all, "warning", "预警管理", "/warning/list");
-            addMenu(all, "analytics", "统计分析", "/analytics/charts");
+            addMenu(all, "apply", "申领审批", "/apply/list", "业务操作");
+            addMenu(all, "transfer", "调拨管理", "/transfer/list", "业务操作");
+            addMenu(all, "warning", "预警管理", "/warning/list", "安全监控");
+            addMenu(all, "analytics", "统计分析", "/analytics/charts", "安全监控");
             return all;
         }
-        addMenu(all, "apply", "申领审批", "/apply/list");
-        addMenu(all, "analytics", "统计分析", "/analytics/charts");
+        addMenu(all, "apply", "申领审批", "/apply/list", "业务操作");
+        addMenu(all, "analytics", "统计分析", "/analytics/charts", "安全监控");
         return all;
     }
 
-    private void addMenu(List<Map<String, String>> menus, String key, String title, String path) {
+    private void addMenu(List<Map<String, String>> menus, String key, String title, String path, String group) {
         Map<String, String> map = new HashMap<>();
         map.put("key", key);
         map.put("title", title);
         map.put("path", path);
+        map.put("group", group);
         menus.add(map);
     }
 

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="page-card">
     <h2 class="page-title">出库管理</h2>
     <el-button type="primary" @click="openCreate" style="margin-bottom:12px">新建出库单</el-button>
@@ -12,7 +12,7 @@
       <el-table-column prop="createdAt" label="创建时间" width="170" />
     </el-table>
 
-    <el-dialog v-model="visible" title="新建出库单" width="650">
+    <el-dialog append-to-body v-model="visible" title="新建出库单" width="650">
       <el-form :model="form" label-width="100px">
         <el-form-item label="申领单ID"><el-input-number v-model="form.applyOrderId" :min="0" style="width:100%" placeholder="可选" /></el-form-item>
         <el-form-item label="出库仓库">

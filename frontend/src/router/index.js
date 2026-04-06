@@ -3,6 +3,7 @@ import { useAuthStore } from '../store/auth'
 
 const routes = [
   { path: '/login', component: () => import('../views/LoginView.vue') },
+  { path: '/bigscreen', component: () => import('../views/bigscreen/BigScreenView.vue'), meta: { requiresAuth: true } },
   {
     path: '/',
     component: () => import('../layouts/MainLayout.vue'),

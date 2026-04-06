@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="page-card">
     <h2 class="page-title">用户管理</h2>
     <el-space style="margin-bottom:12px">
@@ -31,7 +31,7 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog v-model="visible" :title="form.id ? '编辑用户' : '新增用户'" width="520">
+    <el-dialog append-to-body v-model="visible" :title="form.id ? '编辑用户' : '新增用户'" width="520">
       <el-form :model="form" label-width="90px">
         <el-form-item label="用户名"><el-input v-model="form.username" /></el-form-item>
         <el-form-item label="密码"><el-input v-model="form.password" type="password" :placeholder="form.id ? '留空不修改' : '请输入密码'" /></el-form-item>

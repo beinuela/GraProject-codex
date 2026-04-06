@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="page-card">
     <h2 class="page-title">应急事件</h2>
     <el-space style="margin-bottom:12px">
@@ -34,7 +34,7 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog v-model="createVisible" title="上报应急事件" width="560">
+    <el-dialog append-to-body v-model="createVisible" title="上报应急事件" width="560">
       <el-form :model="form" label-width="90px">
         <el-form-item label="事件标题"><el-input v-model="form.eventTitle" /></el-form-item>
         <el-form-item label="事件类型">

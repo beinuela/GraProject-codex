@@ -16,9 +16,11 @@ import java.util.Map;
 public class ApplyController {
 
     private final ApplyService applyService;
+    private final com.campus.emergency.modules.log.service.OperationLogService operationLogService;
 
-    public ApplyController(ApplyService applyService) {
+    public ApplyController(ApplyService applyService, com.campus.emergency.modules.log.service.OperationLogService operationLogService) {
         this.applyService = applyService;
+        this.operationLogService = operationLogService;
     }
 
     @GetMapping("/list")
@@ -65,5 +67,11 @@ public class ApplyController {
     public ApiResponse<Void> receive(@PathVariable Long id) {
         applyService.receive(id);
         return ApiResponse.ok(null);
+    }
+
+    @GetMapping("/{id}/timeline")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
+    public ApiResponse<List<com.campus.emergency.modules.log.entity.OperationLog>> timeline(@PathVariable Long id) {
+        return ApiResponse.ok(operationLogService.getTimeline("APPLY", id));
     }
 }

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="page-card">
     <h2 class="page-title">系统配置</h2>
     <el-space style="margin-bottom:12px">
@@ -24,7 +24,7 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog v-model="visible" title="系统配置" width="520">
+    <el-dialog append-to-body v-model="visible" title="系统配置" width="520">
       <el-form :model="form" label-width="90px">
         <el-form-item label="配置键"><el-input v-model="form.configKey" /></el-form-item>
         <el-form-item label="配置值"><el-input v-model="form.configValue" type="textarea" /></el-form-item>

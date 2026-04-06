@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="page-card">
     <h2 class="page-title">物资信息</h2>
     <el-space style="margin-bottom:12px">
@@ -29,7 +29,7 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog v-model="visible" title="物资信息" width="560">
+    <el-dialog append-to-body v-model="visible" title="物资信息" width="560">
       <el-form :model="form" label-width="90px">
         <el-form-item label="物资名称"><el-input v-model="form.materialName" /></el-form-item>
         <el-form-item label="物资编码"><el-input v-model="form.materialCode" /></el-form-item>
