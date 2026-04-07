@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -20,16 +21,31 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final String allowedOrigins;
+    private final String allowedMethods;
+    private final String allowedHeaders;
+    private final boolean allowCredentials;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            @Value("${security.cors.allowed-origins:http://localhost:5173}") String allowedOrigins,
+            @Value("${security.cors.allowed-methods:GET,POST,PUT,DELETE,OPTIONS}") String allowedMethods,
+            @Value("${security.cors.allowed-headers:Authorization,Content-Type,X-Requested-With}") String allowedHeaders,
+            @Value("${security.cors.allow-credentials:false}") boolean allowCredentials) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.allowedOrigins = allowedOrigins;
+        this.allowedMethods = allowedMethods;
+        this.allowedHeaders = allowedHeaders;
+        this.allowCredentials = allowCredentials;
     }
 
     @Bean
@@ -60,13 +76,20 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("*"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
+        config.setAllowedOrigins(splitCsv(allowedOrigins));
+        config.setAllowedMethods(splitCsv(allowedMethods));
+        config.setAllowedHeaders(splitCsv(allowedHeaders));
+        config.setAllowCredentials(allowCredentials);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+    private List<String> splitCsv(String text) {
+        return Arrays.stream(text.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
     }
 
     private void writeJsonSafe(HttpServletResponse response, int code, String message) {

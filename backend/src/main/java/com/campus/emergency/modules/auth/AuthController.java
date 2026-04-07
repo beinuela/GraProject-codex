@@ -3,12 +3,14 @@ package com.campus.emergency.modules.auth;
 import com.campus.emergency.common.ApiResponse;
 import com.campus.emergency.modules.auth.dto.LoginRequest;
 import com.campus.emergency.modules.auth.dto.LoginResponse;
+import com.campus.emergency.modules.auth.dto.RefreshTokenRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 import java.util.Map;
@@ -29,8 +31,8 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ApiResponse<LoginResponse> refresh(@Valid @RequestBody LoginRequest request) {
-        return ApiResponse.ok(authService.login(request));
+    public ApiResponse<LoginResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        return ApiResponse.ok(authService.refresh(request.getRefreshToken()));
     }
 
     @GetMapping("/me")
@@ -41,5 +43,24 @@ public class AuthController {
     @GetMapping("/menus")
     public ApiResponse<List<Map<String, String>>> menus() {
         return ApiResponse.ok(authService.menus());
+    }
+
+    @PostMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<Void> logout() {
+        authService.logoutCurrentUser();
+        return ApiResponse.ok(null);
+    }
+
+    @GetMapping("/token-policy")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Map<String, Object>> tokenPolicy() {
+        return ApiResponse.ok(authService.tokenPolicyOverview());
+    }
+
+    @PostMapping("/token-cleanup")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Map<String, Object>> tokenCleanup() {
+        return ApiResponse.ok(authService.triggerTokenCleanup());
     }
 }

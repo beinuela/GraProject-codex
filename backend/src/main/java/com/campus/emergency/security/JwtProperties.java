@@ -9,5 +9,8 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "security.jwt")
 public class JwtProperties {
     private String secret;
-    private int expireMinutes;
+    private int accessExpireMinutes;
+    private int refreshExpireDays;
+    private boolean multiDeviceLogin;
+    private String cleanupCron;
 }

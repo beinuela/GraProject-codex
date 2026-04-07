@@ -29,7 +29,8 @@ const routes = [
       { path: 'log/operation', component: () => import('../views/log/OperationLogView.vue') },
       { path: 'log/login', component: () => import('../views/log/LoginLogView.vue') },
       { path: 'notification/list', component: () => import('../views/notification/NotificationView.vue') },
-      { path: 'config/list', component: () => import('../views/config/SystemConfigView.vue') }
+      { path: 'config/list', component: () => import('../views/config/SystemConfigView.vue') },
+      { path: 'security/policy', component: () => import('../views/security/SecurityPolicyView.vue') }
     ]
   }
 ]
@@ -59,6 +60,10 @@ router.beforeEach(async (to) => {
       auth.logout()
       return '/login'
     }
+  }
+
+  if (to.path === '/security/policy' && auth.user?.roleCode !== 'ADMIN') {
+    return '/dashboard'
   }
 
   return true

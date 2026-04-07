@@ -26,6 +26,7 @@ DROP TABLE IF EXISTS inventory;
 DROP TABLE IF EXISTS warehouse;
 DROP TABLE IF EXISTS material_info;
 DROP TABLE IF EXISTS material_category;
+DROP TABLE IF EXISTS auth_refresh_token;
 DROP TABLE IF EXISTS sys_user;
 DROP TABLE IF EXISTS sys_role;
 DROP TABLE IF EXISTS sys_dept;
@@ -65,6 +66,22 @@ CREATE TABLE sys_user (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_user_dept (dept_id),
     INDEX idx_user_role (role_id)
+);
+
+CREATE TABLE auth_refresh_token (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL,
+    token_id VARCHAR(64) NOT NULL,
+    token_hash VARCHAR(255) NOT NULL,
+    expire_at DATETIME NOT NULL,
+    revoked TINYINT NOT NULL DEFAULT 0,
+    deleted TINYINT NOT NULL DEFAULT 0,
+    version INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_refresh_token_id (token_id),
+    INDEX idx_refresh_user (user_id),
+    INDEX idx_refresh_expire (expire_at)
 );
 
 CREATE TABLE material_category (

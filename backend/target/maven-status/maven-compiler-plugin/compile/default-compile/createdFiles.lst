@@ -4,6 +4,7 @@ com\campus\emergency\security\LoginUser.class
 com\campus\emergency\common\WarningType.class
 com\campus\emergency\common\ApiResponse.class
 com\campus\emergency\security\JwtProperties.class
+com\campus\emergency\modules\auth\dto\RefreshTokenRequest.class
 com\campus\emergency\config\MybatisPlusConfig.class
 com\campus\emergency\common\BaseEntity.class
 com\campus\emergency\common\BizException.class
@@ -12,5 +13,8 @@ com\campus\emergency\config\OpenApiConfig.class
 com\campus\emergency\security\JwtTokenProvider.class
 com\campus\emergency\common\GlobalExceptionHandler.class
 com\campus\emergency\security\SecurityConfig.class
+com\campus\emergency\modules\auth\AuthRefreshTokenCleanupTask.class
 com\campus\emergency\security\JwtAuthenticationFilter.class
 com\campus\emergency\security\AuthUtil.class
+com\campus\emergency\modules\auth\entity\AuthRefreshToken.class
+com\campus\emergency\modules\auth\mapper\AuthRefreshTokenMapper.class

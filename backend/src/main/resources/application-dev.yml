@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/campus_emergency?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false}
+    username: root
+    password: Lyk20041102.
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:dev-local-jwt-secret-key-must-be-at-least-32-bytes}
+
+mybatis-plus:
+  configuration:
+    log-impl: ${MYBATIS_LOG_IMPL:org.apache.ibatis.logging.stdout.StdOutImpl}
+
+knife4j:
+  enable: ${KNIFE4J_ENABLE:true}
+
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED:true}
+  swagger-ui:
+    enabled: ${SPRINGDOC_SWAGGER_UI_ENABLED:true}

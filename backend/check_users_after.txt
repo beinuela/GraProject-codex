@@ -1,0 +1,6 @@
+mysql: [Warning] Using a password on the command line interface can be insecure.
+id	username	password
+1	admin	123456
+2	warehouse	123456
+3	dept	123456
+4	approver	123456

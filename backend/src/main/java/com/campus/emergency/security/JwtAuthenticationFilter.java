@@ -31,12 +31,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = auth.substring(7);
             try {
                 Claims claims = jwtTokenProvider.parseToken(token);
+                String tokenType = (String) claims.get("typ");
+                if (!"access".equals(tokenType)) {
+                    SecurityContextHolder.clearContext();
+                    filterChain.doFilter(request, response);
+                    return;
+                }
                 Long userId = ((Number) claims.get("uid")).longValue();
                 String username = claims.getSubject();
                 String role = (String) claims.get("role");
                 LoginUser loginUser = new LoginUser(userId, username, "", role, 1);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        loginUser, null, Collections.singleton(() -> "ROLE_" + role));
+                        loginUser, null, loginUser.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception ignored) {

@@ -49,6 +49,7 @@ const filterGroup = ref('')
 const form = reactive({ id: null, configKey: '', configValue: '', configGroup: '', remark: '' })
 
 const load = async () => { list.value = await apiGet('/api/config') }
+
 const openCreate = () => { Object.assign(form, { id: null, configKey: '', configValue: '', configGroup: '', remark: '' }); visible.value = true }
 const openEdit = (row) => { Object.assign(form, row); visible.value = true }
 const save = async () => { await apiPost('/api/config', form); visible.value = false; await load() }

@@ -1,24 +1,36 @@
 package com.campus.emergency.modules.auth;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.campus.emergency.common.BizException;
 import com.campus.emergency.modules.auth.dto.LoginRequest;
 import com.campus.emergency.modules.auth.dto.LoginResponse;
+import com.campus.emergency.modules.auth.entity.AuthRefreshToken;
+import com.campus.emergency.modules.auth.mapper.AuthRefreshTokenMapper;
 import com.campus.emergency.modules.log.service.LoginLogService;
 import com.campus.emergency.modules.rbac.entity.SysRole;
 import com.campus.emergency.modules.rbac.entity.SysUser;
 import com.campus.emergency.modules.rbac.mapper.SysRoleMapper;
 import com.campus.emergency.modules.rbac.mapper.SysUserMapper;
 import com.campus.emergency.security.AuthUtil;
+import com.campus.emergency.security.JwtProperties;
 import com.campus.emergency.security.JwtTokenProvider;
 import com.campus.emergency.security.LoginUser;
+import io.jsonwebtoken.Claims;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -28,16 +40,25 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final LoginLogService loginLogService;
+    private final AuthRefreshTokenMapper authRefreshTokenMapper;
+    private final JwtProperties jwtProperties;
+    private final AuthRefreshTokenCleanupTask authRefreshTokenCleanupTask;
 
     public AuthService(SysUserMapper userMapper, SysRoleMapper roleMapper, PasswordEncoder passwordEncoder,
-                       JwtTokenProvider jwtTokenProvider, LoginLogService loginLogService) {
+                       JwtTokenProvider jwtTokenProvider, LoginLogService loginLogService,
+                       AuthRefreshTokenMapper authRefreshTokenMapper, JwtProperties jwtProperties,
+                       AuthRefreshTokenCleanupTask authRefreshTokenCleanupTask) {
         this.userMapper = userMapper;
         this.roleMapper = roleMapper;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
         this.loginLogService = loginLogService;
+        this.authRefreshTokenMapper = authRefreshTokenMapper;
+        this.jwtProperties = jwtProperties;
+        this.authRefreshTokenCleanupTask = authRefreshTokenCleanupTask;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public LoginResponse login(LoginRequest request) {
         String username = request.getUsername() == null ? null : request.getUsername().trim();
         SysUser user = userMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getUsername, username));
@@ -52,17 +73,111 @@ public class AuthService {
         }
         SysRole role = roleMapper.selectById(user.getRoleId());
         String roleCode = role == null ? "DEPT_USER" : role.getRoleCode();
-        String token = jwtTokenProvider.generateToken(user.getId(), user.getUsername(), roleCode);
+        LoginResponse response = issueTokens(user, roleCode);
         // 记录登录成功日志
         loginLogService.record(user.getId(), user.getUsername(), "", "1", "");
+        return response;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public LoginResponse refresh(String refreshToken) {
+        Claims claims;
+        try {
+            claims = jwtTokenProvider.parseToken(refreshToken);
+        } catch (Exception e) {
+            throw new BizException(401, "refresh token 无效或已过期");
+        }
+        String tokenType = (String) claims.get("typ");
+        if (!"refresh".equals(tokenType)) {
+            throw new BizException(401, "token 类型错误");
+        }
+        String tokenId = claims.getId();
+        if (tokenId == null || tokenId.isBlank()) {
+            throw new BizException(401, "refresh token 无效");
+        }
+        Long userId = ((Number) claims.get("uid")).longValue();
+
+        AuthRefreshToken stored = authRefreshTokenMapper.selectOne(new LambdaQueryWrapper<AuthRefreshToken>()
+                .eq(AuthRefreshToken::getUserId, userId)
+                .eq(AuthRefreshToken::getTokenId, tokenId)
+                .eq(AuthRefreshToken::getRevoked, 0)
+                .last("limit 1"));
+        if (stored == null) {
+            throw new BizException(401, "refresh token 已失效");
+        }
+        if (stored.getExpireAt() == null || stored.getExpireAt().isBefore(LocalDateTime.now())) {
+            revokeById(stored.getId());
+            throw new BizException(401, "refresh token 已过期");
+        }
+        if (!sha256Base64(refreshToken).equals(stored.getTokenHash())) {
+            revokeById(stored.getId());
+            throw new BizException(401, "refresh token 校验失败");
+        }
+
+        SysUser user = userMapper.selectById(userId);
+        if (user == null || user.getStatus() == null || user.getStatus() != 1) {
+            revokeById(stored.getId());
+            throw new BizException(403, "账号不可用");
+        }
+        SysRole role = roleMapper.selectById(user.getRoleId());
+        String roleCode = role == null ? "DEPT_USER" : role.getRoleCode();
+
+        // refresh token 单次使用：先撤销旧 token，再发新 token（轮换）
+        revokeById(stored.getId());
+        return issueTokens(user, roleCode);
+    }
+
+    private LoginResponse issueTokens(SysUser user, String roleCode) {
+        if (!jwtProperties.isMultiDeviceLogin()) {
+            revokeAllActiveTokensByUserId(user.getId());
+        }
+
+        String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getUsername(), roleCode);
+        String refreshJti = UUID.randomUUID().toString();
+        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId(), user.getUsername(), roleCode, refreshJti);
+
+        AuthRefreshToken entity = new AuthRefreshToken();
+        entity.setUserId(user.getId());
+        entity.setTokenId(refreshJti);
+        entity.setTokenHash(sha256Base64(refreshToken));
+        entity.setExpireAt(LocalDateTime.now().plusDays(jwtProperties.getRefreshExpireDays()));
+        entity.setRevoked(0);
+        authRefreshTokenMapper.insert(entity);
+
         return LoginResponse.builder()
-                .token(token)
+                .token(accessToken)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .tokenType("Bearer")
+                .expiresIn(jwtProperties.getAccessExpireMinutes() * 60)
                 .userId(user.getId())
                 .username(user.getUsername())
                 .realName(user.getRealName())
                 .roleCode(roleCode)
                 .build();
+    }
+
+    private void revokeAllActiveTokensByUserId(Long userId) {
+        authRefreshTokenMapper.update(null, new LambdaUpdateWrapper<AuthRefreshToken>()
+                .eq(AuthRefreshToken::getUserId, userId)
+                .eq(AuthRefreshToken::getRevoked, 0)
+                .set(AuthRefreshToken::getRevoked, 1));
+    }
+
+    private void revokeById(Long id) {
+        authRefreshTokenMapper.update(null, new LambdaUpdateWrapper<AuthRefreshToken>()
+                .eq(AuthRefreshToken::getId, id)
+                .set(AuthRefreshToken::getRevoked, 1));
+    }
+
+    private String sha256Base64(String value) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] bytes = digest.digest(value.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(bytes);
+        } catch (Exception e) {
+            throw new BizException(500, "token 处理失败");
+        }
     }
 
     public Map<String, Object> me() {
@@ -88,6 +203,49 @@ public class AuthService {
         }
         return buildMenusByRole(current.getRoleCode());
     }
+
+    public void logoutCurrentUser() {
+        Long uid = AuthUtil.currentUserId();
+        if (uid == null) {
+            return;
+        }
+        authRefreshTokenMapper.update(null, new LambdaUpdateWrapper<AuthRefreshToken>()
+                .eq(AuthRefreshToken::getUserId, uid)
+                .eq(AuthRefreshToken::getRevoked, 0)
+                .set(AuthRefreshToken::getRevoked, 1));
+    }
+
+            public Map<String, Object> tokenPolicyOverview() {
+            LocalDateTime now = LocalDateTime.now();
+            Long total = authRefreshTokenMapper.selectCount(new LambdaQueryWrapper<AuthRefreshToken>());
+            Long active = authRefreshTokenMapper.selectCount(new LambdaQueryWrapper<AuthRefreshToken>()
+                .eq(AuthRefreshToken::getRevoked, 0)
+                .gt(AuthRefreshToken::getExpireAt, now));
+            Long revoked = authRefreshTokenMapper.selectCount(new LambdaQueryWrapper<AuthRefreshToken>()
+                .eq(AuthRefreshToken::getRevoked, 1));
+            Long expired = authRefreshTokenMapper.selectCount(new LambdaQueryWrapper<AuthRefreshToken>()
+                .eq(AuthRefreshToken::getRevoked, 0)
+                .le(AuthRefreshToken::getExpireAt, now));
+
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("multiDeviceLogin", jwtProperties.isMultiDeviceLogin());
+            map.put("accessExpireMinutes", jwtProperties.getAccessExpireMinutes());
+            map.put("refreshExpireDays", jwtProperties.getRefreshExpireDays());
+            map.put("cleanupCron", jwtProperties.getCleanupCron());
+            map.put("tokenTotal", total == null ? 0 : total);
+            map.put("activeTokenCount", active == null ? 0 : active);
+            map.put("revokedTokenCount", revoked == null ? 0 : revoked);
+            map.put("expiredTokenCount", expired == null ? 0 : expired);
+            return map;
+            }
+
+            public Map<String, Object> triggerTokenCleanup() {
+            int removed = authRefreshTokenCleanupTask.cleanupNow();
+            Map<String, Object> result = new HashMap<>();
+            result.put("removed", removed);
+            result.put("cleanedAt", LocalDateTime.now());
+            return result;
+            }
 
     private List<Map<String, String>> buildMenusByRole(String role) {
         List<Map<String, String>> all = new ArrayList<>();
@@ -119,6 +277,7 @@ public class AuthService {
             addMenu(all, "loginlog", "登录日志", "/log/login", "系统工具");
             addMenu(all, "notification", "消息通知", "/notification/list", "系统工具");
             addMenu(all, "sysconfig", "系统配置", "/config/list", "系统工具");
+            addMenu(all, "securityPolicy", "安全策略", "/security/policy", "系统工具");
             return all;
         }
         if ("WAREHOUSE_ADMIN".equals(role)) {

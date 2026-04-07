@@ -26,6 +26,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ApiResponse<Void> handleUnknown(Exception e) {
         log.error("Unhandled exception", e);
-        return ApiResponse.fail(500, "服务器内部错误: " + e.toString());
+        return ApiResponse.fail(500, "服务器内部错误: " + e.getMessage());
     }
 }
