@@ -1,4 +1,4 @@
-USE campus_emergency;
+﻿USE campus_material;
 SET NAMES utf8mb4;
 
 INSERT INTO sys_role (id, role_code, role_name, description) VALUES
@@ -54,7 +54,7 @@ INSERT INTO material_info (id, material_code, material_name, category_id, spec, 
 INSERT INTO warehouse (id, warehouse_name, campus, address, manager) VALUES
 (1, '科学校区总仓', '科学校区', '后勤楼B1层', '张老师'),
 (2, '东风校区分仓', '东风校区', '体育馆北侧', '李老师'),
-(3, '医务室应急仓', '科学校区', '医务室一层', '王医生');
+(3, '医务室物资仓', '科学校区', '医务室一层', '王医生');
 
 INSERT INTO inventory (id, material_id, warehouse_id, current_qty, locked_qty) VALUES
 (1, 1, 1, 520, 0),
@@ -77,7 +77,7 @@ INSERT INTO inventory_batch (material_id, warehouse_id, batch_no, in_qty, remain
 (3, 1, 'MED-2024B', 20, 14, '2024-07-01', '2026-03-20', '2025-10-05 09:00:00', '2025-10-05 09:00:00');
 
 INSERT INTO stock_in (id, warehouse_id, source_type, operator_id, remark, created_at, updated_at) VALUES
-(1, 1, 'PURCHASE', 2, '年初应急采购', '2026-01-02 10:00:00', '2026-01-02 10:00:00'),
+(1, 1, 'PURCHASE', 2, '年初集中采购', '2026-01-02 10:00:00', '2026-01-02 10:00:00'),
 (2, 3, 'PURCHASE', 2, '医务室补货', '2026-01-12 09:00:00', '2026-01-12 09:00:00');
 
 INSERT INTO stock_in_item (stock_in_id, material_id, batch_no, quantity, production_date, expire_date, created_at, updated_at) VALUES
@@ -87,7 +87,7 @@ INSERT INTO stock_in_item (stock_in_id, material_id, batch_no, quantity, product
 
 INSERT INTO apply_order (id, dept_id, applicant_id, urgency_level, status, reason, scenario, fast_track, approver_id, approve_remark, approve_time, created_at, updated_at) VALUES
 (1, 5, 3, 1, 'RECEIVED', '学院活动防疫物资领取', '大型活动', 0, 4, '同意发放', '2026-02-11 10:00:00', '2026-02-10 09:00:00', '2026-02-12 18:00:00'),
-(2, 3, 3, 2, 'OUTBOUND', '暴雨应急巡查保障', '恶劣天气应急', 1, 4, '紧急快速审批', '2026-03-01 08:20:00', '2026-03-01 08:00:00', '2026-03-01 09:00:00'),
+(2, 3, 3, 2, 'OUTBOUND', '暴雨巡查保障', '恶劣天气保障', 1, 4, '紧急快速审批', '2026-03-01 08:20:00', '2026-03-01 08:00:00', '2026-03-01 09:00:00'),
 (3, 4, 3, 0, 'SUBMITTED', '医务室常规补充', '日常储备', 0, NULL, NULL, NULL, '2026-03-05 15:00:00', '2026-03-05 15:00:00');
 
 INSERT INTO apply_order_item (apply_order_id, material_id, apply_qty, actual_qty, created_at, updated_at) VALUES
@@ -107,7 +107,7 @@ INSERT INTO stock_out_item (stock_out_id, material_id, quantity, created_at, upd
 
 INSERT INTO transfer_order (id, from_warehouse_id, to_warehouse_id, status, reason, applicant_id, approver_id, approve_remark, approve_time, created_at, updated_at) VALUES
 (1, 1, 2, 'RECEIVED', '东校区储备不足补充', 2, 4, '同意调拨', '2026-02-20 09:00:00', '2026-02-19 10:00:00', '2026-02-20 14:00:00'),
-(2, 1, 3, 'APPROVED', '医务室应急包补充', 2, 4, '同意', '2026-03-06 09:30:00', '2026-03-06 09:00:00', '2026-03-06 09:30:00');
+(2, 1, 3, 'APPROVED', '医务室物资补充', 2, 4, '同意', '2026-03-06 09:30:00', '2026-03-06 09:00:00', '2026-03-06 09:30:00');
 
 INSERT INTO transfer_order_item (transfer_order_id, material_id, quantity, created_at, updated_at) VALUES
 (1, 1, 20, '2026-02-19 10:00:00', '2026-02-20 14:00:00'),
@@ -140,13 +140,13 @@ INSERT INTO supplier (id, supplier_name, contact_person, contact_phone, email, a
 (1, '华安防护用品有限公司', '赵经理', '13800001111', 'huaan@example.com', '郑州市二七区航海路88号', '口罩、防护服、护目镜'),
 (2, '洁安化工有限公司', '钱经理', '13800002222', 'jiean@example.com', '郑州市中原区嵩山路50号', '消毒液、洗手液、酒精'),
 (3, '康护医疗器械有限公司', '孙经理', '13800003333', 'kanghu@example.com', '郑州市管城区紫荆山路12号', '急救包、医疗器械、药品'),
-(4, '清泉食品有限公司', '李经理', '13800004444', 'qingquan@example.com', '郑州市惠济区花园路100号', '饮用水、应急食品'),
+(4, '清泉食品有限公司', '李经理', '13800004444', 'qingquan@example.com', '郑州市惠济区花园路100号', '饮用水、储备食品'),
 (5, '明锐电子科技有限公司', '周经理', '13800005555', 'mingrui@example.com', '郑州市高新区科学大道66号', '手电筒、对讲机、充电设备');
 
--- ===================== 应急事件数据 =====================
-INSERT INTO emergency_event (id, event_title, event_type, event_level, campus_id, location, description, status, reporter_id, handler_id, handle_result, event_time, close_time) VALUES
-(1, '教学楼消防演练', 'DRILL', 'NORMAL', 1, '科学校区3号教学楼', '学期例行消防安全疏散演练，需配备应急物资保障', 'CLOSED', 3, 2, '演练顺利完成，物资全部回收', '2026-02-15 14:00:00', '2026-02-15 16:30:00'),
-(2, '暴雨防汛应急', 'NATURAL_DISASTER', 'URGENT', 2, '东风校区学生宿舍区', '气象局发布暴雨红色预警，需紧急调拨防汛物资', 'IN_PROGRESS', 4, 2, NULL, '2026-03-08 07:00:00', NULL),
+-- ===================== 事件数据 =====================
+INSERT INTO event_record (id, event_title, event_type, event_level, campus_id, location, description, status, reporter_id, handler_id, handle_result, event_time, close_time) VALUES
+(1, '教学楼消防演练', 'DRILL', 'NORMAL', 1, '科学校区3号教学楼', '学期例行消防安全疏散演练，需配备物资保障', 'CLOSED', 3, 2, '演练顺利完成，物资全部回收', '2026-02-15 14:00:00', '2026-02-15 16:30:00'),
+(2, '暴雨防汛处置', 'NATURAL_DISASTER', 'URGENT', 2, '东风校区学生宿舍区', '气象局发布暴雨红色预警，需紧急调拨防汛物资', 'IN_PROGRESS', 4, 2, NULL, '2026-03-08 07:00:00', NULL),
 (3, '食堂食品安全事件', 'SAFETY_INCIDENT', 'CRITICAL', 1, '科学校区第二食堂', '部分学生出现食物不适症状，医务室需紧急补充医疗物资', 'OPEN', 3, NULL, NULL, '2026-03-10 11:30:00', NULL);
 
 -- ===================== 系统配置数据 =====================
@@ -157,7 +157,7 @@ INSERT INTO system_config (config_key, config_value, config_name, config_group, 
 ('backlog_ratio', '3.0', '积压预警倍率', 'WARNING', '库存超过安全库存的此倍率触发积压预警'),
 ('restock_buffer_days', '30', '补货保障天数', 'SMART', '智能补货时额外保障的天数'),
 ('forecast_months', '3', '需求预测月数', 'SMART', '默认预测未来几个月的需求'),
-('system_name', '校园应急物资智能管理系统', '系统名称', 'SYSTEM', ''),
+('system_name', '校园物资智能管理系统', '系统名称', 'SYSTEM', ''),
 ('school_name', '郑州轻工业大学', '学校名称', 'SYSTEM', '');
 
 -- ===================== 登录日志数据 =====================
@@ -171,5 +171,5 @@ INSERT INTO login_log (user_id, username, login_ip, login_status, login_time, us
 INSERT INTO notification (title, content, msg_type, target_user_id, is_read, biz_type, biz_id) VALUES
 ('预警通知', '急救包(MED-2024B)距离过期不足30天，请及时处理', 'WARNING', 2, 0, 'WARNING', 1),
 ('审批通知', '医务室常规补充申请等待您审批', 'APPROVAL', 4, 0, 'APPLY', 3),
-('入库通知', '年初应急采购入库已完成', 'SYSTEM', 1, 1, 'STOCK_IN', 1),
-('应急事件', '暴雨防汛应急事件已登记，请关注物资调拨', 'EVENT', 2, 0, 'EVENT', 2);
+('入库通知', '年初集中采购入库已完成', 'SYSTEM', 1, 1, 'STOCK_IN', 1),
+('事件通知', '暴雨防汛处置事件已登记，请关注物资调拨', 'EVENT', 2, 0, 'EVENT', 2);

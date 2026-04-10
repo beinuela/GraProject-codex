@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+﻿import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../store/auth'
 
 const routes = [
@@ -24,7 +24,7 @@ const routes = [
       { path: 'apply/list', component: () => import('../views/apply/ApplyView.vue') },
       { path: 'transfer/list', component: () => import('../views/transfer/TransferView.vue') },
       { path: 'warning/list', component: () => import('../views/warning/WarningView.vue') },
-      { path: 'event/list', component: () => import('../views/event/EmergencyEventView.vue') },
+      { path: 'event/list', component: () => import('../views/event/EventView.vue') },
       { path: 'analytics/charts', component: () => import('../views/analytics/AnalyticsView.vue') },
       { path: 'log/operation', component: () => import('../views/log/OperationLogView.vue') },
       { path: 'log/login', component: () => import('../views/log/LoginLogView.vue') },

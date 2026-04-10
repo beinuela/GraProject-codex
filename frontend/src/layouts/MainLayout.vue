@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="layout">
     <aside class="sidebar" :class="{ collapsed: sidebarCollapsed }">
       <div class="sidebar-logo" @click="$router.push('/dashboard')" v-if="!sidebarCollapsed">
@@ -8,7 +8,7 @@
           </svg>
         </div>
         <div class="logo-text">
-          <strong style="font-size: 15px; color: #1e293b; letter-spacing: 1px;">应急物资管理</strong>
+          <strong style="font-size: 15px; color: #1e293b; letter-spacing: 1px;">物资智能管理</strong>
           <span style="font-size: 13px; color: #0ea5e9; font-weight: bold;">Campus EMS</span>
         </div>
       </div>
