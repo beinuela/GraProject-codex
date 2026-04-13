@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class AnalyticsService {
@@ -118,7 +119,7 @@ public class AnalyticsService {
     }
 
     private Long count(String sql) {
-        Long value = jdbcTemplate.queryForObject(sql, Long.class);
+        Long value = jdbcTemplate.queryForObject(Objects.requireNonNull(sql), Long.class);
         return value == null ? 0L : value;
     }
 }

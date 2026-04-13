@@ -17,7 +17,7 @@ public class NotificationService {
         this.notificationMapper = notificationMapper;
     }
 
-    /** 闁哄被鍎撮妤呭箰閸パ呮毎闁活潿鍔嶉崺娑㈡儍閸曨垪鍋撳杈╁弨闁告帗顨夐妴?*/
+    /** 按用户查询通知列表（未读优先、最新优先） */
     public List<Notification> listByUser(Long userId) {
         return notificationMapper.selectList(
                 new LambdaQueryWrapper<Notification>()
@@ -27,7 +27,7 @@ public class NotificationService {
         );
     }
 
-    /** 缂備胶鍠曢鎼佸嫉椤忓浂鍤㈤柡浣峰嵆閸?*/
+    /** 统计用户未读通知数量 */
     public long countUnread(Long userId) {
         return notificationMapper.selectCount(
                 new LambdaQueryWrapper<Notification>()
@@ -36,7 +36,7 @@ public class NotificationService {
         );
     }
 
-    /** 闁哄秴娲╅鍥ь啅閼奸鍤?*/
+    /** 将单条通知标记为已读 */
     public void markRead(Long id) {
         Notification n = notificationMapper.selectById(id);
         if (n != null) {
@@ -45,7 +45,7 @@ public class NotificationService {
         }
     }
 
-    /** 闁稿繈鍔戦崕鏉戭啅閼奸鍤?*/
+    /** 将用户全部未读通知标记为已读 */
     public void markAllRead(Long userId) {
         List<Notification> unread = notificationMapper.selectList(
                 new LambdaQueryWrapper<Notification>()
@@ -58,12 +58,12 @@ public class NotificationService {
         }
     }
 
-    /** 闁告帞濞€濞呭酣鏌呭杈╁弨 */
+    /** 删除单条通知 */
     public void delete(Long id) {
         notificationMapper.deleteById(id);
     }
 
-    /** 闁告瑦鍨块埀顑跨窔閳ь剚姘ㄩ悡锟犳晬閸х浛rgetUserId 濞?null 闁哄啯鍎奸妴鍐矆閸濆嫮鐣柟缁㈠幘缁即骞嶉埀顒勫嫉婢跺鐪介柨?*/
+    /** 发送通知；当 bizType 为空时默认使用 SYSTEM */
     public void send(Long targetUserId, String title, String content, String bizType, Long bizId) {
         Notification n = new Notification();
         n.setTargetUserId(targetUserId);
