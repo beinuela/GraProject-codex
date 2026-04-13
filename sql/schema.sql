@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS campus_emergency DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE campus_emergency;
+ï»¿CREATE DATABASE IF NOT EXISTS campus_material DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE campus_material;
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -7,7 +7,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS notification;
 DROP TABLE IF EXISTS login_log;
 DROP TABLE IF EXISTS system_config;
-DROP TABLE IF EXISTS emergency_event;
+DROP TABLE IF EXISTS event_record;
 DROP TABLE IF EXISTS supplier;
 DROP TABLE IF EXISTS storage_location;
 DROP TABLE IF EXISTS campus;
@@ -304,7 +304,7 @@ CREATE TABLE operation_log (
     INDEX idx_log_module (module)
 );
 
--- ===================== Ð£Çø¹ÜÀí =====================
+-- ===================== Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ =====================
 CREATE TABLE campus (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     campus_name VARCHAR(100) NOT NULL,
@@ -318,7 +318,7 @@ CREATE TABLE campus (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- ===================== ¿âÎ»¹ÜÀí =====================
+-- ===================== ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½ =====================
 CREATE TABLE storage_location (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     location_code VARCHAR(50) NOT NULL,
@@ -335,7 +335,7 @@ CREATE TABLE storage_location (
     INDEX idx_location_warehouse (warehouse_id)
 );
 
--- ===================== ¹©Ó¦ÉÌ¹ÜÀí =====================
+-- ===================== ï¿½ï¿½Ó¦ï¿½Ì¹ï¿½ï¿½ï¿½ =====================
 CREATE TABLE supplier (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     supplier_name VARCHAR(100) NOT NULL,
@@ -351,8 +351,8 @@ CREATE TABLE supplier (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- ===================== Ó¦¼±ÊÂ¼þ¹ÜÀí =====================
-CREATE TABLE emergency_event (
+-- ===================== Ó¦ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ =====================
+CREATE TABLE event_record (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     event_title VARCHAR(200) NOT NULL,
     event_type VARCHAR(50) NOT NULL,
@@ -375,7 +375,7 @@ CREATE TABLE emergency_event (
     INDEX idx_event_level (event_level)
 );
 
--- ===================== ÏµÍ³ÅäÖÃ =====================
+-- ===================== ÏµÍ³ï¿½ï¿½ï¿½ï¿½ =====================
 CREATE TABLE system_config (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     config_key VARCHAR(100) NOT NULL UNIQUE,
@@ -390,7 +390,7 @@ CREATE TABLE system_config (
     INDEX idx_config_group (config_group)
 );
 
--- ===================== µÇÂ¼ÈÕÖ¾ =====================
+-- ===================== ï¿½ï¿½Â¼ï¿½ï¿½Ö¾ =====================
 CREATE TABLE login_log (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT,
@@ -408,7 +408,7 @@ CREATE TABLE login_log (
     INDEX idx_login_log_time (login_time)
 );
 
--- ===================== Í¨ÖªÏûÏ¢ =====================
+-- ===================== Í¨Öªï¿½ï¿½Ï¢ =====================
 CREATE TABLE notification (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(200) NOT NULL,

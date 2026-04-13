@@ -1,11 +1,11 @@
-<template>
+﻿<template>
   <div class="big-screen-container">
     <header class="header">
       <div class="header-left">
         <span class="time">{{ currentTime }}</span>
       </div>
       <div class="header-center">
-        <h1>校园应急物资指挥中心</h1>
+        <h1>校园物资管理指挥中心</h1>
       </div>
       <div class="header-right">
         <el-button color="#1e40af" :dark="true" size="small" @click="goBack" class="back-btn">
@@ -51,7 +51,7 @@
             <div class="glow-circle delay-2"></div>
             <div class="center-text">
               <div class="val">{{ kpiData.monthlyEvents || 0 }}</div>
-              <div class="lbl">本月应急事件</div>
+              <div class="lbl">本月事件列表</div>
             </div>
           </div>
         </div>

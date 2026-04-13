@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="page-card">
     <h2 class="page-title">调拨管理</h2>
     <el-space style="margin-bottom:12px">
@@ -31,7 +31,7 @@
     <el-dialog append-to-body v-model="createVisible" title="新建调拨 / Smart Dispatch" width="650">
       <el-form :model="createForm" label-width="100px">
         <el-form-item label="调入仓库">
-          <el-select v-model="createForm.toWarehouseId" placeholder="应急事发地/缺货仓" style="width:100%">
+          <el-select v-model="createForm.toWarehouseId" placeholder="所属校区/目标位置" style="width:100%">
             <el-option v-for="w in warehouses" :key="w.id" :label="w.warehouseName + ' (' + w.campus + ')'" :value="w.id" />
           </el-select>
         </el-form-item>

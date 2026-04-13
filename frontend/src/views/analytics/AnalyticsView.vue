@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="analytics-page">
     <h2 class="page-title">统计分析</h2>
 
@@ -42,9 +42,9 @@
         <h3>⏰ 物资过期统计</h3>
         <div ref="expiryBarRef" class="chart-box"></div>
       </div>
-      <!-- 6. 应急消耗趋势 -->
+      <!-- 6. 消耗趋势统计 -->
       <div class="chart-card">
-        <h3>🚨 应急消耗趋势</h3>
+        <h3>🚨 消耗趋势统计</h3>
         <div ref="emergencyLineRef" class="chart-box"></div>
       </div>
     </div>

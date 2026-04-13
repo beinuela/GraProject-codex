@@ -1,41 +1,38 @@
-# 校园应急物资智能管理系统
+# 校园物资智能管理系统
 
-毕业设计全功能版实现（前后端分离）：
-- 前端：Vue3 + Element Plus + ECharts + Pinia + Vite
-- 后端：Spring Boot 3 + Spring Security + JWT + MyBatis-Plus
-- 数据库：MySQL 8
+校园物资精细化、标准化管理方案，毕业设计全功能版实现（前后端分离）：
+
+- **前端**：Vue3 + Element Plus + ECharts + Pinia + Vite
+- **后端**：Spring Boot 3 + Spring Security + JWT + MyBatis-Plus
+- **数据库**：MySQL 8
+- **UI 风格**：深色模式玻璃拟态 (Glassmorphism) / 极简商务风
 
 ## 目录结构
 
-- `backend`：后端服务
-- `frontend`：前端管理端
-- `sql`：建表与演示数据脚本
+- `backend`：后端服务 (基于 Spring Boot 3)
+- `frontend`：前端管理端 (基于 Vue 3)
+- `sql`：数据库建表与种子数据脚本
 
 ## 快速启动
 
 ### 1. 初始化数据库
 
-1. 在 MySQL 8 执行：`sql/schema.sql`
-2. 再执行：`sql/seed.sql`
-3. 确认数据库连接（默认）：
-   - 数据库：`campus_emergency`
-   - 用户名：`root`
-   - 密码：`root`
-
-如需修改，请编辑：`backend/src/main/resources/application.yml`
+1. 在 MySQL 8 环境下手动创建数据库：`CREATE DATABASE campus_material DEFAULT CHARACTER SET utf8mb4;`
+2. 执行脚本：`sql/schema.sql` (结构定义)
+3. 执行脚本：`sql/seed.sql` (演示数据)
+4. 确认数据库连接配置：
+   - 数据库名：`campus_material`
+   - 配置文件：`backend/src/main/resources/application-dev.yml`
 
 ### 2. 启动后端
 
 ```bash
 cd backend
-mvn spring-boot:run
+mvn clean spring-boot:run
 ```
 
-后端地址：`http://127.0.0.1:8080`
-
-API 文档：
-- Knife4j: `http://127.0.0.1:8080/doc.html`
-- OpenAPI: `http://127.0.0.1:8080/swagger-ui/index.html`
+- 后端接口：`http://127.0.0.1:8080`
+- API 文档：`http://127.0.0.1:8080/swagger-ui/index.html`
 
 ### 3. 启动前端
 
@@ -45,35 +42,31 @@ npm install
 npm run dev
 ```
 
-前端地址：`http://127.0.0.1:5173`
+- 后端地址：`http://127.0.0.1:5173`
+
+## 核心功能模块
+
+- **仪表盘/大数据屏**：实时库存概览、物资流转监控、事件警示。
+- **仓储管理**：支持多校区、多仓库、多库位结构；支持入库、出库、移库及库存盘点。
+- **业务申领**：完整的 申领 -> 审批 -> 出库 -> 签收 闭环流程，支持紧急领用。
+- **物资调拨**：支持跨库、跨校区物资互助。
+- **智能预警**：库存不足告警、积压告警、效期临期/过期提醒。
+- **统计分析**：物资消耗趋势分析、部门领用排行、库存占比分布。
+- **事件管理**：突发性物资需求登记与跟踪。
+- **系统工具**：RBAC 权限控制、操作日志审计、消息通知。
 
 ## 演示账号
 
 - 管理员：`admin / 123456`
 - 仓库管理员：`warehouse / 123456`
-- 部门用户：`dept / 123456`
 - 审批人员：`approver / 123456`
+- 部门用户：`dept / 123456`
 
-## 一键答辩演示流程（建议）
+## 技术亮点
 
-1. 使用 `dept` 登录，创建普通申请并提交。
-2. 使用 `approver` 登录，对申请审批通过。
-3. 使用 `warehouse` 登录，在出库管理按 FEFO 执行出库（关联申请ID）。
-4. 使用 `dept` 登录，执行签收。
-5. 在预警中心触发扫描并处理预警。
-6. 打开首页仪表盘与数据分析页，展示图表、预测与补货建议。
+- **FEFO (先到期先出)**：系统在出库推荐中采用先进先出/先到期先出逻辑。
+- **响应式设计**：适配 PC 端与移动端显示。
+- **高阶 UI**：采用自定义玻璃拟态设计，系统感官精致。
 
-## 已实现能力
-
-- 登录认证、JWT 鉴权、角色菜单控制
-- 用户/角色/部门、物资分类/物资、仓库管理
-- 入库、出库、库存查询、批次管理、盘点
-- 申请审批（普通/紧急快速审批）、签收闭环
-- 调拨申请、审批、执行、确认
-- 预警扫描（不足/积压/临期/过期/异常领用）
-- 统计分析图表与移动平均预测、补货建议
-
-## 说明
-
-- 默认密码允许明文种子数据登录（便于演示），新增/编辑用户密码将自动 BCrypt 存储。
-- 当前版本为单体架构，适配毕业设计答辩场景。
+---
+*本项目原名为“校园应急物资智能管理系统”，现已升级为更通用的“校园物资智能管理系统”。*
