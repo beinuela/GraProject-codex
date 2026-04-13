@@ -1,6 +1,7 @@
 package com.campus.material.modules.apply.controller;
 
 import com.campus.material.common.ApiResponse;
+import com.campus.material.common.RemarkRequest;
 import com.campus.material.modules.apply.dto.ApplyCreateRequest;
 import com.campus.material.modules.apply.entity.ApplyOrder;
 import com.campus.material.modules.apply.service.ApplyService;
@@ -50,15 +51,19 @@ public class ApplyController {
 
     @PostMapping("/{id}/approve")
     @PreAuthorize("hasAnyRole('ADMIN','APPROVER')")
-    public ApiResponse<Void> approve(@PathVariable Long id, @RequestParam(required = false) String remark) {
-        applyService.approve(id, remark);
+    public ApiResponse<Void> approve(@PathVariable Long id,
+                                     @RequestParam(required = false) String remark,
+                                     @RequestBody(required = false) RemarkRequest body) {
+        applyService.approve(id, resolveRemark(remark, body));
         return ApiResponse.ok(null);
     }
 
     @PostMapping("/{id}/reject")
     @PreAuthorize("hasAnyRole('ADMIN','APPROVER')")
-    public ApiResponse<Void> reject(@PathVariable Long id, @RequestParam(required = false) String remark) {
-        applyService.reject(id, remark);
+    public ApiResponse<Void> reject(@PathVariable Long id,
+                                    @RequestParam(required = false) String remark,
+                                    @RequestBody(required = false) RemarkRequest body) {
+        applyService.reject(id, resolveRemark(remark, body));
         return ApiResponse.ok(null);
     }
 
@@ -73,5 +78,12 @@ public class ApplyController {
     @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
     public ApiResponse<List<com.campus.material.modules.log.entity.OperationLog>> timeline(@PathVariable Long id) {
         return ApiResponse.ok(operationLogService.getTimeline("APPLY", id));
+    }
+
+    private String resolveRemark(String remark, RemarkRequest body) {
+        if (body != null && body.getRemark() != null && !body.getRemark().isBlank()) {
+            return body.getRemark();
+        }
+        return remark;
     }
 }

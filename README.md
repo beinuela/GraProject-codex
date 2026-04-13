@@ -31,6 +31,13 @@ cd backend
 mvn clean spring-boot:run
 ```
 
+启动前请先在系统环境变量或 `.env` 中配置以下关键项：
+
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `JWT_SECRET`（必须为至少 32 字节的高强度随机字符串）
+- `CORS_ALLOWED_ORIGINS`（默认 `http://localhost:5173`，生产环境请改为实际前端域名）
+
 - 后端接口：`http://127.0.0.1:8080`
 - API 文档：`http://127.0.0.1:8080/swagger-ui/index.html`
 
@@ -57,16 +64,26 @@ npm run dev
 
 ## 演示账号
 
-- 管理员：`admin / 123456`
-- 仓库管理员：`warehouse / 123456`
-- 审批人员：`approver / 123456`
-- 部门用户：`dept / 123456`
+> **安全提示**：为保障系统安全，演示账号的初始密码已在 `application-dev.yml`、`seed.sql` 及 `.env.example` 中集中管理（默认 BCrypt 加密为 `Abc@123456`）。
+> 生产环境部署前，请务必修改！
+
+- 管理员：`admin`
+- 仓库管理员：`warehouse`
+- 审批人员：`approver`
+- 部门用户：`dept`
 
 ## 技术亮点
 
 - **FEFO (先到期先出)**：系统在出库推荐中采用先进先出/先到期先出逻辑。
 - **响应式设计**：适配 PC 端与移动端显示。
 - **高阶 UI**：采用自定义玻璃拟态设计，系统感官精致。
+
+## 提交与验收建议
+
+- 提交分组与文件清单请参考：`SUBMIT_CHECKLIST.md`
+- 建议验收前执行：
+   - `mvn -f backend/pom.xml test`
+   - `cd frontend && npm run build`
 
 ---
 *本项目原名为“校园应急物资智能管理系统”，现已升级为更通用的“校园物资智能管理系统”。*

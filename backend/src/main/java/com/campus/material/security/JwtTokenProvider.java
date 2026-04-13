@@ -25,10 +25,10 @@ public class JwtTokenProvider {
     private SecretKey secretKey() {
         String secret = jwtProperties.getSecret();
         if (secret == null || secret.isBlank()) {
-            throw new BizException(500, "JWT_SECRET δ���ã����ڻ�������������");
+            throw new BizException(500, "JWT_SECRET 未配置，请在环境变量中设置");
         }
         if (secret.getBytes(StandardCharsets.UTF_8).length < 32) {
-            throw new BizException(500, "JWT_SECRET ���Ȳ��㣬������Ҫ 32 �ֽ�");
+            throw new BizException(500, "JWT_SECRET 长度不足，至少需要 32 字节");
         }
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }

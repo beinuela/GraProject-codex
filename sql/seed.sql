@@ -1,4 +1,4 @@
-﻿USE campus_material;
+USE campus_material;
 SET NAMES utf8mb4;
 
 INSERT INTO sys_role (id, role_code, role_name, description) VALUES
@@ -23,11 +23,12 @@ dept_name = VALUES(dept_name),
 parent_id = VALUES(parent_id),
 deleted = 0;
 
+-- 演示账号密码统一为 Abc@123456（BCrypt 加密存储）
 INSERT INTO sys_user (id, username, password, real_name, dept_id, role_id, status) VALUES
-(1, 'admin', '123456', '系统管理员', 2, 1, 1),
-(2, 'warehouse', '123456', '仓库管理员', 2, 2, 1),
-(3, 'dept', '123456', '部门申请员', 5, 3, 1),
-(4, 'approver', '123456', '审批负责人', 2, 4, 1)
+(1, 'admin', '$2a$10$HF0xvRR/pa3b2XcZ2t.DqumBrQCdHWtNN2SUgd/xYhrPjglgru28O', '系统管理员', 2, 1, 1),
+(2, 'warehouse', '$2a$10$HF0xvRR/pa3b2XcZ2t.DqumBrQCdHWtNN2SUgd/xYhrPjglgru28O', '仓库管理员', 2, 2, 1),
+(3, 'dept', '$2a$10$HF0xvRR/pa3b2XcZ2t.DqumBrQCdHWtNN2SUgd/xYhrPjglgru28O', '部门申请员', 5, 3, 1),
+(4, 'approver', '$2a$10$HF0xvRR/pa3b2XcZ2t.DqumBrQCdHWtNN2SUgd/xYhrPjglgru28O', '审批负责人', 2, 4, 1)
 ON DUPLICATE KEY UPDATE
 username = VALUES(username),
 password = VALUES(password),

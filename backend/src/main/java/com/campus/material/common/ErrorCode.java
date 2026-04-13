@@ -1,0 +1,24 @@
+package com.campus.material.common;
+
+import lombok.Getter;
+
+@Getter
+public enum ErrorCode {
+
+    SUCCESS(200, "操作成功"),
+    BAD_REQUEST(400, "参数校验失败"),
+    UNAUTHORIZED(401, "未认证或Token失效"),
+    FORBIDDEN(403, "无权限访问该资源"),
+    NOT_FOUND(404, "请求资源不存在"),
+    METHOD_NOT_ALLOWED(405, "请求方法不被允许"),
+    BUSINESS_ERROR(410, "业务逻辑异常"),
+    INTERNAL_SERVER_ERROR(500, "服务器内部错误");
+
+    private final int code;
+    private final String defaultMessage;
+
+    ErrorCode(int code, String defaultMessage) {
+        this.code = code;
+        this.defaultMessage = defaultMessage;
+    }
+}

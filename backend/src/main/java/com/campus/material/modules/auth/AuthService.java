@@ -328,16 +328,11 @@ public class AuthService {
             stored = stored.substring("{bcrypt}".length());
         }
 
-        // 优先按加密密码匹配（支持 BCrypt 及后续可扩展编码器）
+        // 仅支持 BCrypt 加密密码校验
         try {
-            if (passwordEncoder.matches(raw, stored)) {
-                return true;
-            }
-        } catch (IllegalArgumentException ignored) {
-            // 非 BCrypt 格式时回退到明文兼容
+            return passwordEncoder.matches(raw, stored);
+        } catch (IllegalArgumentException e) {
+            return false;
         }
-
-        // 兼容演示环境中的明文密码
-        return raw.equals(stored) || raw.equals(encodedOrPlain);
     }
 }
