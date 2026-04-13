@@ -1,4 +1,4 @@
-﻿CREATE DATABASE IF NOT EXISTS campus_material DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+CREATE DATABASE IF NOT EXISTS campus_material DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE campus_material;
 
 SET NAMES utf8mb4;
@@ -304,7 +304,7 @@ CREATE TABLE operation_log (
     INDEX idx_log_module (module)
 );
 
--- ===================== У������ =====================
+-- ===================== 校区管理 =====================
 CREATE TABLE campus (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     campus_name VARCHAR(100) NOT NULL,
@@ -318,7 +318,7 @@ CREATE TABLE campus (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- ===================== ��λ���� =====================
+-- ===================== 库位管理 =====================
 CREATE TABLE storage_location (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     location_code VARCHAR(50) NOT NULL,
@@ -335,7 +335,7 @@ CREATE TABLE storage_location (
     INDEX idx_location_warehouse (warehouse_id)
 );
 
--- ===================== ��Ӧ�̹��� =====================
+-- ===================== 供应商管理 =====================
 CREATE TABLE supplier (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     supplier_name VARCHAR(100) NOT NULL,
@@ -351,7 +351,7 @@ CREATE TABLE supplier (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- ===================== Ӧ���¼����� =====================
+-- ===================== 事件记录管理 =====================
 CREATE TABLE event_record (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     event_title VARCHAR(200) NOT NULL,
@@ -375,7 +375,7 @@ CREATE TABLE event_record (
     INDEX idx_event_level (event_level)
 );
 
--- ===================== ϵͳ���� =====================
+-- ===================== 系统配置 =====================
 CREATE TABLE system_config (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     config_key VARCHAR(100) NOT NULL UNIQUE,
@@ -390,7 +390,7 @@ CREATE TABLE system_config (
     INDEX idx_config_group (config_group)
 );
 
--- ===================== ��¼��־ =====================
+-- ===================== 登录日志 =====================
 CREATE TABLE login_log (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT,
@@ -408,7 +408,7 @@ CREATE TABLE login_log (
     INDEX idx_login_log_time (login_time)
 );
 
--- ===================== ֪ͨ��Ϣ =====================
+-- ===================== 通知消息 =====================
 CREATE TABLE notification (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(200) NOT NULL,
