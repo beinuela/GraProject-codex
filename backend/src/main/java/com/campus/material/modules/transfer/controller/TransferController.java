@@ -1,6 +1,7 @@
 package com.campus.material.modules.transfer.controller;
 
 import com.campus.material.common.ApiResponse;
+import com.campus.material.common.RemarkRequest;
 import com.campus.material.modules.transfer.dto.TransferCreateRequest;
 import com.campus.material.modules.transfer.entity.TransferOrder;
 import com.campus.material.modules.transfer.service.TransferService;
@@ -48,15 +49,19 @@ public class TransferController {
 
     @PostMapping("/{id}/approve")
     @PreAuthorize("hasAnyRole('ADMIN','APPROVER')")
-    public ApiResponse<Void> approve(@PathVariable Long id, @RequestParam(required = false) String remark) {
-        transferService.approve(id, remark);
+    public ApiResponse<Void> approve(@PathVariable Long id,
+                                     @RequestParam(required = false) String remark,
+                                     @RequestBody(required = false) RemarkRequest body) {
+        transferService.approve(id, resolveRemark(remark, body));
         return ApiResponse.ok(null);
     }
 
     @PostMapping("/{id}/reject")
     @PreAuthorize("hasAnyRole('ADMIN','APPROVER')")
-    public ApiResponse<Void> reject(@PathVariable Long id, @RequestParam(required = false) String remark) {
-        transferService.reject(id, remark);
+    public ApiResponse<Void> reject(@PathVariable Long id,
+                                    @RequestParam(required = false) String remark,
+                                    @RequestBody(required = false) RemarkRequest body) {
+        transferService.reject(id, resolveRemark(remark, body));
         return ApiResponse.ok(null);
     }
 
@@ -81,5 +86,12 @@ public class TransferController {
             @RequestParam Long materialId,
             @RequestParam Integer qty) {
         return ApiResponse.ok(transferService.recommendTransfer(targetCampus, materialId, qty));
+    }
+
+    private String resolveRemark(String remark, RemarkRequest body) {
+        if (body != null && body.getRemark() != null && !body.getRemark().isBlank()) {
+            return body.getRemark();
+        }
+        return remark;
     }
 }

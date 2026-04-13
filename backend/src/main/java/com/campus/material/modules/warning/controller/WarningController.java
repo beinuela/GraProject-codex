@@ -1,6 +1,7 @@
 package com.campus.material.modules.warning.controller;
 
 import com.campus.material.common.ApiResponse;
+import com.campus.material.common.RemarkRequest;
 import com.campus.material.modules.warning.entity.WarningRecord;
 import com.campus.material.modules.warning.service.WarningService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,8 +35,17 @@ public class WarningController {
 
     @PostMapping("/{id}/handle")
     @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER')")
-    public ApiResponse<Void> handle(@PathVariable Long id, @RequestParam(required = false) String remark) {
-        warningService.handle(id, remark);
+    public ApiResponse<Void> handle(@PathVariable Long id,
+                                    @RequestParam(required = false) String remark,
+                                    @RequestBody(required = false) RemarkRequest body) {
+        warningService.handle(id, resolveRemark(remark, body));
         return ApiResponse.ok(null);
+    }
+
+    private String resolveRemark(String remark, RemarkRequest body) {
+        if (body != null && body.getRemark() != null && !body.getRemark().isBlank()) {
+            return body.getRemark();
+        }
+        return remark;
     }
 }
