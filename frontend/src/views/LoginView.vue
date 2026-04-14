@@ -10,7 +10,7 @@
             <el-icon><Monitor /></el-icon>
           </div>
           <h1>校园物资智能管理系统</h1>
-          <p>Campus Emergency Material System</p>
+          <p>Campus Material Intelligent Management System</p>
         </div>
         
         <el-form :model="form" @submit.prevent="handleLogin" label-width="0" class="login-form">

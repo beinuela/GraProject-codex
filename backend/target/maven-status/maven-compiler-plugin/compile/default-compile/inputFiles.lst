@@ -2,8 +2,10 @@ D:\idea+\project\GraProject-codex\backend\src\main\java\com\campus\material\Camp
 D:\idea+\project\GraProject-codex\backend\src\main\java\com\campus\material\common\ApiResponse.java
 D:\idea+\project\GraProject-codex\backend\src\main\java\com\campus\material\common\BaseEntity.java
 D:\idea+\project\GraProject-codex\backend\src\main\java\com\campus\material\common\BizException.java
+D:\idea+\project\GraProject-codex\backend\src\main\java\com\campus\material\common\ErrorCode.java
 D:\idea+\project\GraProject-codex\backend\src\main\java\com\campus\material\common\GlobalExceptionHandler.java
 D:\idea+\project\GraProject-codex\backend\src\main\java\com\campus\material\common\OrderStatus.java
+D:\idea+\project\GraProject-codex\backend\src\main\java\com\campus\material\common\RemarkRequest.java
 D:\idea+\project\GraProject-codex\backend\src\main\java\com\campus\material\common\WarningType.java
 D:\idea+\project\GraProject-codex\backend\src\main\java\com\campus\material\config\MybatisPlusConfig.java
 D:\idea+\project\GraProject-codex\backend\src\main\java\com\campus\material\config\MyMetaObjectHandler.java
