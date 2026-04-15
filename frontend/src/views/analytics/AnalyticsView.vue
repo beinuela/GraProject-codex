@@ -1,211 +1,302 @@
-﻿<template>
-  <div class="analytics-page">
-    <h2 class="page-title">统计分析</h2>
+<template>
+  <PageScaffold :metrics="overviewMetrics" page-type="analytics">
+    <template #hero-actions>
+      <el-button @click="load">刷新分析</el-button>
+      <el-button type="primary" @click="router.push('/bigscreen')">打开大屏</el-button>
+    </template>
 
-    <!-- KPI 概览 -->
-    <div class="kpi-row">
-      <div class="kpi-card" v-for="(item, idx) in overviewList" :key="item.label" :style="{ animationDelay: idx * 0.06 + 's' }">
-        <div class="kpi-icon" :style="{ background: kpiColors[idx] }">
-          <el-icon :size="22"><component :is="kpiIcons[idx]" /></el-icon>
-        </div>
-        <div class="kpi-info">
-          <div class="kpi-value">{{ item.value }}</div>
-          <div class="kpi-label">{{ item.label }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 图表网格 -->
-    <div class="chart-grid">
-      <!-- 1. 库存占比饼图 -->
-      <div class="chart-card">
-        <h3>📦 库存占比分布</h3>
+    <div class="surface-grid surface-grid--2">
+      <DataPanel title="库存占比分布" description="观察库存结构和重点物资占比。">
         <div ref="pieRef" class="chart-box"></div>
-      </div>
-      <!-- 2. 仓库库存柱状图 -->
-      <div class="chart-card">
-        <h3>🏗️ 仓库库存分布</h3>
+      </DataPanel>
+      <DataPanel title="仓库库存分布" description="对比各仓库承载的库存规模。">
         <div ref="warehouseBarRef" class="chart-box"></div>
-      </div>
-      <!-- 3. 出入库趋势折线图 -->
-      <div class="chart-card">
-        <h3>📈 出入库趋势 (近6月)</h3>
+      </DataPanel>
+      <DataPanel title="出入库趋势" description="跟踪近六个月入库与出库变化。">
         <div ref="trendLineRef" class="chart-box"></div>
-      </div>
-      <!-- 4. 部门领用排行 -->
-      <div class="chart-card">
-        <h3>🏆 部门领用排行 Top10</h3>
+      </DataPanel>
+      <DataPanel title="部门领用排行" description="识别领用量靠前的部门。">
         <div ref="deptBarRef" class="chart-box"></div>
-      </div>
-      <!-- 5. 物资过期统计 -->
-      <div class="chart-card">
-        <h3>⏰ 物资过期统计</h3>
+      </DataPanel>
+      <DataPanel title="物资效期风险" description="统计已过期和即将过期物资数量。">
         <div ref="expiryBarRef" class="chart-box"></div>
-      </div>
-      <!-- 6. 消耗趋势统计 -->
-      <div class="chart-card">
-        <h3>🚨 消耗趋势统计</h3>
+      </DataPanel>
+      <DataPanel title="应急消耗趋势" description="观察异常时期的消耗波动。">
         <div ref="emergencyLineRef" class="chart-box"></div>
-      </div>
+      </DataPanel>
     </div>
-  </div>
+  </PageScaffold>
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { Bell, Box, Document, OfficeBuilding, User, Warning } from '@element-plus/icons-vue'
 import { apiGet } from '../../api'
+import DataPanel from '../../components/ui/DataPanel.vue'
+import PageScaffold from '../../components/ui/PageScaffold.vue'
 import { useChart } from '../../composables/useChart'
-import { User, Box, OfficeBuilding, Warning, Bell, Document } from '@element-plus/icons-vue'
 
-const COLORS = ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6']
+const router = useRouter()
 
-// ========== KPI 概览 ==========
-const overviewList = ref([])
-const kpiIcons = [User, Box, OfficeBuilding, Warning, Document, Bell]
-const kpiColors = [
-  'linear-gradient(135deg, #3b82f6, #2563eb)',
-  'linear-gradient(135deg, #10b981, #059669)',
-  'linear-gradient(135deg, #06b6d4, #0891b2)',
-  'linear-gradient(135deg, #f59e0b, #d97706)',
-  'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-  'linear-gradient(135deg, #ef4444, #dc2626)'
-]
+const chartColors = ['#2670e9', '#35d4c6', '#7856ff', '#ff9f43', '#fa5252', '#12b886']
 
-// ========== 1. 库存占比饼图 ==========
-const pieRef = ref(null)
+const overview = ref({
+  userCount: 0,
+  materialCount: 0,
+  warehouseCount: 0,
+  unhandledWarningCount: 0,
+  pendingApplyCount: 0,
+  pendingTransferCount: 0
+})
+
 const inventoryData = ref([])
+const warehouseData = ref([])
+const trendData = ref([])
+const deptData = ref([])
+const expiryData = ref([])
+const emergencyData = ref([])
+
+const overviewMetrics = computed(() => [
+  { label: '系统用户', value: overview.value.userCount, helper: '当前可登录账号', icon: User, tone: 'accent' },
+  { label: '物资种类', value: overview.value.materialCount, helper: '物资档案总量', icon: Box, tone: 'teal' },
+  { label: '仓库数量', value: overview.value.warehouseCount, helper: '已建仓储节点', icon: OfficeBuilding, tone: 'neutral' },
+  { label: '未处理预警', value: overview.value.unhandledWarningCount, helper: '待处置风险', icon: Warning, tone: overview.value.unhandledWarningCount ? 'danger' : 'warning' },
+  { label: '待审批申领', value: overview.value.pendingApplyCount, helper: '申领流程待办', icon: Document, tone: 'warning' },
+  { label: '待审批调拨', value: overview.value.pendingTransferCount, helper: '调拨流程待办', icon: Bell, tone: 'accent' }
+])
+
+const pieRef = ref(null)
 const pieOpt = computed(() => {
   if (!inventoryData.value.length) return null
   return {
-    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
-    legend: { type: 'scroll', bottom: 0, textStyle: { color: '#64748b', fontSize: 12 } },
-    color: COLORS,
-    series: [{
-      type: 'pie', radius: ['38%', '68%'], center: ['50%', '45%'],
-      itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
-      label: { show: false },
-      emphasis: { label: { show: true, fontSize: 14, fontWeight: 'bold' } },
-      data: inventoryData.value.map(d => ({ name: d.name, value: Number(d.value) }))
-    }]
+    tooltip: { trigger: 'item', borderRadius: 14 },
+    legend: { type: 'scroll', bottom: 0, textStyle: { color: '#6b7b96' } },
+    color: chartColors,
+    series: [
+      {
+        type: 'pie',
+        radius: ['40%', '70%'],
+        center: ['50%', '45%'],
+        itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 3 },
+        label: { show: false },
+        emphasis: { label: { show: true, fontWeight: 700 } },
+        data: inventoryData.value.map(item => ({ name: item.name, value: Number(item.value) }))
+      }
+    ]
   }
 })
 useChart(pieRef, pieOpt)
 
-// ========== 2. 仓库库存柱状图 ==========
 const warehouseBarRef = ref(null)
-const warehouseData = ref([])
 const warehouseBarOpt = computed(() => {
   if (!warehouseData.value.length) return null
   return {
-    tooltip: { trigger: 'axis' },
-    grid: { left: 60, right: 20, top: 20, bottom: 30 },
-    xAxis: { type: 'category', data: warehouseData.value.map(d => d.warehouseName), axisLabel: { color: '#94a3b8', rotate: 20, fontSize: 11 }, axisLine: { lineStyle: { color: '#e2e8f0' } } },
-    yAxis: { type: 'value', axisLabel: { color: '#94a3b8' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
-    series: [{
-      type: 'bar', data: warehouseData.value.map(d => Number(d.totalQty)),
-      barWidth: '50%',
-      itemStyle: { borderRadius: [6, 6, 0, 0], color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: '#3b82f6' }, { offset: 1, color: '#06b6d4' }] } }
-    }]
+    tooltip: { trigger: 'axis', borderRadius: 14 },
+    grid: { left: 56, right: 20, top: 20, bottom: 36 },
+    xAxis: {
+      type: 'category',
+      data: warehouseData.value.map(item => item.warehouseName),
+      axisLine: { lineStyle: { color: '#d8e1ef' } },
+      axisLabel: { color: '#73849f', rotate: 20 }
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: { color: '#73849f' },
+      splitLine: { lineStyle: { color: '#edf2fa' } }
+    },
+    series: [
+      {
+        type: 'bar',
+        barWidth: '52%',
+        data: warehouseData.value.map(item => Number(item.totalQty)),
+        itemStyle: {
+          borderRadius: [10, 10, 0, 0],
+          color: {
+            type: 'linear',
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [
+              { offset: 0, color: '#2670e9' },
+              { offset: 1, color: '#35d4c6' }
+            ]
+          }
+        }
+      }
+    ]
   }
 })
 useChart(warehouseBarRef, warehouseBarOpt)
 
-// ========== 3. 出入库趋势折线图 ==========
 const trendLineRef = ref(null)
-const trendData = ref([])
 const trendLineOpt = computed(() => {
   if (!trendData.value.length) return null
-  const months = trendData.value.map(d => d.month_key || d.monthKey)
   return {
-    tooltip: { trigger: 'axis' },
-    legend: { data: ['入库', '出库'], textStyle: { color: '#64748b' } },
-    grid: { left: 50, right: 20, top: 40, bottom: 30 },
-    xAxis: { type: 'category', data: months, axisLabel: { color: '#94a3b8' }, axisLine: { lineStyle: { color: '#e2e8f0' } } },
-    yAxis: { type: 'value', axisLabel: { color: '#94a3b8' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
-    color: ['#3b82f6', '#ef4444'],
+    tooltip: { trigger: 'axis', borderRadius: 14 },
+    legend: { data: ['入库', '出库'], textStyle: { color: '#6b7b96' } },
+    grid: { left: 50, right: 20, top: 42, bottom: 34 },
+    xAxis: {
+      type: 'category',
+      data: trendData.value.map(item => item.month_key || item.monthKey),
+      axisLine: { lineStyle: { color: '#d8e1ef' } },
+      axisLabel: { color: '#73849f' }
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: { color: '#73849f' },
+      splitLine: { lineStyle: { color: '#edf2fa' } }
+    },
+    color: ['#2670e9', '#fa5252'],
     series: [
-      { name: '入库', type: 'line', data: trendData.value.map(d => Number(d.inQty || d.in_qty || 0)), smooth: true, areaStyle: { opacity: 0.12 }, symbolSize: 6 },
-      { name: '出库', type: 'line', data: trendData.value.map(d => Number(d.outQty || d.out_qty || 0)), smooth: true, areaStyle: { opacity: 0.12 }, symbolSize: 6 }
+      {
+        name: '入库',
+        type: 'line',
+        smooth: true,
+        symbolSize: 8,
+        areaStyle: { opacity: 0.12 },
+        data: trendData.value.map(item => Number(item.inQty || item.in_qty || 0))
+      },
+      {
+        name: '出库',
+        type: 'line',
+        smooth: true,
+        symbolSize: 8,
+        areaStyle: { opacity: 0.12 },
+        data: trendData.value.map(item => Number(item.outQty || item.out_qty || 0))
+      }
     ]
   }
 })
 useChart(trendLineRef, trendLineOpt)
 
-// ========== 4. 部门领用排行横向柱状图 ==========
 const deptBarRef = ref(null)
-const deptData = ref([])
 const deptBarOpt = computed(() => {
   if (!deptData.value.length) return null
-  const sorted = [...deptData.value].reverse()
+  const rows = [...deptData.value].reverse()
   return {
-    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-    grid: { left: 100, right: 30, top: 10, bottom: 20 },
-    xAxis: { type: 'value', axisLabel: { color: '#94a3b8' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
-    yAxis: { type: 'category', data: sorted.map(d => d.deptName), axisLabel: { color: '#64748b', fontSize: 12 } },
-    series: [{
-      type: 'bar', data: sorted.map(d => Number(d.totalQty)),
-      barWidth: '60%',
-      itemStyle: { borderRadius: [0, 6, 6, 0], color: { type: 'linear', x: 0, y: 0, x2: 1, y2: 0, colorStops: [{ offset: 0, color: '#8b5cf6' }, { offset: 1, color: '#ec4899' }] } }
-    }]
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, borderRadius: 14 },
+    grid: { left: 100, right: 24, top: 14, bottom: 20 },
+    xAxis: {
+      type: 'value',
+      axisLabel: { color: '#73849f' },
+      splitLine: { lineStyle: { color: '#edf2fa' } }
+    },
+    yAxis: {
+      type: 'category',
+      data: rows.map(item => item.deptName),
+      axisLabel: { color: '#5d6f8b' }
+    },
+    series: [
+      {
+        type: 'bar',
+        barWidth: '58%',
+        data: rows.map(item => Number(item.totalQty)),
+        itemStyle: {
+          borderRadius: [0, 10, 10, 0],
+          color: {
+            type: 'linear',
+            x: 0,
+            y: 0,
+            x2: 1,
+            y2: 0,
+            colorStops: [
+              { offset: 0, color: '#7856ff' },
+              { offset: 1, color: '#2670e9' }
+            ]
+          }
+        }
+      }
+    ]
   }
 })
 useChart(deptBarRef, deptBarOpt)
 
-// ========== 5. 物资过期统计堆叠柱状图 ==========
 const expiryBarRef = ref(null)
-const expiryData = ref([])
 const expiryBarOpt = computed(() => {
   if (!expiryData.value.length) return null
-  const names = expiryData.value.map(d => d.materialName)
   return {
-    tooltip: { trigger: 'axis' },
-    legend: { data: ['已过期', '即将过期(30天内)'], textStyle: { color: '#64748b' } },
-    grid: { left: 50, right: 20, top: 40, bottom: 50 },
-    xAxis: { type: 'category', data: names, axisLabel: { color: '#94a3b8', rotate: 30, fontSize: 11 }, axisLine: { lineStyle: { color: '#e2e8f0' } } },
-    yAxis: { type: 'value', axisLabel: { color: '#94a3b8' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
-    color: ['#ef4444', '#f59e0b'],
+    tooltip: { trigger: 'axis', borderRadius: 14 },
+    legend: { data: ['已过期', '即将过期'], textStyle: { color: '#6b7b96' } },
+    grid: { left: 50, right: 20, top: 42, bottom: 50 },
+    xAxis: {
+      type: 'category',
+      data: expiryData.value.map(item => item.materialName),
+      axisLine: { lineStyle: { color: '#d8e1ef' } },
+      axisLabel: { color: '#73849f', rotate: 24 }
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: { color: '#73849f' },
+      splitLine: { lineStyle: { color: '#edf2fa' } }
+    },
+    color: ['#fa5252', '#ff9f43'],
     series: [
-      { name: '已过期', type: 'bar', stack: 'total', data: expiryData.value.map(d => Number(d.expiredQty || 0)), itemStyle: { borderRadius: [0, 0, 0, 0] } },
-      { name: '即将过期(30天内)', type: 'bar', stack: 'total', data: expiryData.value.map(d => Number(d.expiringQty || 0)), itemStyle: { borderRadius: [4, 4, 0, 0] } }
+      { name: '已过期', type: 'bar', stack: 'total', data: expiryData.value.map(item => Number(item.expiredQty || 0)) },
+      { name: '即将过期', type: 'bar', stack: 'total', data: expiryData.value.map(item => Number(item.expiringQty || item.expiringSoonQty || 0)) }
     ]
   }
 })
 useChart(expiryBarRef, expiryBarOpt)
 
-// ========== 6. 应急消耗面积图 ==========
 const emergencyLineRef = ref(null)
-const emergencyData = ref([])
 const emergencyLineOpt = computed(() => {
   if (!emergencyData.value.length) return null
   return {
-    tooltip: { trigger: 'axis' },
-    grid: { left: 50, right: 20, top: 20, bottom: 30 },
-    xAxis: { type: 'category', data: emergencyData.value.map(d => d.monthKey || d.month_key), axisLabel: { color: '#94a3b8' }, axisLine: { lineStyle: { color: '#e2e8f0' } } },
-    yAxis: { type: 'value', axisLabel: { color: '#94a3b8' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
-    series: [{
-      type: 'line', data: emergencyData.value.map(d => Number(d.totalQty || 0)),
-      smooth: true, symbolSize: 6,
-      areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(239,68,68,0.35)' }, { offset: 1, color: 'rgba(239,68,68,0.02)' }] } },
-      lineStyle: { color: '#ef4444', width: 2 },
-      itemStyle: { color: '#ef4444' }
-    }]
+    tooltip: { trigger: 'axis', borderRadius: 14 },
+    grid: { left: 50, right: 20, top: 20, bottom: 32 },
+    xAxis: {
+      type: 'category',
+      data: emergencyData.value.map(item => item.monthKey || item.month_key),
+      axisLine: { lineStyle: { color: '#d8e1ef' } },
+      axisLabel: { color: '#73849f' }
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: { color: '#73849f' },
+      splitLine: { lineStyle: { color: '#edf2fa' } }
+    },
+    series: [
+      {
+        type: 'line',
+        smooth: true,
+        symbolSize: 8,
+        lineStyle: { color: '#fa5252', width: 2 },
+        itemStyle: { color: '#fa5252' },
+        areaStyle: {
+          color: {
+            type: 'linear',
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [
+              { offset: 0, color: 'rgba(250, 82, 82, 0.26)' },
+              { offset: 1, color: 'rgba(250, 82, 82, 0.02)' }
+            ]
+          }
+        },
+        data: emergencyData.value.map(item => Number(item.totalQty || 0))
+      }
+    ]
   }
 })
 useChart(emergencyLineRef, emergencyLineOpt)
 
-// ========== 数据加载 ==========
 const load = async () => {
   try {
-    const ov = await apiGet('/api/analytics/overview')
-    overviewList.value = [
-      { label: '系统用户', value: ov.userCount ?? 0 },
-      { label: '物资种类', value: ov.materialCount ?? 0 },
-      { label: '仓库数量', value: ov.warehouseCount ?? 0 },
-      { label: '未处理预警', value: ov.unhandledWarningCount ?? 0 },
-      { label: '待审批申领', value: ov.pendingApplyCount ?? 0 },
-      { label: '待审批调拨', value: ov.pendingTransferCount ?? 0 }
-    ]
-  } catch { overviewList.value = [] }
+    overview.value = await apiGet('/api/analytics/overview')
+  } catch {
+    overview.value = {
+      userCount: 0,
+      materialCount: 0,
+      warehouseCount: 0,
+      unhandledWarningCount: 0,
+      pendingApplyCount: 0,
+      pendingTransferCount: 0
+    }
+  }
 
   try { inventoryData.value = await apiGet('/api/analytics/inventory-ratio') } catch { inventoryData.value = [] }
   try { warehouseData.value = await apiGet('/api/analytics/warehouse-distribution') } catch { warehouseData.value = [] }
@@ -219,82 +310,8 @@ onMounted(load)
 </script>
 
 <style scoped>
-.analytics-page { padding-bottom: 24px; }
-
-.kpi-row {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 14px;
-  margin-bottom: 20px;
-}
-.kpi-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--bg-card, #fff);
-  border-radius: 14px;
-  padding: 16px 18px;
-  box-shadow: 0 2px 12px rgba(0,0,0,.06);
-  animation: fadeInUp 0.4s cubic-bezier(0.25, 1, 0.5, 1) both;
-}
-.kpi-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  flex-shrink: 0;
-}
-.kpi-info { flex: 1; min-width: 0; }
-.kpi-value {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--text-primary, #1e293b);
-  line-height: 1.2;
-}
-.kpi-label {
-  margin-top: 2px;
-  color: var(--text-regular, #64748b);
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.chart-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-.chart-card {
-  background: var(--bg-card, #fff);
-  border-radius: 14px;
-  padding: 20px 24px;
-  box-shadow: 0 2px 12px rgba(0,0,0,.06);
-}
-.chart-card h3 {
-  margin: 0 0 12px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-primary, #1e293b);
-}
 .chart-box {
   width: 100%;
   height: 300px;
-}
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@media (max-width: 1200px) {
-  .kpi-row { grid-template-columns: repeat(3, 1fr); }
-}
-@media (max-width: 900px) {
-  .kpi-row { grid-template-columns: repeat(2, 1fr); }
-  .chart-grid { grid-template-columns: 1fr; }
 }
 </style>

@@ -1,14 +1,23 @@
 package com.campus.material.modules.smart.service;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 @Service
 public class SmartService {
+
+    private static final DateTimeFormatter MONTH_KEY_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM");
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -20,25 +29,37 @@ public class SmartService {
         if (months <= 0) {
             months = 3;
         }
-        String sql = """
-                select date_format(so.created_at,'%Y-%m') as monthKey, sum(soi.quantity) as qty
-                from stock_out_item soi
-                         join stock_out so on soi.stock_out_id = so.id and so.deleted=0
-                where soi.deleted=0 and soi.material_id = ? and so.created_at >= date_sub(curdate(), interval 6 month)
-                group by date_format(so.created_at,'%Y-%m')
-                order by monthKey
-                """;
-        List<Map<String, Object>> history = jdbcTemplate.queryForList(sql, materialId);
+
+        Map<String, long[]> monthly = new TreeMap<>();
+        jdbcTemplate.query("""
+                        select so.created_at as createdAt, soi.quantity as quantity
+                        from stock_out_item soi
+                        join stock_out so on soi.stock_out_id = so.id and so.deleted=0
+                        where soi.deleted=0 and soi.material_id = ? and so.created_at >= ?
+                        """,
+                (RowCallbackHandler) rs -> mergeMonthlyQty(monthly, rs.getObject("createdAt", LocalDateTime.class), rs.getLong("quantity")),
+                materialId,
+                LocalDateTime.now().minusMonths(6)
+        );
+
+        List<Map<String, Object>> history = new ArrayList<>();
+        monthly.forEach((monthKey, qty) -> {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("monthKey", monthKey);
+            item.put("qty", qty[0]);
+            history.add(item);
+        });
+
         double avg = history.stream()
                 .mapToDouble(row -> row.get("qty") == null ? 0 : ((Number) row.get("qty")).doubleValue())
-                .average().orElse(0D);
+                .average()
+                .orElse(0D);
 
         List<Map<String, Object>> future = new ArrayList<>();
         LocalDate cursor = LocalDate.now().withDayOfMonth(1).plusMonths(1);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
         for (int i = 0; i < months; i++) {
-            Map<String, Object> item = new HashMap<>();
-            item.put("monthKey", formatter.format(cursor.plusMonths(i)));
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("monthKey", MONTH_KEY_FORMATTER.format(cursor.plusMonths(i)));
             item.put("predictQty", Math.round(avg));
             future.add(item);
         }
@@ -56,25 +77,35 @@ public class SmartService {
                 select m.id as materialId,
                        m.material_name as materialName,
                        m.safety_stock as safetyStock,
-                       ifnull(inv.totalQty,0) as currentStock,
-                       ifnull(out30.outQty,0) as outQty30
+                       coalesce(inv.totalQty, 0) as currentStock,
+                       coalesce(out30.outQty, 0) as outQty30
                 from material_info m
-                         left join (
+                left join (
                     select material_id, sum(current_qty) as totalQty
                     from inventory
                     where deleted=0
                     group by material_id
                 ) inv on m.id = inv.material_id
-                         left join (
+                left join (
                     select soi.material_id, sum(soi.quantity) as outQty
                     from stock_out_item soi
-                             join stock_out so on soi.stock_out_id = so.id and so.deleted=0
-                    where soi.deleted=0 and so.created_at >= date_sub(curdate(), interval 30 day)
+                    join stock_out so on soi.stock_out_id = so.id and so.deleted=0
+                    where soi.deleted=0 and so.created_at >= ?
                     group by soi.material_id
                 ) out30 on m.id = out30.material_id
                 where m.deleted=0
                 """;
-        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
+
+        List<Map<String, Object>> list = jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("materialId", rs.getLong("materialId"));
+            item.put("materialName", rs.getString("materialName"));
+            item.put("safetyStock", rs.getInt("safetyStock"));
+            item.put("currentStock", rs.getInt("currentStock"));
+            item.put("outQty30", rs.getInt("outQty30"));
+            return item;
+        }, LocalDateTime.now().minusDays(30));
+
         for (Map<String, Object> row : list) {
             int safety = row.get("safetyStock") == null ? 0 : ((Number) row.get("safetyStock")).intValue();
             int stock = row.get("currentStock") == null ? 0 : ((Number) row.get("currentStock")).intValue();
@@ -86,7 +117,17 @@ public class SmartService {
             row.put("targetStock", target);
             row.put("suggestQty", suggest);
         }
-        list.sort((a, b) -> Integer.compare(((Number) b.get("suggestQty")).intValue(), ((Number) a.get("suggestQty")).intValue()));
+
+        list.sort((left, right) -> Integer.compare(((Number) right.get("suggestQty")).intValue(), ((Number) left.get("suggestQty")).intValue()));
         return list;
+    }
+
+    private void mergeMonthlyQty(Map<String, long[]> monthly, LocalDateTime createdAt, long quantity) {
+        if (createdAt == null) {
+            return;
+        }
+        String monthKey = MONTH_KEY_FORMATTER.format(createdAt);
+        long[] qty = monthly.computeIfAbsent(monthKey, key -> new long[1]);
+        qty[0] += quantity;
     }
 }

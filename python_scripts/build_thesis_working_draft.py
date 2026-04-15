@@ -53,6 +53,75 @@ def clear_paragraph(paragraph) -> None:
             p.remove(child)
 
 
+def body_blocks(doc: Document) -> List[OxmlElement]:
+    return list(doc._element.body.iterchildren())
+
+
+def block_text(block: OxmlElement) -> str:
+    texts = [node.text for node in block.iter(qn("w:t")) if node.text]
+    return "".join(texts).strip()
+
+
+def block_is_paragraph_with_text(block: OxmlElement, text: str) -> bool:
+    return block.tag == qn("w:p") and block_text(block) == text
+
+
+def move_block_after(anchor: OxmlElement, block: OxmlElement) -> OxmlElement:
+    parent = block.getparent()
+    if parent is not None:
+        parent.remove(block)
+    anchor.addnext(block)
+    return block
+
+
+def make_page_break_paragraph() -> OxmlElement:
+    paragraph = OxmlElement("w:p")
+    ppr = OxmlElement("w:pPr")
+    page_break = OxmlElement("w:pageBreakBefore")
+    page_break.set(qn("w:val"), "1")
+    ppr.append(page_break)
+    paragraph.append(ppr)
+    return paragraph
+
+
+def normalize_front_matter_order(doc: Document) -> None:
+    blocks = body_blocks(doc)
+    abstract_block = next(block for block in blocks if block_is_paragraph_with_text(block, "ABSTRACT"))
+    chapter_block = next(block for block in blocks if block_is_paragraph_with_text(block, "1  绪论"))
+    abstract_idx = blocks.index(abstract_block)
+    chapter_idx = blocks.index(chapter_block)
+    between = blocks[abstract_idx + 1 : chapter_idx]
+
+    toc_block = next((block for block in between if block.tag == qn("w:sdt")), None)
+    text_blocks = [block for block in between if block.tag == qn("w:p") and block_text(block)]
+    en_abstract_block = next((block for block in text_blocks if not block_text(block).startswith("Keywords")), None)
+    en_keywords_block = next((block for block in text_blocks if block_text(block).startswith("Keywords")), None)
+
+    if toc_block is None or en_abstract_block is None or en_keywords_block is None:
+        raise ValueError("Unable to normalize front matter order: missing TOC or English abstract blocks.")
+
+    keep_ids = {id(toc_block), id(en_abstract_block), id(en_keywords_block)}
+    for block in between:
+        if id(block) not in keep_ids:
+            parent = block.getparent()
+            if parent is not None:
+                parent.remove(block)
+
+    en_abstract_block = move_block_after(abstract_block, en_abstract_block)
+    en_keywords_block = move_block_after(en_abstract_block, en_keywords_block)
+    toc_block = move_block_after(en_keywords_block, toc_block)
+
+    previous = toc_block.getprevious()
+    has_page_break = (
+        previous is not None
+        and previous.tag == qn("w:p")
+        and previous.find(qn("w:pPr")) is not None
+        and previous.find(qn("w:pPr")).find(qn("w:pageBreakBefore")) is not None
+    )
+    if not has_page_break:
+        toc_block.addprevious(make_page_break_paragraph())
+
+
 def set_outline_level(paragraph, level: int) -> None:
     ppr = paragraph._p.get_or_add_pPr()
     outline = ppr.find(qn("w:outlineLvl"))
@@ -138,13 +207,11 @@ def add_table(doc: Document, caption: str, rows: List[List[str]], col_widths_cm:
     return table
 
 
-def set_update_fields_on_open(doc: Document) -> None:
+def disable_update_fields_on_open(doc: Document) -> None:
     settings = doc.settings.element
     update = settings.find(qn("w:updateFields"))
-    if update is None:
-        update = OxmlElement("w:updateFields")
-        settings.append(update)
-    update.set(qn("w:val"), "true")
+    if update is not None:
+        settings.remove(update)
 
 
 def set_all_text_black(doc: Document) -> None:
@@ -245,6 +312,7 @@ def replace_abstracts(doc: Document) -> None:
     p4 = body_anchor.insert_paragraph_before(en_keywords, style="英文摘要内容")
     p3.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     p4.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    normalize_front_matter_order(doc)
 
 
 def delete_old_body(doc: Document) -> int:
@@ -1155,7 +1223,7 @@ def build_document() -> Tuple[Path, int]:
     for item in references:
         add_reference_paragraph(doc, item)
 
-    set_update_fields_on_open(doc)
+    disable_update_fields_on_open(doc)
     set_all_text_black(doc)
     doc.save(WORKING_DRAFT)
     return WORKING_DRAFT, estimate_body_chars(doc)

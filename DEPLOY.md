@@ -29,14 +29,13 @@
    ```bash
    cd backend
    ```
-2. 环境变量配置：
-   复制项目根目录下的 `.env.example` 为 `.env`，或直接在系统/IDE中配置以下环境变量（**禁止在代码中硬编码密码**）：
-   - `DB_USERNAME` (如 root)
-   - `DB_PASSWORD` (数据库密码)
-   - `JWT_SECRET` (至少 32 字节的高强度随机字符串，用于 Token 签名，**必须配置**)
-   - `CORS_ALLOWED_ORIGINS` (前端访问域名，开发环境默认 `http://localhost:5173`)
-
-   > 提示：主配置 [backend/src/main/resources/application.yml](backend/src/main/resources/application.yml) 中 `JWT_SECRET` 无默认值；未配置将导致鉴权相关接口不可用。
+2. 开发环境可直接使用 `backend/src/main/resources/application-dev.yml` 中的 MySQL 配置。
+   如果需要切换账号、密码或域名，请修改：
+   - `spring.datasource.url`
+   - `spring.datasource.username`
+   - `spring.datasource.password`
+   - `security.jwt.secret`
+   - `security.cors.allowed-origins`
 
 3. 编译并启动：
    ```bash
@@ -83,4 +82,4 @@
 2. **前后端接口跨域 (CORS) 报错？**
    - 后端通过 `CORS_ALLOWED_ORIGINS` 环境变量控制允许的跨域源，默认允许 `http://localhost:5173`。如果您通过其他域名访问前端，请修改此配置。
 3. **数据库连接失败？**
-   - 请检查 `.env` 文件或环境变量 `DB_USERNAME` 和 `DB_PASSWORD` 是否正确设置，MySQL 服务是否开启，端口是否为 `3306`。
+   - 请检查 `application-dev.yml` 中的 MySQL 账号、密码是否正确，MySQL 服务是否开启，端口是否为 `3306`。

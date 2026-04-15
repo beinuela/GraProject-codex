@@ -31,12 +31,7 @@ cd backend
 mvn clean spring-boot:run
 ```
 
-启动前请先在系统环境变量或 `.env` 中配置以下关键项：
-
-- `DB_USERNAME`
-- `DB_PASSWORD`
-- `JWT_SECRET`（必须为至少 32 字节的高强度随机字符串）
-- `CORS_ALLOWED_ORIGINS`（默认 `http://localhost:5173`，生产环境请改为实际前端域名）
+启动前请确认 `application-dev.yml` 中的 MySQL 账号、密码和 `JWT_SECRET` 可用。
 
 - 后端接口：`http://127.0.0.1:8080`
 - API 文档：`http://127.0.0.1:8080/swagger-ui/index.html`

@@ -1,104 +1,151 @@
-﻿<template>
-  <div class="page-card">
-    <h2 class="page-title">调拨管理</h2>
-    <el-space style="margin-bottom:12px">
-      <el-button type="primary" @click="openCreate">新建调拨</el-button>
-      <el-button @click="load">刷新</el-button>
-    </el-space>
+<template>
+  <PageScaffold :metrics="metrics" page-type="workflow">
+    <FilterActionBar>
+      <template #filters>
+        <span class="table-note">调拨流程支持智能推荐调出仓，保留原有审批和执行接口。</span>
+      </template>
+      <template #actions>
+        <el-button type="primary" @click="openCreate">新建调拨</el-button>
+        <el-button @click="load">刷新</el-button>
+      </template>
+    </FilterActionBar>
 
-    <el-table :data="list" border>
-      <el-table-column prop="id" label="ID" width="70" />
-      <el-table-column prop="fromWarehouseId" label="调出仓库" width="100" />
-      <el-table-column prop="toWarehouseId" label="调入仓库" width="100" />
-      <el-table-column prop="status" label="状态" width="100" />
-      <el-table-column prop="reason" label="调拨原因" show-overflow-tooltip />
-      <el-table-column prop="createdAt" label="创建时间" width="170" />
-      <el-table-column label="操作" width="350">
-        <template #default="scope">
-          <el-space>
-            <el-button size="small" @click="detail(scope.row.id)">详情</el-button>
-            <el-button size="small" type="success" v-if="scope.row.status==='DRAFT'" @click="submitOrder(scope.row.id)">提交</el-button>
-            <el-button size="small" type="primary" v-if="scope.row.status==='SUBMITTED'" @click="approveOrder(scope.row.id)">审批</el-button>
-            <el-button size="small" type="warning" v-if="scope.row.status==='SUBMITTED'" @click="rejectOrder(scope.row.id)">驳回</el-button>
-            <el-button size="small" type="success" v-if="scope.row.status==='APPROVED'" @click="executeOrder(scope.row.id)">执行</el-button>
-            <el-button size="small" type="info" v-if="scope.row.status==='OUTBOUND'" @click="receiveOrder(scope.row.id)">签收</el-button>
-          </el-space>
+    <TableShell title="调拨单列表" description="查看调拨状态、仓库去向与执行动作。" :badge="`${list.length} 条`">
+      <el-table :data="list" class="list-table">
+        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column prop="fromWarehouseId" label="调出仓库" width="120" />
+        <el-table-column prop="toWarehouseId" label="调入仓库" width="120" />
+        <el-table-column label="状态" width="120">
+          <template #default="{ row }">
+            <StatusBadge :label="row.status" :tone="statusTone(row.status)" />
+          </template>
+        </el-table-column>
+        <el-table-column prop="reason" label="调拨原因" min-width="240" show-overflow-tooltip />
+        <el-table-column prop="createdAt" label="创建时间" width="180" />
+        <el-table-column label="操作" min-width="360" fixed="right">
+          <template #default="{ row }">
+            <div class="inline-actions">
+              <el-button size="small" @click="detail(row.id)">详情</el-button>
+              <el-button v-if="row.status === 'DRAFT'" size="small" type="success" @click="submitOrder(row.id)">提交</el-button>
+              <el-button v-if="row.status === 'SUBMITTED'" size="small" type="primary" @click="approveOrder(row.id)">审批</el-button>
+              <el-button v-if="row.status === 'SUBMITTED'" size="small" type="warning" @click="rejectOrder(row.id)">驳回</el-button>
+              <el-button v-if="row.status === 'APPROVED'" size="small" type="success" @click="executeOrder(row.id)">执行</el-button>
+              <el-button v-if="row.status === 'OUTBOUND'" size="small" @click="receiveOrder(row.id)">签收</el-button>
+            </div>
+          </template>
+        </el-table-column>
+        <template #empty>
+          <EmptyState glyph="TR" title="暂无调拨单" description="创建调拨单后，可继续审批、执行和签收。" />
         </template>
-      </el-table-column>
-    </el-table>
+      </el-table>
+    </TableShell>
 
-    <!-- 新建调拨 -->
-    <el-dialog append-to-body v-model="createVisible" title="新建调拨 / Smart Dispatch" width="650">
-      <el-form :model="createForm" label-width="100px">
+    <DialogShell v-model="createVisible" title="新建调拨" eyebrow="Transfer Workflow" subtitle="选择目标仓库、推荐调出仓并录入调拨物资。" width="980">
+      <el-form :model="createForm" label-position="top" class="form-grid form-grid--2">
         <el-form-item label="调入仓库">
-          <el-select v-model="createForm.toWarehouseId" placeholder="所属校区/目标位置" style="width:100%">
-            <el-option v-for="w in warehouses" :key="w.id" :label="w.warehouseName + ' (' + w.campus + ')'" :value="w.id" />
+          <el-select v-model="createForm.toWarehouseId" placeholder="所属校区 / 目标位置">
+            <el-option v-for="warehouse in warehouses" :key="warehouse.id" :label="warehouse.warehouseName + (warehouse.campus ? ` (${warehouse.campus})` : '')" :value="warehouse.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="调出仓库">
-          <div style="display:flex; width:100%; gap:10px;">
-            <el-select v-model="createForm.fromWarehouseId" placeholder="可手动指定或智能推荐" style="flex:1">
-              <el-option v-for="w in warehouses" :key="w.id" :label="w.warehouseName" :value="w.id" />
+          <div class="inline-actions" style="width: 100%;">
+            <el-select v-model="createForm.fromWarehouseId" placeholder="可手动指定或智能推荐" style="flex: 1 1 240px;">
+              <el-option v-for="warehouse in warehouses" :key="warehouse.id" :label="warehouse.warehouseName" :value="warehouse.id" />
             </el-select>
-            <el-button color="#22d3ee" style="color:#0f172a" @click="fetchRecommendation">
-               <el-icon><Guide /></el-icon> 智能推荐
-            </el-button>
+            <el-button type="primary" plain @click="fetchRecommendation">智能推荐</el-button>
           </div>
         </el-form-item>
-        
-        <div v-if="recommendations.length > 0" style="margin-bottom: 20px; background: #e0f2fe; border: 1px solid #bae6fd; padding:15px; border-radius: 6px;">
-          <h4 style="margin-top:0; color: #0369a1; display:flex; align-items:center; gap:5px;">
-            <el-icon><Check /></el-icon> AI 调度推荐方案
-          </h4>
-          <div v-for="(rec, idx) in recommendations" :key="rec.warehouseId" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <div>
-              <span style="font-weight:bold; color: #0c4a6e;">NO.{{idx+1}} {{ rec.warehouseName }} ({{ rec.campus }})</span>
-              <br/>
-              <span style="font-size:12px; color: #0284c7;">预计路程：{{ rec.distance }} km | 当前库存：{{ rec.availableQty }} 件</span>
+        <el-form-item label="调拨原因" style="grid-column: 1 / -1;">
+          <el-input v-model="createForm.reason" type="textarea" />
+        </el-form-item>
+      </el-form>
+
+      <DetailSection v-if="recommendations.length" title="推荐调度方案" description="基于目标校区与首个物资项，给出推荐调出仓。">
+        <div class="stack-md">
+          <div v-for="recommendation in recommendations" :key="recommendation.warehouseId" class="detail-item">
+            <span class="detail-item__label">{{ recommendation.warehouseName }}</span>
+            <span class="detail-item__value">预计路程 {{ recommendation.distance }} km，当前库存 {{ recommendation.availableQty }} 件。</span>
+            <div class="inline-actions">
+              <el-button size="small" type="primary" @click="applyRecommendation(recommendation.warehouseId)">应用此仓</el-button>
             </div>
-            <el-button size="small" type="primary" plain @click="applyRecommendation(rec.warehouseId)">应用此仓</el-button>
           </div>
         </div>
+      </DetailSection>
 
-        <el-form-item label="调拨原因"><el-input v-model="createForm.reason" type="textarea" /></el-form-item>
-        <el-divider>调拨物资</el-divider>
-        <div v-for="(item, idx) in createForm.items" :key="idx" style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
-          <el-select v-model="item.materialId" placeholder="物资" style="width:200px">
-            <el-option v-for="m in materials" :key="m.id" :label="m.materialName" :value="m.id" />
+      <div class="collection-editor">
+        <div class="table-note">调拨物资</div>
+        <div v-for="(item, index) in createForm.items" :key="index" class="collection-editor__row collection-editor__row--4">
+          <el-select v-model="item.materialId" placeholder="物资">
+            <el-option v-for="material in materials" :key="material.id" :label="material.materialName" :value="material.id" />
           </el-select>
-          <el-input-number v-model="item.quantity" :min="1" placeholder="数量" style="width:140px" />
-          <el-button type="danger" size="small" @click="createForm.items.splice(idx, 1)">删除</el-button>
+          <el-input-number v-model="item.quantity" :min="1" />
+          <div class="table-note">推荐逻辑仅参考第一项物资与数量。</div>
+          <div class="table-note">最终库存校验仍由后端处理。</div>
+          <el-button type="danger" @click="createForm.items.splice(index, 1)">删除</el-button>
         </div>
         <el-button @click="createForm.items.push({ materialId: null, quantity: 1 })">添加物资</el-button>
-      </el-form>
+      </div>
+
       <template #footer>
         <el-button @click="createVisible = false">取消</el-button>
         <el-button type="primary" @click="saveCreate">提交申请</el-button>
       </template>
-    </el-dialog>
+    </DialogShell>
 
-    <!-- 详情 -->
-    <el-dialog append-to-body v-model="detailVisible" title="调拨详情" width="600">
-      <el-descriptions :column="2" border v-if="detailData.order">
-        <el-descriptions-item label="ID">{{ detailData.order.id }}</el-descriptions-item>
-        <el-descriptions-item label="状态">{{ detailData.order.status }}</el-descriptions-item>
-        <el-descriptions-item label="调出仓库ID">{{ detailData.order.fromWarehouseId }}</el-descriptions-item>
-        <el-descriptions-item label="调入仓库ID">{{ detailData.order.toWarehouseId }}</el-descriptions-item>
-        <el-descriptions-item label="调拨原因">{{ detailData.order.reason }}</el-descriptions-item>
-      </el-descriptions>
-      <el-table :data="detailData.items || []" border style="margin-top:12px">
-        <el-table-column prop="materialId" label="物资ID" />
-        <el-table-column prop="quantity" label="数量" />
-      </el-table>
-    </el-dialog>
-  </div>
+    <DialogShell v-model="detailVisible" title="调拨详情" eyebrow="Transfer Detail" subtitle="查看调拨摘要和物资清单。" width="980">
+      <div class="surface-grid surface-grid--2">
+        <DetailSection title="调拨摘要" description="调拨状态、仓库方向与调拨原因。">
+          <div class="detail-grid" v-if="detailData.order">
+            <div class="detail-item">
+              <span class="detail-item__label">状态</span>
+              <div class="detail-item__value">
+                <StatusBadge :label="detailData.order.status" :tone="statusTone(detailData.order.status)" />
+              </div>
+            </div>
+            <div class="detail-item">
+              <span class="detail-item__label">调出仓库</span>
+              <span class="detail-item__value">{{ detailData.order.fromWarehouseId }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-item__label">调入仓库</span>
+              <span class="detail-item__value">{{ detailData.order.toWarehouseId }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-item__label">调拨原因</span>
+              <span class="detail-item__value">{{ detailData.order.reason || '无' }}</span>
+            </div>
+          </div>
+        </DetailSection>
+
+        <DetailSection title="调拨物资" description="查看单据关联的物资与数量。">
+          <el-table :data="detailData.items || []" class="list-table">
+            <el-table-column prop="materialId" label="物资ID" />
+            <el-table-column prop="quantity" label="数量" width="120" />
+            <template #empty>
+              <EmptyState compact glyph="IT" title="暂无物资明细" description="该调拨单暂无可显示的物资项。" />
+            </template>
+          </el-table>
+        </DetailSection>
+      </div>
+      <template #footer>
+        <el-button @click="detailVisible = false">关闭</el-button>
+      </template>
+    </DialogShell>
+  </PageScaffold>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
-import { apiGet, apiPost } from '../../api'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Guide, Check } from '@element-plus/icons-vue'
+import { Bell, Check, Connection, Switch } from '@element-plus/icons-vue'
+import { apiGet, apiPost } from '../../api'
+import DetailSection from '../../components/ui/DetailSection.vue'
+import DialogShell from '../../components/ui/DialogShell.vue'
+import EmptyState from '../../components/ui/EmptyState.vue'
+import FilterActionBar from '../../components/ui/FilterActionBar.vue'
+import PageScaffold from '../../components/ui/PageScaffold.vue'
+import StatusBadge from '../../components/ui/StatusBadge.vue'
+import TableShell from '../../components/ui/TableShell.vue'
 
 const list = ref([])
 const warehouses = ref([])
@@ -109,56 +156,98 @@ const createForm = reactive({ fromWarehouseId: null, toWarehouseId: null, reason
 const detailData = reactive({ order: null, items: [] })
 const recommendations = ref([])
 
+const statusTone = status => ({ DRAFT: 'neutral', SUBMITTED: 'warning', APPROVED: 'success', REJECTED: 'danger', OUTBOUND: 'accent', RECEIVED: 'success' }[status] || 'neutral')
+
+const metrics = computed(() => [
+  { label: '调拨总数', value: list.value.length, helper: '当前调拨单总量', icon: Connection, tone: 'accent' },
+  { label: '待审批', value: list.value.filter(item => item.status === 'SUBMITTED').length, helper: '等待审批的调拨单', icon: Bell, tone: 'warning' },
+  { label: '执行中', value: list.value.filter(item => item.status === 'APPROVED' || item.status === 'OUTBOUND').length, helper: '已通过等待执行或签收', icon: Switch, tone: 'teal' },
+  { label: '已签收', value: list.value.filter(item => item.status === 'RECEIVED').length, helper: '已完成闭环', icon: Check, tone: 'success' }
+])
+
 const loadBase = async () => {
   warehouses.value = await apiGet('/api/warehouse/list')
   materials.value = await apiGet('/api/material/info')
 }
-const load = async () => { list.value = await apiGet('/api/transfer/list') }
+
+const load = async () => {
+  list.value = await apiGet('/api/transfer/list')
+}
 
 const openCreate = () => {
-  createForm.fromWarehouseId = null; createForm.toWarehouseId = null; createForm.reason = ''
+  createForm.fromWarehouseId = null
+  createForm.toWarehouseId = null
+  createForm.reason = ''
   createForm.items = [{ materialId: null, quantity: 1 }]
   recommendations.value = []
   createVisible.value = true
 }
 
 const fetchRecommendation = async () => {
-  if (!createForm.toWarehouseId) return ElMessage.warning('请先选择调入仓库 (事发地)')
+  if (!createForm.toWarehouseId) return ElMessage.warning('请先选择调入仓库')
   const firstItem = createForm.items[0]
   if (!firstItem || !firstItem.materialId || !firstItem.quantity) {
     return ElMessage.warning('请先指定至少一项调拨物资和数量')
   }
 
-  const targetWh = warehouses.value.find(w => w.id === createForm.toWarehouseId)
-  if (!targetWh || !targetWh.campus) return ElMessage.error('调入仓库缺乏校区地理信息')
+  const targetWarehouse = warehouses.value.find(item => item.id === createForm.toWarehouseId)
+  if (!targetWarehouse || !targetWarehouse.campus) {
+    return ElMessage.error('调入仓库缺乏校区地理信息')
+  }
 
-  try {
-    const url = `/api/transfer/recommend?targetCampus=${encodeURIComponent(targetWh.campus)}&materialId=${firstItem.materialId}&qty=${firstItem.quantity}`
-    const result = await apiGet(url)
-    if (!result || result.length === 0) {
-      ElMessage.info('未找到符合库存条件的调出仓')
-      recommendations.value = []
-    } else {
-      recommendations.value = result.slice(0, 3) // Top 3
-    }
-  } catch (error) {
-    console.error(error)
+  const url = `/api/transfer/recommend?targetCampus=${encodeURIComponent(targetWarehouse.campus)}&materialId=${firstItem.materialId}&qty=${firstItem.quantity}`
+  const result = await apiGet(url)
+  recommendations.value = (result || []).slice(0, 3)
+  if (!recommendations.value.length) {
+    ElMessage.info('未找到符合条件的调出仓')
   }
 }
 
-const applyRecommendation = (whId) => {
-  createForm.fromWarehouseId = whId
+const applyRecommendation = (warehouseId) => {
+  createForm.fromWarehouseId = warehouseId
   recommendations.value = []
-  ElMessage.success('已自动填入推荐的调出仓！')
+  ElMessage.success('已应用推荐调出仓')
 }
 
-const saveCreate = async () => { await apiPost('/api/transfer', createForm); createVisible.value = false; await load() }
-const detail = async (id) => { const d = await apiGet(`/api/transfer/${id}`); Object.assign(detailData, d); detailVisible.value = true }
-const submitOrder = async (id) => { await apiPost(`/api/transfer/${id}/submit`); await load() }
-const approveOrder = async (id) => { await apiPost(`/api/transfer/${id}/approve`, { remark: '同意' }); await load() }
-const rejectOrder = async (id) => { await apiPost(`/api/transfer/${id}/reject`, { remark: '驳回' }); await load() }
-const executeOrder = async (id) => { await apiPost(`/api/transfer/${id}/execute`); await load() }
-const receiveOrder = async (id) => { await apiPost(`/api/transfer/${id}/receive`); await load() }
+const saveCreate = async () => {
+  await apiPost('/api/transfer', createForm)
+  createVisible.value = false
+  await load()
+}
 
-onMounted(async () => { await loadBase(); await load() })
+const detail = async (id) => {
+  const detailResponse = await apiGet(`/api/transfer/${id}`)
+  Object.assign(detailData, detailResponse)
+  detailVisible.value = true
+}
+
+const submitOrder = async (id) => {
+  await apiPost(`/api/transfer/${id}/submit`)
+  await load()
+}
+
+const approveOrder = async (id) => {
+  await apiPost(`/api/transfer/${id}/approve`, { remark: '同意' })
+  await load()
+}
+
+const rejectOrder = async (id) => {
+  await apiPost(`/api/transfer/${id}/reject`, { remark: '驳回' })
+  await load()
+}
+
+const executeOrder = async (id) => {
+  await apiPost(`/api/transfer/${id}/execute`)
+  await load()
+}
+
+const receiveOrder = async (id) => {
+  await apiPost(`/api/transfer/${id}/receive`)
+  await load()
+}
+
+onMounted(async () => {
+  await loadBase()
+  await load()
+})
 </script>
