@@ -1,42 +1,91 @@
 # 校园物资智能管理系统
 
-校园物资精细化、标准化管理方案，毕业设计全功能版实现（前后端分离）：
+前后端分离的校园物资管理系统，覆盖认证、申领、审批、库存、调拨、预警、日志、通知与观测能力。
 
-- **前端**：Vue3 + Element Plus + ECharts + Pinia + Vite
-- **后端**：Spring Boot 3 + Spring Security + JWT + MyBatis-Plus
-- **数据库**：MySQL 8
-- **UI 风格**：深色模式玻璃拟态 (Glassmorphism) / 极简商务风
+- 前端：Vue 3 + Vite + Element Plus + Pinia + ECharts
+- 后端：Spring Boot 3 + Spring Security + JWT + MyBatis-Plus
+- 数据库：MySQL 8 / H2（截图与 E2E）
+- 监控：Actuator + Prometheus + Grafana + Loki + Sentry
 
-## 目录结构
+## 0. 当前交付状态
 
-- `backend`：后端服务 (基于 Spring Boot 3)
-- `frontend`：前端管理端 (基于 Vue 3)
-- `sql`：数据库建表与种子数据脚本
+截至 `2026-04-21`，本轮工程化整改在仓库内已完成：
 
-## 快速启动
+- 文档补齐：`README`、`DEPLOY`、`CONTRIBUTING`、架构、版本策略、可观测性说明
+- 安全加固：环境变量化、JWT 启动校验、限流、安全头
+- 可测性补齐：后端单测与集成测试、前端单测、Playwright E2E、k6 脚本
+- 性能与接口治理：高增长列表分页化、查询热点优化、统一 `PageQuery` / `PageResult<T>`
+- 可观测性接入：Actuator、Prometheus 指标、JSON 日志、Loki/Promtail、Sentry 降级接入
 
-### 1. 初始化数据库
+本地已验证通过：
 
-1. 在 MySQL 8 环境下手动创建数据库：`CREATE DATABASE campus_material DEFAULT CHARACTER SET utf8mb4;`
-2. 执行脚本：`sql/schema.sql` (结构定义)
-3. 执行脚本：`sql/seed.sql` (演示数据)
-4. 确认数据库连接配置：
-   - 数据库名：`campus_material`
-   - 配置文件：`backend/src/main/resources/application-dev.yml`
+- `cd backend && mvn test`，共 `48` 个测试通过
+- `cd frontend && npm run build`
+- `cd frontend && npm run test:unit`
+- `cd frontend && npm run test:e2e`
+- `k6` 冒烟脚本已覆盖登录、库存分页、预警分页、操作日志分页
 
-### 2. 启动后端
+仍需人工准备的外部前置条件：
+
+- 首次执行 Playwright 需安装浏览器：`cd frontend && npx playwright install chromium`
+- 首次执行 k6 需安装客户端；Windows 可执行 `winget install -e --id GrafanaLabs.k6`
+- 若要完整联调观测栈，需要先启动 Docker Desktop
+- 若要验证真实 Sentry 上报，需要提供 `SENTRY_DSN` 与 `VITE_SENTRY_DSN`
+
+## 1. 先看这些文档
+
+- [架构设计](./docs/architecture.md)
+- [API 版本控制策略](./docs/api-versioning.md)
+- [可观测性说明](./docs/observability.md)
+- [性能基线记录](./docs/performance-baseline.md)
+- [部署说明](./DEPLOY.md)
+- [开发者贡献指南](./CONTRIBUTING.md)
+
+## 2. 目录结构
+
+- `backend/`：Spring Boot 后端服务与测试
+- `frontend/`：Vue 管理端、单测与 Playwright E2E
+- `sql/`：MySQL 初始化脚本与种子数据
+- `docs/`：架构、版本、观测、部署文档
+- `tests/performance/`：k6 性能脚本
+
+## 3. 快速启动
+
+### 3.1 准备环境变量
+
+1. 复制根目录 `.env.example` 为 `.env`
+2. 至少设置：
+   - `SPRING_PROFILES_ACTIVE`
+   - `JWT_SECRET`
+   - 如果使用 MySQL，再设置 `DB_URL` / `DB_USERNAME` / `DB_PASSWORD`
+
+PowerShell 示例：
+
+```powershell
+Copy-Item .env.example .env
+```
+
+### 3.2 启动模式
+
+推荐两种模式：
+
+- `screenshot`：使用 H2 演示数据，适合快速联调、截图和 E2E
+- `mysql`：连接真实 MySQL
+
+### 3.3 启动后端
 
 ```bash
 cd backend
-mvn clean spring-boot:run
+mvn spring-boot:run
 ```
 
-启动前请确认 `application-dev.yml` 中的 MySQL 账号、密码和 `JWT_SECRET` 可用。
+默认业务接口：
 
-- 后端接口：`http://127.0.0.1:8080`
-- API 文档：`http://127.0.0.1:8080/swagger-ui/index.html`
+- API：`http://127.0.0.1:8080`
+- Swagger：`http://127.0.0.1:8080/swagger-ui/index.html`
+- 管理端点：`http://127.0.0.1:18080/actuator`
 
-### 3. 启动前端
+### 3.4 启动前端
 
 ```bash
 cd frontend
@@ -44,41 +93,67 @@ npm install
 npm run dev
 ```
 
-- 后端地址：`http://127.0.0.1:5173`
+默认前端地址：
 
-## 核心功能模块
+- `http://127.0.0.1:5173`
 
-- **仪表盘/大数据屏**：实时库存概览、物资流转监控、事件警示。
-- **仓储管理**：支持多校区、多仓库、多库位结构；支持入库、出库、移库及库存盘点。
-- **业务申领**：完整的 申领 -> 审批 -> 出库 -> 签收 闭环流程，支持紧急领用。
-- **物资调拨**：支持跨库、跨校区物资互助。
-- **智能预警**：库存不足告警、积压告警、效期临期/过期提醒。
-- **统计分析**：物资消耗趋势分析、部门领用排行、库存占比分布。
-- **事件管理**：突发性物资需求登记与跟踪。
-- **系统工具**：RBAC 权限控制、操作日志审计、消息通知。
+## 4. 初始化 MySQL
 
-## 演示账号
+仅 `mysql` profile 需要：
 
-> **安全提示**：为保障系统安全，演示账号的初始密码已在 `application-dev.yml`、`seed.sql` 及 `.env.example` 中集中管理（默认 BCrypt 加密为 `Abc@123456`）。
-> 生产环境部署前，请务必修改！
+```sql
+CREATE DATABASE IF NOT EXISTS campus_material
+  DEFAULT CHARACTER SET utf8mb4
+  COLLATE utf8mb4_general_ci;
+```
+
+```bash
+mysql -u <user> -p campus_material < sql/schema.sql
+mysql -u <user> -p campus_material < sql/seed.sql
+```
+
+## 5. 核心功能
+
+- 仪表盘与大屏：库存、预警、日志、趋势总览
+- 仓储管理：库存查询、入库、出库、库位与仓库管理
+- 申领闭环：草稿、提交、审批、出库、签收
+- 调拨闭环：创建、提交、审批、执行、签收
+- 智能预警：低库存、积压、临期、过期、异常出库
+- 安全与审计：JWT、限流、安全头、登录日志、操作日志
+- 通知与配置：站内通知、系统配置、观测接入
+
+## 6. 演示账号
+
+`screenshot` / E2E 数据集内置以下测试账号，密码均为 `Abc@123456`，仅用于本地联调：
 
 - 管理员：`admin`
 - 仓库管理员：`warehouse`
 - 审批人员：`approver`
 - 部门用户：`dept`
 
-## 技术亮点
+生产环境必须替换测试密码与所有密钥。
 
-- **FEFO (先到期先出)**：系统在出库推荐中采用先进先出/先到期先出逻辑。
-- **响应式设计**：适配 PC 端与移动端显示。
-- **高阶 UI**：采用自定义玻璃拟态设计，系统感官精致。
+## 7. 常用验证命令
 
-## 提交与验收建议
+```bash
+cd backend && mvn test
+cd backend && mvn -Dtest=CoreFlowIntegrationTest test
+cd frontend && npm run test:unit
+cd frontend && npm run build
+cd frontend && npm run test:e2e
+```
 
-- 提交分组与文件清单请参考：`SUBMIT_CHECKLIST.md`
-- 建议验收前执行：
-   - `mvn -f backend/pom.xml test`
-   - `cd frontend && npm run build`
+安装 k6 后可执行：
 
----
-*本项目原名为“校园应急物资智能管理系统”，现已升级为更通用的“校园物资智能管理系统”。*
+```bash
+k6 run tests/performance/login.js
+k6 run tests/performance/inventory-list.js
+k6 run tests/performance/warning-list.js
+k6 run tests/performance/operation-log-list.js
+```
+
+Windows 若当前终端尚未刷新 `PATH`，可直接使用：
+
+```powershell
+& 'C:\Program Files\k6\k6.exe' run tests/performance/login.js
+```

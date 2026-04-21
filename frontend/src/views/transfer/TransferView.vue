@@ -10,7 +10,7 @@
       </template>
     </FilterActionBar>
 
-    <TableShell title="调拨单列表" description="查看调拨状态、仓库去向与执行动作。" :badge="`${list.length} 条`">
+    <TableShell title="调拨单列表" description="查看调拨状态、仓库去向与执行动作。" :badge="`${pagination.total} 条`">
       <el-table :data="list" class="list-table">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="fromWarehouseId" label="调出仓库" width="120" />
@@ -39,6 +39,13 @@
         </template>
       </el-table>
     </TableShell>
+    <PaginationBar
+      :page="pagination.page"
+      :size="pagination.size"
+      :total="pagination.total"
+      @current-change="handlePageChange"
+      @size-change="handleSizeChange"
+    />
 
     <DialogShell v-model="createVisible" title="新建调拨" eyebrow="Transfer Workflow" subtitle="选择目标仓库、推荐调出仓并录入调拨物资。" width="980">
       <el-form :model="createForm" label-position="top" class="form-grid form-grid--2">
@@ -143,6 +150,7 @@ import DetailSection from '../../components/ui/DetailSection.vue'
 import DialogShell from '../../components/ui/DialogShell.vue'
 import EmptyState from '../../components/ui/EmptyState.vue'
 import FilterActionBar from '../../components/ui/FilterActionBar.vue'
+import PaginationBar from '../../components/ui/PaginationBar.vue'
 import PageScaffold from '../../components/ui/PageScaffold.vue'
 import StatusBadge from '../../components/ui/StatusBadge.vue'
 import TableShell from '../../components/ui/TableShell.vue'
@@ -155,14 +163,15 @@ const detailVisible = ref(false)
 const createForm = reactive({ fromWarehouseId: null, toWarehouseId: null, reason: '', items: [{ materialId: null, quantity: 1 }] })
 const detailData = reactive({ order: null, items: [] })
 const recommendations = ref([])
+const pagination = reactive({ page: 1, size: 10, total: 0 })
 
 const statusTone = status => ({ DRAFT: 'neutral', SUBMITTED: 'warning', APPROVED: 'success', REJECTED: 'danger', OUTBOUND: 'accent', RECEIVED: 'success' }[status] || 'neutral')
 
 const metrics = computed(() => [
-  { label: '调拨总数', value: list.value.length, helper: '当前调拨单总量', icon: Connection, tone: 'accent' },
+  { label: '调拨总数', value: pagination.total, helper: '当前调拨单总量', icon: Connection, tone: 'accent' },
   { label: '待审批', value: list.value.filter(item => item.status === 'SUBMITTED').length, helper: '等待审批的调拨单', icon: Bell, tone: 'warning' },
   { label: '执行中', value: list.value.filter(item => item.status === 'APPROVED' || item.status === 'OUTBOUND').length, helper: '已通过等待执行或签收', icon: Switch, tone: 'teal' },
-  { label: '已签收', value: list.value.filter(item => item.status === 'RECEIVED').length, helper: '已完成闭环', icon: Check, tone: 'success' }
+  { label: '已签收', value: list.value.filter(item => item.status === 'RECEIVED').length, helper: '当前页已完成闭环', icon: Check, tone: 'success' }
 ])
 
 const loadBase = async () => {
@@ -171,7 +180,12 @@ const loadBase = async () => {
 }
 
 const load = async () => {
-  list.value = await apiGet('/api/transfer/list')
+  const result = await apiGet('/api/transfer/list', {
+    page: pagination.page,
+    size: pagination.size
+  })
+  list.value = result.records || []
+  pagination.total = Number(result.total || 0)
 }
 
 const openCreate = () => {
@@ -212,6 +226,7 @@ const applyRecommendation = (warehouseId) => {
 const saveCreate = async () => {
   await apiPost('/api/transfer', createForm)
   createVisible.value = false
+  pagination.page = 1
   await load()
 }
 
@@ -243,6 +258,17 @@ const executeOrder = async (id) => {
 
 const receiveOrder = async (id) => {
   await apiPost(`/api/transfer/${id}/receive`)
+  await load()
+}
+
+const handlePageChange = async (page) => {
+  pagination.page = page
+  await load()
+}
+
+const handleSizeChange = async (size) => {
+  pagination.size = size
+  pagination.page = 1
   await load()
 }
 

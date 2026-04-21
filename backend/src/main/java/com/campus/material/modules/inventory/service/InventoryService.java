@@ -1,9 +1,13 @@
 package com.campus.material.modules.inventory.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.campus.material.common.BizException;
 import com.campus.material.common.OrderStatus;
+import com.campus.material.common.PageQuery;
+import com.campus.material.common.PageResult;
 import com.campus.material.common.WarningType;
+import com.campus.material.monitoring.BusinessMetrics;
 import com.campus.material.modules.apply.entity.ApplyOrder;
 import com.campus.material.modules.apply.entity.ApplyOrderItem;
 import com.campus.material.modules.apply.mapper.ApplyOrderItemMapper;
@@ -24,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,12 +45,13 @@ public class InventoryService {
     private final ApplyOrderMapper applyOrderMapper;
     private final ApplyOrderItemMapper applyOrderItemMapper;
     private final OperationLogService operationLogService;
+    private final BusinessMetrics businessMetrics;
 
     public InventoryService(InventoryMapper inventoryMapper, InventoryBatchMapper batchMapper, StockInMapper stockInMapper,
                             StockInItemMapper stockInItemMapper, StockOutMapper stockOutMapper, StockOutItemMapper stockOutItemMapper,
                             MaterialInfoMapper materialInfoMapper, WarningRecordMapper warningRecordMapper,
                             ApplyOrderMapper applyOrderMapper, ApplyOrderItemMapper applyOrderItemMapper,
-                            OperationLogService operationLogService) {
+                            OperationLogService operationLogService, BusinessMetrics businessMetrics) {
         this.inventoryMapper = inventoryMapper;
         this.batchMapper = batchMapper;
         this.stockInMapper = stockInMapper;
@@ -57,9 +63,10 @@ public class InventoryService {
         this.applyOrderMapper = applyOrderMapper;
         this.applyOrderItemMapper = applyOrderItemMapper;
         this.operationLogService = operationLogService;
+        this.businessMetrics = businessMetrics;
     }
 
-    public List<Map<String, Object>> list(Long materialId, Long warehouseId) {
+    public PageResult<Map<String, Object>> list(PageQuery pageQuery, Long materialId, Long warehouseId) {
         LambdaQueryWrapper<Inventory> wrapper = new LambdaQueryWrapper<Inventory>().orderByDesc(Inventory::getId);
         if (materialId != null) {
             wrapper.eq(Inventory::getMaterialId, materialId);
@@ -67,7 +74,8 @@ public class InventoryService {
         if (warehouseId != null) {
             wrapper.eq(Inventory::getWarehouseId, warehouseId);
         }
-        List<Inventory> inventoryList = inventoryMapper.selectList(wrapper);
+        Page<Inventory> inventoryPage = inventoryMapper.selectPage(new Page<>(pageQuery.getPage(), pageQuery.getSize()), wrapper);
+        List<Inventory> inventoryList = inventoryPage.getRecords();
         List<Long> materialIds = inventoryList.stream().map(Inventory::getMaterialId).distinct().toList();
         Map<Long, MaterialInfo> materialMap = materialIds.isEmpty()
                 ? new HashMap<>()
@@ -85,7 +93,7 @@ public class InventoryService {
             row.put("lockedQty", inv.getLockedQty());
             result.add(row);
         }
-        return result;
+        return PageResult.of(result, inventoryPage.getTotal(), inventoryPage.getCurrent(), inventoryPage.getSize());
     }
 
     public List<InventoryBatch> batches(Long materialId, Long warehouseId) {
@@ -97,12 +105,20 @@ public class InventoryService {
                 .orderByAsc(InventoryBatch::getId));
     }
 
-    public List<StockIn> listStockIn() {
-        return stockInMapper.selectList(new LambdaQueryWrapper<StockIn>().orderByDesc(StockIn::getId));
+    public PageResult<StockIn> listStockIn(PageQuery pageQuery) {
+        Page<StockIn> page = stockInMapper.selectPage(
+                new Page<>(pageQuery.getPage(), pageQuery.getSize()),
+                new LambdaQueryWrapper<StockIn>().orderByDesc(StockIn::getId)
+        );
+        return PageResult.from(page);
     }
 
-    public List<StockOut> listStockOut() {
-        return stockOutMapper.selectList(new LambdaQueryWrapper<StockOut>().orderByDesc(StockOut::getId));
+    public PageResult<StockOut> listStockOut(PageQuery pageQuery) {
+        Page<StockOut> page = stockOutMapper.selectPage(
+                new Page<>(pageQuery.getPage(), pageQuery.getSize()),
+                new LambdaQueryWrapper<StockOut>().orderByDesc(StockOut::getId)
+        );
+        return PageResult.from(page);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -141,6 +157,7 @@ public class InventoryService {
         }
 
         operationLogService.log(AuthUtil.currentUserId(), "INVENTORY", "STOCK_IN", "入库单:" + stockIn.getId());
+        businessMetrics.recordInventoryStockIn();
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -151,7 +168,13 @@ public class InventoryService {
         stockOut.setOperatorId(AuthUtil.currentUserId());
         stockOut.setRemark(request.getRemark());
         stockOutMapper.insert(stockOut);
+        Map<Long, ApplyOrderItem> applyItemMap = loadApplyItemsByMaterial(request.getApplyOrderId());
 
+        /*
+         * 出库链路需要同时维护批次余量、库存汇总以及申领实发数量的一致性。
+         * 处理顺序固定为：校验库存 -> 按 FEFO 扣减批次 -> 更新库存汇总 -> 回写申领实发数量。
+         * 申领单明细在事务开始时一次性预取，避免按物资逐条查询带来的重复回表。
+         */
         for (StockOutRequest.Item item : request.getItems()) {
             Inventory inventory = inventoryMapper.selectOne(new LambdaQueryWrapper<Inventory>()
                     .eq(Inventory::getMaterialId, item.getMaterialId())
@@ -194,10 +217,7 @@ public class InventoryService {
             stockOutItemMapper.insert(outItem);
 
             if (request.getApplyOrderId() != null) {
-                ApplyOrderItem applyItem = applyOrderItemMapper.selectOne(new LambdaQueryWrapper<ApplyOrderItem>()
-                        .eq(ApplyOrderItem::getApplyOrderId, request.getApplyOrderId())
-                        .eq(ApplyOrderItem::getMaterialId, item.getMaterialId())
-                        .last("limit 1"));
+                ApplyOrderItem applyItem = applyItemMap.get(item.getMaterialId());
                 if (applyItem != null) {
                     int old = applyItem.getActualQty() == null ? 0 : applyItem.getActualQty();
                     applyItem.setActualQty(old + item.getQuantity());
@@ -216,6 +236,7 @@ public class InventoryService {
             }
         }
         operationLogService.log(AuthUtil.currentUserId(), "INVENTORY", "STOCK_OUT", "出库单:" + stockOut.getId());
+        businessMetrics.recordInventoryStockOut();
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -278,5 +299,19 @@ public class InventoryService {
         warning.setContent(content);
         warning.setHandleStatus("UNHANDLED");
         warningRecordMapper.insert(warning);
+    }
+
+    private Map<Long, ApplyOrderItem> loadApplyItemsByMaterial(Long applyOrderId) {
+        if (applyOrderId == null) {
+            return Map.of();
+        }
+        return applyOrderItemMapper.selectList(new LambdaQueryWrapper<ApplyOrderItem>()
+                        .eq(ApplyOrderItem::getApplyOrderId, applyOrderId))
+                .stream()
+                .collect(Collectors.toMap(
+                        ApplyOrderItem::getMaterialId,
+                        Function.identity(),
+                        (left, right) -> left
+                ));
     }
 }

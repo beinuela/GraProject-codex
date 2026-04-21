@@ -228,8 +228,7 @@ const loadMenus = async () => {
 
 const loadUnread = async () => {
   try {
-    const list = await apiGet('/api/notification')
-    unreadCount.value = list.filter(item => !item.isRead).length
+    unreadCount.value = await apiGet('/api/notification/unread-count')
   } catch {
     unreadCount.value = 0
   }

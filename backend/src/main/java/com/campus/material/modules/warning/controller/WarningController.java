@@ -1,13 +1,14 @@
 package com.campus.material.modules.warning.controller;
 
 import com.campus.material.common.ApiResponse;
+import com.campus.material.common.PageQuery;
+import com.campus.material.common.PageResult;
 import com.campus.material.common.RemarkRequest;
 import com.campus.material.modules.warning.entity.WarningRecord;
 import com.campus.material.modules.warning.service.WarningService;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/warning")
@@ -21,9 +22,10 @@ public class WarningController {
 
     @GetMapping("/list")
     @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER')")
-    public ApiResponse<List<WarningRecord>> list(@RequestParam(required = false) String type,
-                                                 @RequestParam(required = false) String status) {
-        return ApiResponse.ok(warningService.list(type, status));
+    public ApiResponse<PageResult<WarningRecord>> list(@Valid PageQuery pageQuery,
+                                                       @RequestParam(required = false) String type,
+                                                       @RequestParam(required = false) String status) {
+        return ApiResponse.ok(warningService.list(pageQuery, type, status));
     }
 
     @PostMapping("/scan")

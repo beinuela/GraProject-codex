@@ -1,0 +1,258 @@
+meta:
+  profile: academic-paper
+  theme: academic
+  layout: vertical
+  routing: orthogonal
+  canvas: 760x1060
+  title: 申领审批闭环流程图
+  description: 部门用户、审批人和仓库管理员围绕申领单状态推进的闭环流程
+nodes:
+- id: start
+  label: 创建申领单
+  type: terminal
+  size: xl
+  position:
+    x: 330
+    y: 40
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+- id: draft
+  label: 保存草稿
+  type: process
+  size: xl
+  position:
+    x: 330
+    y: 145
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+- id: submit
+  label: 提交申领单
+  type: process
+  size: xl
+  position:
+    x: 330
+    y: 250
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+- id: urgent
+  label: 紧急等级≥2？
+  type: decision
+  size: large
+  position:
+    x: 330
+    y: 360
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+- id: approve
+  label: 审批人审核
+  type: process
+  size: xl
+  position:
+    x: 110
+    y: 500
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+- id: fast
+  label: 快速审批
+  type: process
+  size: xl
+  position:
+    x: 550
+    y: 500
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+- id: pass
+  label: 审批通过？
+  type: decision
+  size: large
+  position:
+    x: 330
+    y: 635
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+- id: reject
+  label: 驳回并记录意见
+  type: process
+  size: xl
+  position:
+    x: 580
+    y: 635
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+- id: stockout
+  label: '库存匹配
+
+    批次出库'
+  type: process
+  size: xl
+  position:
+    x: 330
+    y: 770
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+- id: receive
+  label: 部门用户签收
+  type: process
+  size: xl
+  position:
+    x: 330
+    y: 885
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+- id: end
+  label: 状态为 RECEIVED
+  type: terminal
+  size: xl
+  position:
+    x: 330
+    y: 995
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+edges:
+- from: start
+  to: draft
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: draft
+  to: submit
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: submit
+  to: urgent
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: urgent
+  to: approve
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+  label: 否
+- from: urgent
+  to: fast
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+  label: 是
+- from: approve
+  to: pass
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: fast
+  to: pass
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: pass
+  to: reject
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+  label: 否
+- from: pass
+  to: stockout
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+  label: 是
+- from: stockout
+  to: receive
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: receive
+  to: end
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12

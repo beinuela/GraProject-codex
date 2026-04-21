@@ -1,15 +1,15 @@
 spring:
   datasource:
     url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/campus_material?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false}
-    username: ${DB_USERNAME:root}
+    username: ${DB_USERNAME:}
     password: ${DB_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 security:
   jwt:
-    secret: ${JWT_SECRET:dev-local-jwt-secret-key-must-be-at-least-32-bytes}
+    secret: ${JWT_SECRET:}
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173}
 
 mybatis-plus:
   configuration:

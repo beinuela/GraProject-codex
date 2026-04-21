@@ -152,7 +152,8 @@ CREATE TABLE inventory_batch (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_batch_material_warehouse (material_id, warehouse_id),
-    INDEX idx_batch_expire (expire_date)
+    INDEX idx_batch_expire (expire_date),
+    INDEX idx_batch_outbound_pick (material_id, warehouse_id, expire_date, remain_qty)
 );
 
 CREATE TABLE stock_in (
@@ -241,7 +242,8 @@ CREATE TABLE stock_out_item (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_stock_out_item_order (stock_out_id),
-    INDEX idx_stock_out_item_material (material_id)
+    INDEX idx_stock_out_item_material (material_id),
+    INDEX idx_stock_out_item_created_material (created_at, material_id)
 );
 
 CREATE TABLE transfer_order (
@@ -287,7 +289,8 @@ CREATE TABLE warning_record (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_warning_status (handle_status),
-    INDEX idx_warning_type (warning_type)
+    INDEX idx_warning_type (warning_type),
+    INDEX idx_warning_type_material_warehouse_status (warning_type, material_id, warehouse_id, handle_status)
 );
 
 CREATE TABLE operation_log (
@@ -301,7 +304,8 @@ CREATE TABLE operation_log (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_log_operator (operator_id),
-    INDEX idx_log_module (module)
+    INDEX idx_log_module (module),
+    INDEX idx_log_created_at (created_at)
 );
 
 -- ===================== 校区管理 =====================
@@ -423,7 +427,8 @@ CREATE TABLE notification (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_notification_user (target_user_id),
-    INDEX idx_notification_read (is_read)
+    INDEX idx_notification_read (is_read),
+    INDEX idx_notification_user_created (target_user_id, created_at)
 );
 
 SET FOREIGN_KEY_CHECKS = 1;

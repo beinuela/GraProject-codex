@@ -1,6 +1,7 @@
 package com.campus.material.modules.auth;
 
 import com.campus.material.common.BizException;
+import com.campus.material.monitoring.BusinessMetrics;
 import com.campus.material.modules.auth.dto.LoginRequest;
 import com.campus.material.modules.auth.dto.LoginResponse;
 import com.campus.material.modules.auth.mapper.AuthRefreshTokenMapper;
@@ -49,6 +50,9 @@ class AuthServiceTest {
 
     @Mock
     private AuthRefreshTokenCleanupTask authRefreshTokenCleanupTask;
+
+    @Mock
+    private BusinessMetrics businessMetrics;
 
     @InjectMocks
     private AuthService authService;

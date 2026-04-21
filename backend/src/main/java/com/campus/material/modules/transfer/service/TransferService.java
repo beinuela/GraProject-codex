@@ -1,8 +1,12 @@
 package com.campus.material.modules.transfer.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.campus.material.common.BizException;
 import com.campus.material.common.OrderStatus;
+import com.campus.material.common.PageQuery;
+import com.campus.material.common.PageResult;
+import com.campus.material.monitoring.BusinessMetrics;
 import com.campus.material.modules.inventory.entity.Inventory;
 import com.campus.material.modules.inventory.entity.InventoryBatch;
 import com.campus.material.modules.inventory.mapper.InventoryBatchMapper;
@@ -20,9 +24,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class TransferService {
@@ -33,21 +40,28 @@ public class TransferService {
     private final InventoryBatchMapper batchMapper;
     private final OperationLogService operationLogService;
     private final com.campus.material.modules.warehouse.mapper.WarehouseMapper warehouseMapper;
+    private final BusinessMetrics businessMetrics;
 
     public TransferService(TransferOrderMapper transferOrderMapper, TransferOrderItemMapper transferOrderItemMapper,
                            InventoryMapper inventoryMapper, InventoryBatchMapper batchMapper,
                            OperationLogService operationLogService,
-                           com.campus.material.modules.warehouse.mapper.WarehouseMapper warehouseMapper) {
+                           com.campus.material.modules.warehouse.mapper.WarehouseMapper warehouseMapper,
+                           BusinessMetrics businessMetrics) {
         this.transferOrderMapper = transferOrderMapper;
         this.transferOrderItemMapper = transferOrderItemMapper;
         this.inventoryMapper = inventoryMapper;
         this.batchMapper = batchMapper;
         this.operationLogService = operationLogService;
         this.warehouseMapper = warehouseMapper;
+        this.businessMetrics = businessMetrics;
     }
 
-    public List<TransferOrder> list() {
-        return transferOrderMapper.selectList(new LambdaQueryWrapper<TransferOrder>().orderByDesc(TransferOrder::getId));
+    public PageResult<TransferOrder> list(PageQuery pageQuery) {
+        Page<TransferOrder> page = transferOrderMapper.selectPage(
+                new Page<>(pageQuery.getPage(), pageQuery.getSize()),
+                new LambdaQueryWrapper<TransferOrder>().orderByDesc(TransferOrder::getId)
+        );
+        return PageResult.from(page);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -116,6 +130,11 @@ public class TransferService {
         if (!OrderStatus.APPROVED.equals(order.getStatus())) {
             throw new BizException("当前状态不允许执行调拨");
         }
+        /*
+         * 调拨执行在同一事务中完成批次搬移和库存汇总扣减。
+         * 先按 FEFO 顺序扣减来源批次，再为目标仓生成镜像批次，最后同步更新库存汇总数量。
+         * 任何一步失败都需要整体回滚，避免出现批次和汇总库存不一致。
+         */
         List<TransferOrderItem> items = transferOrderItemMapper.selectList(
                 new LambdaQueryWrapper<TransferOrderItem>().eq(TransferOrderItem::getTransferOrderId, id));
 
@@ -167,6 +186,7 @@ public class TransferService {
         order.setStatus(OrderStatus.OUTBOUND);
         transferOrderMapper.updateById(order);
         operationLogService.log(AuthUtil.currentUserId(), "TRANSFER", "EXECUTE", "执行调拨单:" + id);
+        businessMetrics.recordTransferExecute();
     }
 
     public void receive(Long id) {
@@ -190,19 +210,26 @@ public class TransferService {
     }
 
     public List<Map<String, Object>> recommendTransfer(String targetCampus, Long materialId, Integer qty) {
-        // 1. 获取目标校区到所有校区的最短距离
+        /*
+         * 调拨推荐以目标校区为起点，先计算校区间距离，再把满足库存条件的候选仓统一取出。
+         * 仓库信息采用批量预取，避免在候选列表遍历时出现按仓库逐条查询的 N+1 开销。
+         */
         Map<String, Double> distances = com.campus.material.modules.algorithm.DijkstraUtil.calculateShortestPaths(targetCampus);
-        
-        // 2. 获取所有包含该物资且库存足够的仓库
+
         List<Inventory> invs = inventoryMapper.selectList(new LambdaQueryWrapper<Inventory>()
                 .eq(Inventory::getMaterialId, materialId)
                 .ge(Inventory::getCurrentQty, qty));
-        
-        List<Map<String, Object>> recommendations = new java.util.ArrayList<>();
+        List<Long> warehouseIds = invs.stream().map(Inventory::getWarehouseId).distinct().toList();
+        Map<Long, com.campus.material.modules.warehouse.entity.Warehouse> warehouseMap = warehouseIds.isEmpty()
+                ? Map.of()
+                : warehouseMapper.selectBatchIds(warehouseIds).stream()
+                .collect(Collectors.toMap(com.campus.material.modules.warehouse.entity.Warehouse::getId, Function.identity()));
+
+        List<Map<String, Object>> recommendations = new ArrayList<>();
         for (Inventory inv : invs) {
-            com.campus.material.modules.warehouse.entity.Warehouse wh = warehouseMapper.selectById(inv.getWarehouseId());
+            com.campus.material.modules.warehouse.entity.Warehouse wh = warehouseMap.get(inv.getWarehouseId());
             if (wh == null) continue;
-            
+
             Double dist = distances.getOrDefault(wh.getCampus(), Double.MAX_VALUE);
             Map<String, Object> rec = new HashMap<>();
             rec.put("warehouseId", wh.getId());
@@ -210,13 +237,10 @@ public class TransferService {
             rec.put("campus", wh.getCampus());
             rec.put("distance", dist);
             rec.put("availableQty", inv.getCurrentQty());
-            
-            // 简单的评分权重公式：1/距离。如果在本校区，距离设为极小值。不能完全基于距离，也要看库存是否非常充裕。
-            // 这里简单以距离优先升序。
+
             recommendations.add(rec);
         }
-        
-        // 根据距离从小到大排序
+
         recommendations.sort(Comparator.comparingDouble(m -> (Double) m.get("distance")));
         return recommendations;
     }

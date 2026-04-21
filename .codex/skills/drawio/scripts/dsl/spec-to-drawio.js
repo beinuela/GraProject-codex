@@ -653,6 +653,7 @@ export function deriveNodeIcon(node) {
 export function generateNodeStyle(node, theme) {
   const semanticType = detectSemanticType(node.label, node.type, node.network)
   const shapeStyle = SHAPE_STYLES[semanticType] || SHAPE_STYLES.service
+  const customShapeStyle = node.style?.shape
 
   // Get colors from theme
   const nodeTheme = theme.node?.[semanticType] || theme.node?.default || {}
@@ -667,7 +668,9 @@ export function generateNodeStyle(node, theme) {
 
   // If node has an icon, override shape to use the icon
   const iconShape = resolveIconShape(node.icon || deriveNodeIcon(node))
-  let effectiveShapeStyle = shapeStyle
+  let effectiveShapeStyle = customShapeStyle
+    ? (customShapeStyle.includes('=') ? customShapeStyle : `shape=${customShapeStyle}`)
+    : shapeStyle
   const parts = []
   if (iconShape) {
     effectiveShapeStyle = `shape=${iconShape}`
@@ -708,6 +711,7 @@ export function generateNodeStyle(node, theme) {
 export function generateConnectorStyle(edge, theme, routing = 'orthogonal') {
   const connectorType = edge.type || 'primary'
   const connectorTheme = theme.connector?.[connectorType] || theme.connector?.primary || {}
+  const effectiveRouting = edge.style?.routing || routing
 
   const strokeColor = resolveThemeColor(edge.style?.strokeColor, theme, connectorTheme.strokeColor || '#1E293B')
   const strokeWidth = edge.style?.strokeWidth || connectorTheme.strokeWidth || 2
@@ -719,10 +723,10 @@ export function generateConnectorStyle(edge, theme, routing = 'orthogonal') {
   const startFill = edge.style?.startFill ?? connectorTheme.startFill
 
   const parts = [
-    'edgeStyle=orthogonalEdgeStyle',
-    routing === 'rounded' ? 'rounded=1' : 'rounded=0',
-    'orthogonalLoop=1',
-    'jettySize=auto',
+    `edgeStyle=${edge.style?.edgeStyle || (effectiveRouting === 'straight' ? 'none' : 'orthogonalEdgeStyle')}`,
+    effectiveRouting === 'rounded' ? 'rounded=1' : 'rounded=0',
+    effectiveRouting === 'straight' ? 'orthogonalLoop=0' : 'orthogonalLoop=1',
+    effectiveRouting === 'straight' ? 'jettySize=0' : 'jettySize=auto',
     'html=1',
     `strokeColor=${strokeColor}`,
     `strokeWidth=${strokeWidth}`,
@@ -751,8 +755,10 @@ export function generateConnectorStyle(edge, theme, routing = 'orthogonal') {
   }
 
   // Add jump style for crossings
-  parts.push('jumpStyle=arc')
-  parts.push('jumpSize=8')
+  if (effectiveRouting !== 'straight') {
+    parts.push('jumpStyle=arc')
+    parts.push('jumpSize=8')
+  }
 
   return parts.join(';')
 }
@@ -930,8 +936,10 @@ export function buildXml(spec, theme, layout) {
       const labelOffset = edge.__routing?.orientation === 'vertical'
         ? '<mxPoint x="12" y="0" as="offset"/>'
         : '<mxPoint x="0" y="-12" as="offset"/>'
+      const edgeLabelFontSize = edge.style?.fontSize || 11
+      const edgeLabelFontColor = resolveThemeColor(edge.style?.fontColor, theme, theme.colors?.textMuted || '#64748B')
       edgeXml += `</mxCell>`
-      edgeXml += `<mxCell id="${labelId}" value="${edgeLabel}" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=11;fontColor=${theme.colors?.textMuted || '#64748B'};" vertex="1" connectable="0" parent="${cellId}">`
+      edgeXml += `<mxCell id="${labelId}" value="${edgeLabel}" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=${edgeLabelFontSize};fontColor=${edgeLabelFontColor};" vertex="1" connectable="0" parent="${cellId}">`
       edgeXml += `<mxGeometry x="${labelX}" relative="1" as="geometry">${labelOffset}</mxGeometry>`
       edgeXml += `</mxCell>`
     } else {
@@ -1518,7 +1526,7 @@ export function validateSpec(spec) {
   const VALID_THEME = /^[a-z][a-z0-9-]*$/
   const VALID_ICON = /^[a-zA-Z][a-zA-Z0-9._-]*$/
   const VALID_LAYOUTS = ['horizontal', 'vertical', 'hierarchical', 'star', 'mesh']
-  const VALID_ROUTINGS = ['orthogonal', 'rounded']
+  const VALID_ROUTINGS = ['orthogonal', 'rounded', 'straight']
   const VALID_PROFILES = ['default', 'academic-paper', 'engineering-review']
   const VALID_SOURCES = ['generated', 'replicated', 'edited']
   const VALID_REPLICATION_MODES = ['preserve-original', 'theme-first']

@@ -1,0 +1,206 @@
+meta:
+  profile: academic-paper
+  theme: academic
+  layout: vertical
+  routing: orthogonal
+  canvas: 760x980
+  title: 预警处置流程图
+  description: 定时扫描、预警生成、人工处置与通知联动流程图
+nodes:
+  - id: start
+    label: 触发定时扫描
+    type: terminal
+    size: xl
+    position:
+      x: 330
+      'y': 40
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+  - id: scan
+    label: 检查库存与批次
+    type: process
+    size: xl
+    position:
+      x: 330
+      'y': 150
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+  - id: risk
+    label: 发现异常？
+    type: decision
+    size: large
+    position:
+      x: 330
+      'y': 280
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+  - id: record
+    label: 生成预警记录
+    type: process
+    size: xl
+    position:
+      x: 330
+      'y': 410
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+  - id: view
+    label: 查看待处理预警
+    type: process
+    size: xl
+    position:
+      x: 330
+      'y': 535
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+  - id: handle
+    label: |-
+      填写说明
+      更新状态
+    type: process
+    size: xl
+    position:
+      x: 330
+      'y': 660
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+  - id: notify
+    label: 按需发送通知
+    type: process
+    size: xl
+    position:
+      x: 330
+      'y': 785
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+  - id: end
+    label: 进入统计分析
+    type: terminal
+    size: xl
+    position:
+      x: 330
+      'y': 910
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+  - id: noop
+    label: |-
+      无预警
+      结束扫描
+    type: process
+    size: xl
+    position:
+      x: 580
+      'y': 280
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+edges:
+  - from: start
+    to: scan
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: scan
+    to: risk
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: risk
+    to: record
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+    label: 是
+  - from: risk
+    to: noop
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+    label: 否
+  - from: record
+    to: view
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: view
+    to: handle
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: handle
+    to: notify
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: notify
+    to: end
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+modules: []

@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import { captureFrontendError } from '../monitoring'
 
 const http = axios.create({
   baseURL: '/',
@@ -32,6 +33,13 @@ http.interceptors.response.use(
   (resp) => {
     const payload = resp.data
     if (payload && payload.code !== 0) {
+      if (payload.code >= 500) {
+        captureFrontendError(new Error(payload.message || '请求失败'), {
+          phase: 'api-response',
+          status: payload.code,
+          url: resp?.config?.url
+        })
+      }
       ElMessage.error(payload.message || '请求失败')
       return Promise.reject(new Error(payload.message || '请求失败'))
     }
@@ -100,6 +108,14 @@ http.interceptors.response.use(
         .finally(() => {
           isRefreshing = false
         })
+    }
+
+    if (!code || code >= 500) {
+      captureFrontendError(error, {
+        phase: 'http-error',
+        status: code || 0,
+        url: originalRequest.url || ''
+      })
     }
 
     ElMessage.error(error?.response?.data?.message || error.message || '网络错误')

@@ -1,12 +1,14 @@
 package com.campus.material.modules.log.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.campus.material.common.PageQuery;
+import com.campus.material.common.PageResult;
 import com.campus.material.modules.log.entity.LoginLog;
 import com.campus.material.modules.log.mapper.LoginLogMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class LoginLogService {
@@ -17,10 +19,12 @@ public class LoginLogService {
         this.loginLogMapper = loginLogMapper;
     }
 
-    public List<LoginLog> list() {
-        return loginLogMapper.selectList(
+    public PageResult<LoginLog> list(PageQuery pageQuery) {
+        Page<LoginLog> page = loginLogMapper.selectPage(
+                new Page<>(pageQuery.getPage(), pageQuery.getSize()),
                 new LambdaQueryWrapper<LoginLog>().orderByDesc(LoginLog::getLoginTime)
         );
+        return PageResult.from(page);
     }
 
     public void record(Long userId, String username, String ip, String status, String userAgent) {

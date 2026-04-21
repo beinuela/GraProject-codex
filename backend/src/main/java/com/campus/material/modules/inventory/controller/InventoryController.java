@@ -1,6 +1,8 @@
 package com.campus.material.modules.inventory.controller;
 
 import com.campus.material.common.ApiResponse;
+import com.campus.material.common.PageQuery;
+import com.campus.material.common.PageResult;
 import com.campus.material.modules.inventory.dto.InventoryAdjustRequest;
 import com.campus.material.modules.inventory.dto.StockInRequest;
 import com.campus.material.modules.inventory.dto.StockOutRequest;
@@ -27,9 +29,10 @@ public class InventoryController {
 
     @GetMapping("/list")
     @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER')")
-    public ApiResponse<List<Map<String, Object>>> list(@RequestParam(required = false) Long materialId,
-                                                       @RequestParam(required = false) Long warehouseId) {
-        return ApiResponse.ok(inventoryService.list(materialId, warehouseId));
+    public ApiResponse<PageResult<Map<String, Object>>> list(@Valid PageQuery pageQuery,
+                                                             @RequestParam(required = false) Long materialId,
+                                                             @RequestParam(required = false) Long warehouseId) {
+        return ApiResponse.ok(inventoryService.list(pageQuery, materialId, warehouseId));
     }
 
     @GetMapping("/batches")
@@ -41,14 +44,14 @@ public class InventoryController {
 
     @GetMapping("/stock-in")
     @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
-    public ApiResponse<List<StockIn>> listStockIn() {
-        return ApiResponse.ok(inventoryService.listStockIn());
+    public ApiResponse<PageResult<StockIn>> listStockIn(@Valid PageQuery pageQuery) {
+        return ApiResponse.ok(inventoryService.listStockIn(pageQuery));
     }
 
     @GetMapping("/stock-out")
     @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
-    public ApiResponse<List<StockOut>> listStockOut() {
-        return ApiResponse.ok(inventoryService.listStockOut());
+    public ApiResponse<PageResult<StockOut>> listStockOut(@Valid PageQuery pageQuery) {
+        return ApiResponse.ok(inventoryService.listStockOut(pageQuery));
     }
 
     @PostMapping("/stock-in")

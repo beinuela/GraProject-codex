@@ -10,7 +10,7 @@
       </template>
     </FilterActionBar>
 
-    <TableShell title="入库记录" description="查看已创建的入库单与来源类型。" :badge="`${list.length} 条`">
+    <TableShell title="入库记录" description="查看已创建的入库单与来源类型。" :badge="`${pagination.total} 条`">
       <el-table :data="list" class="list-table">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="warehouseId" label="仓库ID" width="100" />
@@ -23,6 +23,13 @@
         </template>
       </el-table>
     </TableShell>
+    <PaginationBar
+      :page="pagination.page"
+      :size="pagination.size"
+      :total="pagination.total"
+      @current-change="handlePageChange"
+      @size-change="handleSizeChange"
+    />
 
     <DialogShell v-model="visible" title="新建入库单" eyebrow="Stock In" subtitle="录入目标仓库、来源类型与入库明细。" width="980">
       <el-form :model="form" label-position="top" class="form-grid form-grid--2">
@@ -74,6 +81,7 @@ import { apiGet, apiPost } from '../../api'
 import DialogShell from '../../components/ui/DialogShell.vue'
 import EmptyState from '../../components/ui/EmptyState.vue'
 import FilterActionBar from '../../components/ui/FilterActionBar.vue'
+import PaginationBar from '../../components/ui/PaginationBar.vue'
 import PageScaffold from '../../components/ui/PageScaffold.vue'
 import TableShell from '../../components/ui/TableShell.vue'
 
@@ -82,12 +90,13 @@ const warehouses = ref([])
 const materials = ref([])
 const visible = ref(false)
 const form = reactive({ warehouseId: null, sourceType: 'PURCHASE', remark: '', items: [{ materialId: null, quantity: 1, batchNo: '', productionDate: '', expireDate: '' }] })
+const pagination = reactive({ page: 1, size: 10, total: 0 })
 
 const metrics = computed(() => [
-  { label: '入库单数', value: list.value.length, helper: '当前已登记入库单', icon: Tickets, tone: 'accent' },
+  { label: '入库单数', value: pagination.total, helper: '当前已登记入库单总量', icon: Tickets, tone: 'accent' },
   { label: '仓库覆盖', value: new Set(list.value.map(item => item.warehouseId).filter(Boolean)).size, helper: '已发生入库的仓库', icon: OfficeBuilding, tone: 'teal' },
   { label: '采购入库', value: list.value.filter(item => item.sourceType === 'PURCHASE').length, helper: '采购来源数量', icon: Box, tone: 'neutral' },
-  { label: '最近记录', value: list.value.filter(item => item.createdAt).length, helper: '已写入时间记录', icon: Calendar, tone: 'warning' }
+  { label: '最近记录', value: list.value.filter(item => item.createdAt).length, helper: '当前页已写入时间记录', icon: Calendar, tone: 'warning' }
 ])
 
 const loadBase = async () => {
@@ -96,7 +105,12 @@ const loadBase = async () => {
 }
 
 const load = async () => {
-  list.value = await apiGet('/api/inventory/stock-in')
+  const result = await apiGet('/api/inventory/stock-in', {
+    page: pagination.page,
+    size: pagination.size
+  })
+  list.value = result.records || []
+  pagination.total = Number(result.total || 0)
 }
 
 const openCreate = () => {
@@ -111,6 +125,18 @@ const save = async () => {
   await apiPost('/api/inventory/stock-in', form)
   ElMessage.success('入库成功')
   visible.value = false
+  pagination.page = 1
+  await load()
+}
+
+const handlePageChange = async (page) => {
+  pagination.page = page
+  await load()
+}
+
+const handleSizeChange = async (size) => {
+  pagination.size = size
+  pagination.page = 1
   await load()
 }
 

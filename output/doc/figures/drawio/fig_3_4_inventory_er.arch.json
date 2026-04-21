@@ -1,0 +1,393 @@
+{
+  "version": 1,
+  "title": "库存与批次 E-R图",
+  "type": "academic-diagram",
+  "source": "generated",
+  "profile": "academic-paper",
+  "theme": "academic",
+  "layout": "horizontal",
+  "counts": {
+    "nodes": 31,
+    "edges": 30,
+    "modules": 0
+  },
+  "nodes": [
+    {
+      "id": "category",
+      "label": "分类\\nmaterial_category",
+      "type": "service",
+      "size": "medium"
+    },
+    {
+      "id": "material",
+      "label": "物资档案\\nmaterial_info",
+      "type": "service",
+      "size": "medium"
+    },
+    {
+      "id": "warehouse",
+      "label": "仓库\\nwarehouse",
+      "type": "service",
+      "size": "medium"
+    },
+    {
+      "id": "inventory",
+      "label": "库存\\ninventory",
+      "type": "service",
+      "size": "medium"
+    },
+    {
+      "id": "batch",
+      "label": "库存批次\\ninventory_batch",
+      "type": "service",
+      "size": "medium"
+    },
+    {
+      "id": "rel_cat_material",
+      "label": "归类",
+      "type": "decision",
+      "size": "medium"
+    },
+    {
+      "id": "rel_material_inventory",
+      "label": "形成",
+      "type": "decision",
+      "size": "medium"
+    },
+    {
+      "id": "rel_wh_inventory",
+      "label": "存放",
+      "type": "decision",
+      "size": "medium"
+    },
+    {
+      "id": "rel_inventory_batch",
+      "label": "细分",
+      "type": "decision",
+      "size": "medium"
+    },
+    {
+      "id": "cat_id",
+      "label": "id",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "cat_name",
+      "label": "category_name",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "cat_remark",
+      "label": "remark",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "mat_id",
+      "label": "id",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "mat_code",
+      "label": "material_code",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "mat_name",
+      "label": "material_name",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "mat_safety",
+      "label": "safety_stock",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "mat_spec",
+      "label": "spec/unit",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "wh_id",
+      "label": "id",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "wh_name",
+      "label": "warehouse_name",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "wh_campus",
+      "label": "campus",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "wh_manager",
+      "label": "manager",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "inv_id",
+      "label": "id",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "inv_material",
+      "label": "material_id",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "inv_wh",
+      "label": "warehouse_id",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "inv_qty",
+      "label": "current_qty",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "inv_locked",
+      "label": "locked_qty",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "batch_id",
+      "label": "id",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "batch_no",
+      "label": "batch_no",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "batch_in",
+      "label": "in_qty",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "batch_remain",
+      "label": "remain_qty",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "batch_expire",
+      "label": "expire_date",
+      "type": "user",
+      "size": "small"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "from": "category",
+      "to": "rel_cat_material",
+      "type": "primary",
+      "label": "1"
+    },
+    {
+      "id": "edge-2",
+      "from": "rel_cat_material",
+      "to": "material",
+      "type": "primary",
+      "label": "N"
+    },
+    {
+      "id": "edge-3",
+      "from": "material",
+      "to": "rel_material_inventory",
+      "type": "primary",
+      "label": "1"
+    },
+    {
+      "id": "edge-4",
+      "from": "rel_material_inventory",
+      "to": "inventory",
+      "type": "primary",
+      "label": "N"
+    },
+    {
+      "id": "edge-5",
+      "from": "warehouse",
+      "to": "rel_wh_inventory",
+      "type": "primary",
+      "label": "1"
+    },
+    {
+      "id": "edge-6",
+      "from": "rel_wh_inventory",
+      "to": "inventory",
+      "type": "primary",
+      "label": "N"
+    },
+    {
+      "id": "edge-7",
+      "from": "inventory",
+      "to": "rel_inventory_batch",
+      "type": "primary",
+      "label": "1"
+    },
+    {
+      "id": "edge-8",
+      "from": "rel_inventory_batch",
+      "to": "batch",
+      "type": "primary",
+      "label": "N"
+    },
+    {
+      "id": "edge-9",
+      "from": "category",
+      "to": "cat_id",
+      "type": "primary"
+    },
+    {
+      "id": "edge-10",
+      "from": "category",
+      "to": "cat_name",
+      "type": "primary"
+    },
+    {
+      "id": "edge-11",
+      "from": "category",
+      "to": "cat_remark",
+      "type": "primary"
+    },
+    {
+      "id": "edge-12",
+      "from": "material",
+      "to": "mat_id",
+      "type": "primary"
+    },
+    {
+      "id": "edge-13",
+      "from": "material",
+      "to": "mat_code",
+      "type": "primary"
+    },
+    {
+      "id": "edge-14",
+      "from": "material",
+      "to": "mat_name",
+      "type": "primary"
+    },
+    {
+      "id": "edge-15",
+      "from": "material",
+      "to": "mat_safety",
+      "type": "primary"
+    },
+    {
+      "id": "edge-16",
+      "from": "material",
+      "to": "mat_spec",
+      "type": "primary"
+    },
+    {
+      "id": "edge-17",
+      "from": "warehouse",
+      "to": "wh_id",
+      "type": "primary"
+    },
+    {
+      "id": "edge-18",
+      "from": "warehouse",
+      "to": "wh_name",
+      "type": "primary"
+    },
+    {
+      "id": "edge-19",
+      "from": "warehouse",
+      "to": "wh_campus",
+      "type": "primary"
+    },
+    {
+      "id": "edge-20",
+      "from": "warehouse",
+      "to": "wh_manager",
+      "type": "primary"
+    },
+    {
+      "id": "edge-21",
+      "from": "inventory",
+      "to": "inv_id",
+      "type": "primary"
+    },
+    {
+      "id": "edge-22",
+      "from": "inventory",
+      "to": "inv_material",
+      "type": "primary"
+    },
+    {
+      "id": "edge-23",
+      "from": "inventory",
+      "to": "inv_wh",
+      "type": "primary"
+    },
+    {
+      "id": "edge-24",
+      "from": "inventory",
+      "to": "inv_qty",
+      "type": "primary"
+    },
+    {
+      "id": "edge-25",
+      "from": "inventory",
+      "to": "inv_locked",
+      "type": "primary"
+    },
+    {
+      "id": "edge-26",
+      "from": "batch",
+      "to": "batch_id",
+      "type": "primary"
+    },
+    {
+      "id": "edge-27",
+      "from": "batch",
+      "to": "batch_no",
+      "type": "primary"
+    },
+    {
+      "id": "edge-28",
+      "from": "batch",
+      "to": "batch_in",
+      "type": "primary"
+    },
+    {
+      "id": "edge-29",
+      "from": "batch",
+      "to": "batch_remain",
+      "type": "primary"
+    },
+    {
+      "id": "edge-30",
+      "from": "batch",
+      "to": "batch_expire",
+      "type": "primary"
+    }
+  ],
+  "modules": []
+}

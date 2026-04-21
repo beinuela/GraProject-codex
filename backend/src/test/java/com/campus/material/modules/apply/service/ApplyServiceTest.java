@@ -1,6 +1,7 @@
 package com.campus.material.modules.apply.service;
 
 import com.campus.material.common.BizException;
+import com.campus.material.monitoring.BusinessMetrics;
 import com.campus.material.modules.apply.dto.ApplyCreateRequest;
 import com.campus.material.modules.apply.entity.ApplyOrderItem;
 import com.campus.material.modules.apply.entity.ApplyOrder;
@@ -31,6 +32,9 @@ class ApplyServiceTest {
 
     @Mock
     private OperationLogService operationLogService;
+
+    @Mock
+    private BusinessMetrics businessMetrics;
 
     @InjectMocks
     private ApplyService applyService;

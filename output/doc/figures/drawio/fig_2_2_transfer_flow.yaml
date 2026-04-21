@@ -1,0 +1,205 @@
+meta:
+  profile: academic-paper
+  theme: academic
+  layout: vertical
+  routing: orthogonal
+  canvas: 760x980
+  title: 调拨执行流程图
+  description: 调拨单从创建、提交、审批到执行和签收的状态推进流程
+nodes:
+- id: start
+  label: 创建调拨单
+  type: terminal
+  size: xl
+  position:
+    x: 330
+    y: 40
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+- id: recommend
+  label: '选择目标仓
+
+    参考候选来源仓'
+  type: process
+  size: xl
+  position:
+    x: 330
+    y: 150
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+- id: submit
+  label: 提交调拨单
+  type: process
+  size: xl
+  position:
+    x: 330
+    y: 270
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+- id: approve
+  label: 审批人审核
+  type: process
+  size: xl
+  position:
+    x: 330
+    y: 390
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+- id: pass
+  label: 审批通过？
+  type: decision
+  size: large
+  position:
+    x: 330
+    y: 515
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+- id: reject
+  label: 驳回并结束
+  type: process
+  size: xl
+  position:
+    x: 580
+    y: 515
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+- id: execute
+  label: '执行调拨
+
+    同步两端库存'
+  type: process
+  size: xl
+  position:
+    x: 330
+    y: 660
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+- id: receive
+  label: 调入仓签收
+  type: process
+  size: xl
+  position:
+    x: 330
+    y: 790
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+- id: end
+  label: 状态为 RECEIVED
+  type: terminal
+  size: xl
+  position:
+    x: 330
+    y: 910
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 16
+edges:
+- from: start
+  to: recommend
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: recommend
+  to: submit
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: submit
+  to: approve
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: approve
+  to: pass
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: pass
+  to: reject
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+  label: 否
+- from: pass
+  to: execute
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+  label: 是
+- from: execute
+  to: receive
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: receive
+  to: end
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: block
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12

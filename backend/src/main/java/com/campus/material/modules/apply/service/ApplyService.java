@@ -1,8 +1,12 @@
 package com.campus.material.modules.apply.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.campus.material.common.BizException;
 import com.campus.material.common.OrderStatus;
+import com.campus.material.common.PageQuery;
+import com.campus.material.common.PageResult;
+import com.campus.material.monitoring.BusinessMetrics;
 import com.campus.material.modules.apply.dto.ApplyCreateRequest;
 import com.campus.material.modules.apply.entity.ApplyOrder;
 import com.campus.material.modules.apply.entity.ApplyOrderItem;
@@ -24,16 +28,22 @@ public class ApplyService {
     private final ApplyOrderMapper applyOrderMapper;
     private final ApplyOrderItemMapper applyOrderItemMapper;
     private final OperationLogService operationLogService;
+    private final BusinessMetrics businessMetrics;
 
     public ApplyService(ApplyOrderMapper applyOrderMapper, ApplyOrderItemMapper applyOrderItemMapper,
-                        OperationLogService operationLogService) {
+                        OperationLogService operationLogService, BusinessMetrics businessMetrics) {
         this.applyOrderMapper = applyOrderMapper;
         this.applyOrderItemMapper = applyOrderItemMapper;
         this.operationLogService = operationLogService;
+        this.businessMetrics = businessMetrics;
     }
 
-    public List<ApplyOrder> list() {
-        return applyOrderMapper.selectList(new LambdaQueryWrapper<ApplyOrder>().orderByDesc(ApplyOrder::getId));
+    public PageResult<ApplyOrder> list(PageQuery pageQuery) {
+        Page<ApplyOrder> page = applyOrderMapper.selectPage(
+                new Page<>(pageQuery.getPage(), pageQuery.getSize()),
+                new LambdaQueryWrapper<ApplyOrder>().orderByDesc(ApplyOrder::getId)
+        );
+        return PageResult.from(page);
     }
 
     public List<ApplyOrderItem> items(Long orderId) {
@@ -70,6 +80,11 @@ public class ApplyService {
         if (!OrderStatus.DRAFT.equals(order.getStatus())) {
             throw new BizException("当前状态不允许提交");
         }
+        /*
+         * 申领单在提交阶段完成第一次状态跃迁。
+         * 紧急等级达到阈值时直接走快速通道，服务端在同一事务内补齐审批人、审批意见与审批时间，
+         * 避免前端或后续异步任务再拼装半完成状态。
+         */
         if (order.getUrgencyLevel() != null && order.getUrgencyLevel() >= 2) {
             order.setFastTrack(1);
             order.setStatus(OrderStatus.APPROVED);
@@ -81,6 +96,7 @@ public class ApplyService {
         }
         applyOrderMapper.updateById(order);
         operationLogService.log(AuthUtil.currentUserId(), "APPLY", "SUBMIT", "提交申领单:" + orderId);
+        businessMetrics.recordApplySubmit();
     }
 
     public void approve(Long orderId, String remark) {
@@ -88,12 +104,14 @@ public class ApplyService {
         if (!OrderStatus.SUBMITTED.equals(order.getStatus())) {
             throw new BizException("当前状态不允许审批");
         }
+        // 审批只允许从 SUBMITTED 进入 APPROVED，避免重复审批覆盖原有审批信息。
         order.setStatus(OrderStatus.APPROVED);
         order.setApproverId(AuthUtil.currentUserId());
         order.setApproveRemark(remark);
         order.setApproveTime(LocalDateTime.now());
         applyOrderMapper.updateById(order);
         operationLogService.log(AuthUtil.currentUserId(), "APPLY", "APPROVE", "审批通过申领单:" + orderId);
+        businessMetrics.recordApplyApprove();
     }
 
     public void reject(Long orderId, String remark) {
@@ -101,6 +119,7 @@ public class ApplyService {
         if (!OrderStatus.SUBMITTED.equals(order.getStatus())) {
             throw new BizException("当前状态不允许驳回");
         }
+        // 驳回和审批共享同一前置状态，确保单据不会在已审批或已出库后被反向改写。
         order.setStatus(OrderStatus.REJECTED);
         order.setApproverId(AuthUtil.currentUserId());
         order.setApproveRemark(remark);

@@ -1,0 +1,417 @@
+{
+  "version": 1,
+  "title": "RBAC 与组织 E-R图",
+  "type": "academic-diagram",
+  "source": "generated",
+  "profile": "academic-paper",
+  "theme": "academic",
+  "layout": "horizontal",
+  "counts": {
+    "nodes": 33,
+    "edges": 32,
+    "modules": 0
+  },
+  "nodes": [
+    {
+      "id": "dept",
+      "label": "部门\\nsys_dept",
+      "type": "service",
+      "size": "medium"
+    },
+    {
+      "id": "user",
+      "label": "用户\\nsys_user",
+      "type": "service",
+      "size": "medium"
+    },
+    {
+      "id": "role",
+      "label": "角色\\nsys_role",
+      "type": "service",
+      "size": "medium"
+    },
+    {
+      "id": "token",
+      "label": "刷新令牌\\nauth_refresh_token",
+      "type": "service",
+      "size": "medium"
+    },
+    {
+      "id": "log",
+      "label": "登录日志\\nlogin_log",
+      "type": "service",
+      "size": "medium"
+    },
+    {
+      "id": "rel_dept_user",
+      "label": "隶属",
+      "type": "decision",
+      "size": "medium"
+    },
+    {
+      "id": "rel_user_role",
+      "label": "拥有",
+      "type": "decision",
+      "size": "medium"
+    },
+    {
+      "id": "rel_user_token",
+      "label": "签发",
+      "type": "decision",
+      "size": "medium"
+    },
+    {
+      "id": "rel_user_log",
+      "label": "产生",
+      "type": "decision",
+      "size": "medium"
+    },
+    {
+      "id": "dept_id",
+      "label": "部门编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "dept_name",
+      "label": "部门名称",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "dept_parent",
+      "label": "上级部门",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "dept_ver",
+      "label": "版本号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "user_id",
+      "label": "用户编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "user_name",
+      "label": "用户账号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "user_real",
+      "label": "姓名",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "user_status",
+      "label": "状态",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "user_dept",
+      "label": "dept_id",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "user_role",
+      "label": "role_id",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "role_id",
+      "label": "角色编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "role_code",
+      "label": "角色编码",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "role_name",
+      "label": "角色名称",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "role_desc",
+      "label": "角色说明",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "token_id",
+      "label": "令牌编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "token_user",
+      "label": "user_id",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "token_hash",
+      "label": "token_hash",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "token_expire",
+      "label": "expire_at",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "token_revoked",
+      "label": "revoked",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "log_user",
+      "label": "user_id",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "log_name",
+      "label": "username",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "log_ip",
+      "label": "login_ip",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "log_status",
+      "label": "登录状态",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "log_time",
+      "label": "login_time",
+      "type": "user",
+      "size": "small"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "from": "dept",
+      "to": "rel_dept_user",
+      "type": "primary",
+      "label": "1"
+    },
+    {
+      "id": "edge-2",
+      "from": "rel_dept_user",
+      "to": "user",
+      "type": "primary",
+      "label": "N"
+    },
+    {
+      "id": "edge-3",
+      "from": "role",
+      "to": "rel_user_role",
+      "type": "primary",
+      "label": "1"
+    },
+    {
+      "id": "edge-4",
+      "from": "rel_user_role",
+      "to": "user",
+      "type": "primary",
+      "label": "N"
+    },
+    {
+      "id": "edge-5",
+      "from": "user",
+      "to": "rel_user_token",
+      "type": "primary",
+      "label": "1"
+    },
+    {
+      "id": "edge-6",
+      "from": "rel_user_token",
+      "to": "token",
+      "type": "primary",
+      "label": "N"
+    },
+    {
+      "id": "edge-7",
+      "from": "user",
+      "to": "rel_user_log",
+      "type": "primary",
+      "label": "1"
+    },
+    {
+      "id": "edge-8",
+      "from": "rel_user_log",
+      "to": "log",
+      "type": "primary",
+      "label": "N"
+    },
+    {
+      "id": "edge-9",
+      "from": "dept",
+      "to": "dept_id",
+      "type": "primary"
+    },
+    {
+      "id": "edge-10",
+      "from": "dept",
+      "to": "dept_name",
+      "type": "primary"
+    },
+    {
+      "id": "edge-11",
+      "from": "dept",
+      "to": "dept_parent",
+      "type": "primary"
+    },
+    {
+      "id": "edge-12",
+      "from": "dept",
+      "to": "dept_ver",
+      "type": "primary"
+    },
+    {
+      "id": "edge-13",
+      "from": "user",
+      "to": "user_id",
+      "type": "primary"
+    },
+    {
+      "id": "edge-14",
+      "from": "user",
+      "to": "user_name",
+      "type": "primary"
+    },
+    {
+      "id": "edge-15",
+      "from": "user",
+      "to": "user_real",
+      "type": "primary"
+    },
+    {
+      "id": "edge-16",
+      "from": "user",
+      "to": "user_status",
+      "type": "primary"
+    },
+    {
+      "id": "edge-17",
+      "from": "user",
+      "to": "user_dept",
+      "type": "primary"
+    },
+    {
+      "id": "edge-18",
+      "from": "user",
+      "to": "user_role",
+      "type": "primary"
+    },
+    {
+      "id": "edge-19",
+      "from": "role",
+      "to": "role_id",
+      "type": "primary"
+    },
+    {
+      "id": "edge-20",
+      "from": "role",
+      "to": "role_code",
+      "type": "primary"
+    },
+    {
+      "id": "edge-21",
+      "from": "role",
+      "to": "role_name",
+      "type": "primary"
+    },
+    {
+      "id": "edge-22",
+      "from": "role",
+      "to": "role_desc",
+      "type": "primary"
+    },
+    {
+      "id": "edge-23",
+      "from": "token",
+      "to": "token_id",
+      "type": "primary"
+    },
+    {
+      "id": "edge-24",
+      "from": "token",
+      "to": "token_user",
+      "type": "primary"
+    },
+    {
+      "id": "edge-25",
+      "from": "token",
+      "to": "token_hash",
+      "type": "primary"
+    },
+    {
+      "id": "edge-26",
+      "from": "token",
+      "to": "token_expire",
+      "type": "primary"
+    },
+    {
+      "id": "edge-27",
+      "from": "token",
+      "to": "token_revoked",
+      "type": "primary"
+    },
+    {
+      "id": "edge-28",
+      "from": "log",
+      "to": "log_user",
+      "type": "primary"
+    },
+    {
+      "id": "edge-29",
+      "from": "log",
+      "to": "log_name",
+      "type": "primary"
+    },
+    {
+      "id": "edge-30",
+      "from": "log",
+      "to": "log_ip",
+      "type": "primary"
+    },
+    {
+      "id": "edge-31",
+      "from": "log",
+      "to": "log_status",
+      "type": "primary"
+    },
+    {
+      "id": "edge-32",
+      "from": "log",
+      "to": "log_time",
+      "type": "primary"
+    }
+  ],
+  "modules": []
+}

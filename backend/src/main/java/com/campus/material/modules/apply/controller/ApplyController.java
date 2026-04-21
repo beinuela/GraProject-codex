@@ -1,6 +1,8 @@
 package com.campus.material.modules.apply.controller;
 
 import com.campus.material.common.ApiResponse;
+import com.campus.material.common.PageQuery;
+import com.campus.material.common.PageResult;
 import com.campus.material.common.RemarkRequest;
 import com.campus.material.modules.apply.dto.ApplyCreateRequest;
 import com.campus.material.modules.apply.entity.ApplyOrder;
@@ -26,8 +28,8 @@ public class ApplyController {
 
     @GetMapping("/list")
     @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
-    public ApiResponse<List<ApplyOrder>> list() {
-        return ApiResponse.ok(applyService.list());
+    public ApiResponse<PageResult<ApplyOrder>> list(@Valid PageQuery pageQuery) {
+        return ApiResponse.ok(applyService.list(pageQuery));
     }
 
     @GetMapping("/{id}")

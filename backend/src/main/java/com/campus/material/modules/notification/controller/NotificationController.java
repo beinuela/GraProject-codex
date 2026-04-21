@@ -1,13 +1,14 @@
 package com.campus.material.modules.notification.controller;
 
 import com.campus.material.common.ApiResponse;
+import com.campus.material.common.PageQuery;
+import com.campus.material.common.PageResult;
 import com.campus.material.modules.notification.entity.Notification;
 import com.campus.material.modules.notification.service.NotificationService;
 import com.campus.material.security.AuthUtil;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 
 @RestController
@@ -22,8 +23,8 @@ public class NotificationController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ApiResponse<List<Notification>> list() {
-        return ApiResponse.ok(notificationService.listByUser(AuthUtil.currentUserId()));
+    public ApiResponse<PageResult<Notification>> list(@Valid PageQuery pageQuery) {
+        return ApiResponse.ok(notificationService.listByUser(AuthUtil.currentUserId(), pageQuery));
     }
 
     @GetMapping("/unread-count")
@@ -35,7 +36,7 @@ public class NotificationController {
     @PostMapping("/{id}/read")
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<Void> markRead(@PathVariable Long id) {
-        notificationService.markRead(id);
+        notificationService.markRead(id, AuthUtil.currentUserId());
         return ApiResponse.ok(null);
     }
 
@@ -49,7 +50,7 @@ public class NotificationController {
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<Void> delete(@PathVariable Long id) {
-        notificationService.delete(id);
+        notificationService.delete(id, AuthUtil.currentUserId());
         return ApiResponse.ok(null);
     }
 }

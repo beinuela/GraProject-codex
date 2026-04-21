@@ -1,0 +1,209 @@
+meta:
+  profile: academic-paper
+  theme: academic
+  layout: star
+  routing: straight
+  canvas: 980x920
+  title: 系统功能模块图
+  description: 校园物资智能管理系统的功能模块划分
+nodes:
+  - id: core
+    label: 校园物资智能管理系统
+    type: service
+    size: xl
+    position:
+      x: 470
+      'y': 390
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 17
+      shape: shape=rectangle;rounded=0
+  - id: auth
+    label: 认证与权限
+    type: service
+    size: xl
+    position:
+      x: 110
+      'y': 110
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+      shape: shape=rectangle;rounded=0
+  - id: base
+    label: 基础数据
+    type: service
+    size: xl
+    position:
+      x: 470
+      'y': 90
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+      shape: shape=rectangle;rounded=0
+  - id: inventory
+    label: 仓储库存
+    type: service
+    size: xl
+    position:
+      x: 830
+      'y': 110
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+      shape: shape=rectangle;rounded=0
+  - id: apply
+    label: 申领审批
+    type: service
+    size: xl
+    position:
+      x: 110
+      'y': 390
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+      shape: shape=rectangle;rounded=0
+  - id: transfer
+    label: 调拨协同
+    type: service
+    size: xl
+    position:
+      x: 830
+      'y': 390
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+      shape: shape=rectangle;rounded=0
+  - id: warning
+    label: 预警与补货
+    type: service
+    size: xl
+    position:
+      x: 110
+      'y': 690
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+      shape: shape=rectangle;rounded=0
+  - id: analytics
+    label: 统计分析
+    type: service
+    size: xl
+    position:
+      x: 470
+      'y': 730
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+      shape: shape=rectangle;rounded=0
+  - id: support
+    label: 系统支撑
+    type: service
+    size: xl
+    position:
+      x: 830
+      'y': 690
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+      shape: shape=rectangle;rounded=0
+edges:
+  - from: core
+    to: auth
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: core
+    to: base
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: core
+    to: inventory
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: core
+    to: apply
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: core
+    to: transfer
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: core
+    to: warning
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: core
+    to: analytics
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: core
+    to: support
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+modules: []

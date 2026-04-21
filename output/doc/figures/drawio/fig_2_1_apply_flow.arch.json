@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "title": "申领审批闭环流程图",
+  "type": "academic-diagram",
+  "source": "generated",
+  "profile": "academic-paper",
+  "theme": "academic",
+  "layout": "vertical",
+  "counts": {
+    "nodes": 11,
+    "edges": 11,
+    "modules": 0
+  },
+  "nodes": [
+    {
+      "id": "start",
+      "label": "创建申领单",
+      "type": "terminal",
+      "size": "xl"
+    },
+    {
+      "id": "draft",
+      "label": "保存草稿",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "submit",
+      "label": "提交申领单",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "urgent",
+      "label": "紧急等级≥2？",
+      "type": "decision",
+      "size": "large"
+    },
+    {
+      "id": "approve",
+      "label": "审批人审核",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "fast",
+      "label": "快速审批",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "pass",
+      "label": "审批通过？",
+      "type": "decision",
+      "size": "large"
+    },
+    {
+      "id": "reject",
+      "label": "驳回并记录意见",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "stockout",
+      "label": "库存匹配\n批次出库",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "receive",
+      "label": "部门用户签收",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "end",
+      "label": "状态为 RECEIVED",
+      "type": "terminal",
+      "size": "xl"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "from": "start",
+      "to": "draft",
+      "type": "primary"
+    },
+    {
+      "id": "edge-2",
+      "from": "draft",
+      "to": "submit",
+      "type": "primary"
+    },
+    {
+      "id": "edge-3",
+      "from": "submit",
+      "to": "urgent",
+      "type": "primary"
+    },
+    {
+      "id": "edge-4",
+      "from": "urgent",
+      "to": "approve",
+      "type": "primary",
+      "label": "否"
+    },
+    {
+      "id": "edge-5",
+      "from": "urgent",
+      "to": "fast",
+      "type": "primary",
+      "label": "是"
+    },
+    {
+      "id": "edge-6",
+      "from": "approve",
+      "to": "pass",
+      "type": "primary"
+    },
+    {
+      "id": "edge-7",
+      "from": "fast",
+      "to": "pass",
+      "type": "primary"
+    },
+    {
+      "id": "edge-8",
+      "from": "pass",
+      "to": "reject",
+      "type": "primary",
+      "label": "否"
+    },
+    {
+      "id": "edge-9",
+      "from": "pass",
+      "to": "stockout",
+      "type": "primary",
+      "label": "是"
+    },
+    {
+      "id": "edge-10",
+      "from": "stockout",
+      "to": "receive",
+      "type": "primary"
+    },
+    {
+      "id": "edge-11",
+      "from": "receive",
+      "to": "end",
+      "type": "primary"
+    }
+  ],
+  "modules": []
+}

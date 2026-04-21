@@ -1,6 +1,8 @@
 package com.campus.material.modules.transfer.controller;
 
 import com.campus.material.common.ApiResponse;
+import com.campus.material.common.PageQuery;
+import com.campus.material.common.PageResult;
 import com.campus.material.common.RemarkRequest;
 import com.campus.material.modules.transfer.dto.TransferCreateRequest;
 import com.campus.material.modules.transfer.entity.TransferOrder;
@@ -24,8 +26,8 @@ public class TransferController {
 
     @GetMapping("/list")
     @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER')")
-    public ApiResponse<List<TransferOrder>> list() {
-        return ApiResponse.ok(transferService.list());
+    public ApiResponse<PageResult<TransferOrder>> list(@Valid PageQuery pageQuery) {
+        return ApiResponse.ok(transferService.list(pageQuery));
     }
 
     @GetMapping("/{id}")

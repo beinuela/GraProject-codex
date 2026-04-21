@@ -1,6 +1,7 @@
 package com.campus.material.common;
 
 import jakarta.validation.ConstraintViolationException;
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -18,6 +19,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BizException.class)
     public ApiResponse<Void> handleBiz(BizException e) {
         log.warn("业务异常 [{}]: {}", e.getCode(), e.getMessage());
+        if (e.getCode() >= ErrorCode.INTERNAL_SERVER_ERROR.getCode()) {
+            Sentry.captureException(e);
+        }
         return ApiResponse.fail(e.getCode(), e.getMessage());
     }
 
@@ -39,6 +43,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ApiResponse<Void> handleUnknown(Exception e) {
         log.error("服务器内部未知错误", e);
+        Sentry.captureException(e);
         return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR.getCode(), ErrorCode.INTERNAL_SERVER_ERROR.getDefaultMessage());
     }
 }

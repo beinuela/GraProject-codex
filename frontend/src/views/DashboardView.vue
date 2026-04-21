@@ -161,26 +161,26 @@ useChart(lineChartRef, lineOptions)
 const load = async () => {
   try {
     const [inventory, warnings, materials, warehouses] = await Promise.all([
-      apiGet('/api/inventory/list'),
-      apiGet('/api/warning/list?status=UNHANDLED'),
+      apiGet('/api/inventory/list', { page: 1, size: 1 }),
+      apiGet('/api/warning/list', { page: 1, size: 10, status: 'UNHANDLED' }),
       apiGet('/api/material/info'),
       apiGet('/api/warehouse/list')
     ])
     summary.value = {
       materials: materials.length,
       warehouses: warehouses.length,
-      inventoryRecords: inventory.length,
-      warnings: warnings.length
+      inventoryRecords: Number(inventory.total || 0),
+      warnings: Number(warnings.total || 0)
     }
-    unhandledWarnings.value = warnings.slice(0, 10)
+    unhandledWarnings.value = warnings.records || []
   } catch {
     summary.value = { materials: 0, warehouses: 0, inventoryRecords: 0, warnings: 0 }
     unhandledWarnings.value = []
   }
 
   try {
-    const logs = await apiGet('/api/log/list')
-    recentLogs.value = logs.slice(0, 10)
+    const logs = await apiGet('/api/log/list', { page: 1, size: 10 })
+    recentLogs.value = logs.records || []
   } catch {
     recentLogs.value = []
   }

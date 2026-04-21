@@ -10,7 +10,7 @@
       </template>
     </FilterActionBar>
 
-    <TableShell title="申领单列表" description="查看申领单状态、紧急程度与业务动作。" :badge="`${list.length} 条`">
+    <TableShell title="申领单列表" description="查看申领单状态、紧急程度与业务动作。" :badge="`${pagination.total} 条`">
       <el-table :data="list" class="list-table">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="deptId" label="部门ID" width="100" />
@@ -43,6 +43,13 @@
         </template>
       </el-table>
     </TableShell>
+    <PaginationBar
+      :page="pagination.page"
+      :size="pagination.size"
+      :total="pagination.total"
+      @current-change="handlePageChange"
+      @size-change="handleSizeChange"
+    />
 
     <DialogShell v-model="createVisible" title="新建申领" eyebrow="Apply Workflow" subtitle="录入部门、紧急程度、申领原因和物资明细。" width="900">
       <el-form :model="createForm" label-position="top" class="form-grid form-grid--2">
@@ -141,6 +148,7 @@ import DetailTimeline from '../../components/ui/DetailTimeline.vue'
 import DialogShell from '../../components/ui/DialogShell.vue'
 import EmptyState from '../../components/ui/EmptyState.vue'
 import FilterActionBar from '../../components/ui/FilterActionBar.vue'
+import PaginationBar from '../../components/ui/PaginationBar.vue'
 import PageScaffold from '../../components/ui/PageScaffold.vue'
 import StatusBadge from '../../components/ui/StatusBadge.vue'
 import TableShell from '../../components/ui/TableShell.vue'
@@ -151,6 +159,7 @@ const createVisible = ref(false)
 const detailVisible = ref(false)
 const createForm = reactive({ deptId: null, urgencyLevel: 0, reason: '', scenario: '', items: [{ materialId: null, applyQty: 1 }] })
 const detailData = reactive({ order: null, items: [], timeline: [] })
+const pagination = reactive({ page: 1, size: 10, total: 0 })
 
 const urgencyLabel = (level) => ['普通', '一般', '紧急', '特急'][Number(level) || 0] || '普通'
 const urgencyTone = (level) => ({ 0: 'neutral', 1: 'accent', 2: 'warning', 3: 'danger' }[Number(level)] || 'neutral')
@@ -158,10 +167,10 @@ const statusTone = (status) => ({ DRAFT: 'neutral', SUBMITTED: 'warning', APPROV
 const timelineTone = item => ({ CREATE: 'accent', APPROVE: 'success', EXECUTE: 'teal', RECEIVE: 'success', REJECT: 'danger' }[item.badge] || 'neutral')
 
 const metrics = computed(() => [
-  { label: '申领总数', value: list.value.length, helper: '当前申领单总量', icon: Tickets, tone: 'accent' },
+  { label: '申领总数', value: pagination.total, helper: '当前申领单总量', icon: Tickets, tone: 'accent' },
   { label: '待审批', value: list.value.filter(item => item.status === 'SUBMITTED').length, helper: '等待审批处理', icon: Warning, tone: 'warning' },
   { label: '高紧急度', value: list.value.filter(item => Number(item.urgencyLevel) >= 2).length, helper: '紧急与特急申领', icon: Bell, tone: 'danger' },
-  { label: '已完成签收', value: list.value.filter(item => item.status === 'RECEIVED').length, helper: '已闭环单据', icon: DataLine, tone: 'success' }
+  { label: '已完成签收', value: list.value.filter(item => item.status === 'RECEIVED').length, helper: '当前页已闭环单据', icon: DataLine, tone: 'success' }
 ])
 
 const timelineItems = computed(() =>
@@ -178,7 +187,12 @@ const loadBase = async () => {
 }
 
 const load = async () => {
-  list.value = await apiGet('/api/apply/list')
+  const result = await apiGet('/api/apply/list', {
+    page: pagination.page,
+    size: pagination.size
+  })
+  list.value = result.records || []
+  pagination.total = Number(result.total || 0)
 }
 
 const openCreate = () => {
@@ -193,6 +207,7 @@ const openCreate = () => {
 const saveCreate = async () => {
   await apiPost('/api/apply', createForm)
   createVisible.value = false
+  pagination.page = 1
   await load()
 }
 
@@ -223,6 +238,17 @@ const reject = async (id) => {
 
 const receive = async (id) => {
   await apiPost(`/api/apply/${id}/receive`)
+  await load()
+}
+
+const handlePageChange = async (page) => {
+  pagination.page = page
+  await load()
+}
+
+const handleSizeChange = async (size) => {
+  pagination.size = size
+  pagination.page = 1
   await load()
 }
 

@@ -1,0 +1,254 @@
+meta:
+  profile: academic-paper
+  theme: academic
+  layout: vertical
+  routing: orthogonal
+  canvas: 760x1160
+  title: 调拨执行与推荐流程图
+  description: 调拨推荐、审批与执行流程图
+nodes:
+  - id: start
+    label: 发起调拨需求
+    type: terminal
+    size: xl
+    position:
+      x: 330
+      'y': 40
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+  - id: input
+    label: |-
+      输入目标校区
+      物资与数量
+    type: process
+    size: xl
+    position:
+      x: 330
+      'y': 145
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+  - id: calc
+    label: 计算最短路径
+    type: process
+    size: xl
+    position:
+      x: 330
+      'y': 255
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+  - id: candidate
+    label: 筛选候选来源仓
+    type: process
+    size: xl
+    position:
+      x: 330
+      'y': 365
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+  - id: rank
+    label: |-
+      按距离排序
+      返回推荐结果
+    type: process
+    size: xl
+    position:
+      x: 330
+      'y': 475
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+  - id: submit
+    label: |-
+      选择来源仓
+      提交调拨单
+    type: process
+    size: xl
+    position:
+      x: 330
+      'y': 600
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+  - id: approve
+    label: 审批通过？
+    type: decision
+    size: large
+    position:
+      x: 330
+      'y': 730
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+  - id: reject
+    label: 驳回并结束
+    type: process
+    size: xl
+    position:
+      x: 580
+      'y': 730
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+  - id: execute
+    label: |-
+      执行调拨
+      迁移批次
+    type: process
+    size: xl
+    position:
+      x: 330
+      'y': 870
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+  - id: receive
+    label: 调入仓签收
+    type: process
+    size: xl
+    position:
+      x: 330
+      'y': 985
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+  - id: end
+    label: 状态为 RECEIVED
+    type: terminal
+    size: xl
+    position:
+      x: 330
+      'y': 1095
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+edges:
+  - from: start
+    to: input
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: input
+    to: calc
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: calc
+    to: candidate
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: candidate
+    to: rank
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: rank
+    to: submit
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: submit
+    to: approve
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: approve
+    to: reject
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+    label: 否
+  - from: approve
+    to: execute
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+    label: 是
+  - from: execute
+    to: receive
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: receive
+    to: end
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+modules: []

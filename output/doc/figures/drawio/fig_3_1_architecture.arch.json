@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "title": "系统总体架构图",
+  "type": "academic-diagram",
+  "source": "generated",
+  "profile": "academic-paper",
+  "theme": "academic",
+  "layout": "vertical",
+  "counts": {
+    "nodes": 8,
+    "edges": 9,
+    "modules": 0
+  },
+  "nodes": [
+    {
+      "id": "browser",
+      "label": "浏览器访问",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "frontend",
+      "label": "前端表示层",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "router",
+      "label": "路由与状态",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "gateway",
+      "label": "接口访问层",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "controller",
+      "label": "控制层",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "service",
+      "label": "服务层",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "persistence",
+      "label": "数据访问层",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "db",
+      "label": "MySQL 数据库",
+      "type": "service",
+      "size": "xl"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "from": "browser",
+      "to": "frontend",
+      "type": "primary"
+    },
+    {
+      "id": "edge-2",
+      "from": "frontend",
+      "to": "router",
+      "type": "primary"
+    },
+    {
+      "id": "edge-3",
+      "from": "router",
+      "to": "gateway",
+      "type": "primary"
+    },
+    {
+      "id": "edge-4",
+      "from": "gateway",
+      "to": "controller",
+      "type": "primary"
+    },
+    {
+      "id": "edge-5",
+      "from": "gateway",
+      "to": "service",
+      "type": "primary"
+    },
+    {
+      "id": "edge-6",
+      "from": "gateway",
+      "to": "persistence",
+      "type": "primary"
+    },
+    {
+      "id": "edge-7",
+      "from": "controller",
+      "to": "service",
+      "type": "primary"
+    },
+    {
+      "id": "edge-8",
+      "from": "service",
+      "to": "persistence",
+      "type": "primary"
+    },
+    {
+      "id": "edge-9",
+      "from": "persistence",
+      "to": "db",
+      "type": "primary"
+    }
+  ],
+  "modules": []
+}

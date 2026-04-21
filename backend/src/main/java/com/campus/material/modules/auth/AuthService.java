@@ -3,6 +3,7 @@ package com.campus.material.modules.auth;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.campus.material.common.BizException;
+import com.campus.material.monitoring.BusinessMetrics;
 import com.campus.material.modules.auth.dto.LoginRequest;
 import com.campus.material.modules.auth.dto.LoginResponse;
 import com.campus.material.modules.auth.entity.AuthRefreshToken;
@@ -20,6 +21,9 @@ import io.jsonwebtoken.Claims;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -43,11 +47,13 @@ public class AuthService {
     private final AuthRefreshTokenMapper authRefreshTokenMapper;
     private final JwtProperties jwtProperties;
     private final AuthRefreshTokenCleanupTask authRefreshTokenCleanupTask;
+    private final BusinessMetrics businessMetrics;
 
     public AuthService(SysUserMapper userMapper, SysRoleMapper roleMapper, PasswordEncoder passwordEncoder,
                        JwtTokenProvider jwtTokenProvider, LoginLogService loginLogService,
                        AuthRefreshTokenMapper authRefreshTokenMapper, JwtProperties jwtProperties,
-                       AuthRefreshTokenCleanupTask authRefreshTokenCleanupTask) {
+                       AuthRefreshTokenCleanupTask authRefreshTokenCleanupTask,
+                       BusinessMetrics businessMetrics) {
         this.userMapper = userMapper;
         this.roleMapper = roleMapper;
         this.passwordEncoder = passwordEncoder;
@@ -56,26 +62,31 @@ public class AuthService {
         this.authRefreshTokenMapper = authRefreshTokenMapper;
         this.jwtProperties = jwtProperties;
         this.authRefreshTokenCleanupTask = authRefreshTokenCleanupTask;
+        this.businessMetrics = businessMetrics;
     }
 
     @Transactional(rollbackFor = Exception.class)
     public LoginResponse login(LoginRequest request) {
         String username = request.getUsername() == null ? null : request.getUsername().trim();
+        HttpServletRequest servletRequest = currentRequest();
+        String loginIp = servletRequest == null ? "" : servletRequest.getRemoteAddr();
+        String userAgent = servletRequest == null ? "" : defaultString(servletRequest.getHeader("User-Agent"));
         SysUser user = userMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getUsername, username));
         if (user == null || !passwordMatched(request.getPassword(), user.getPassword())) {
-            // 记录登录失败日志
-            loginLogService.record(null, username, "", "0", "");
+            businessMetrics.recordLoginFailure();
+            loginLogService.record(null, username, loginIp, "FAILURE", userAgent);
             throw new BizException(401, "用户名或密码错误");
         }
         if (user.getStatus() == null || user.getStatus() != 1) {
-            loginLogService.record(user.getId(), user.getUsername(), "", "0", "");
+            businessMetrics.recordLoginFailure();
+            loginLogService.record(user.getId(), user.getUsername(), loginIp, "FAILURE", userAgent);
             throw new BizException(403, "账号已被禁用");
         }
         SysRole role = roleMapper.selectById(user.getRoleId());
         String roleCode = role == null ? "DEPT_USER" : role.getRoleCode();
         LoginResponse response = issueTokens(user, roleCode);
-        // 记录登录成功日志
-        loginLogService.record(user.getId(), user.getUsername(), "", "1", "");
+        businessMetrics.recordLoginSuccess();
+        loginLogService.record(user.getId(), user.getUsername(), loginIp, "SUCCESS", userAgent);
         return response;
     }
 
@@ -85,14 +96,17 @@ public class AuthService {
         try {
             claims = jwtTokenProvider.parseToken(refreshToken);
         } catch (Exception e) {
+            businessMetrics.recordRefreshFailure();
             throw new BizException(401, "refresh token 无效或已过期");
         }
         String tokenType = (String) claims.get("typ");
         if (!"refresh".equals(tokenType)) {
+            businessMetrics.recordRefreshFailure();
             throw new BizException(401, "token 类型错误");
         }
         String tokenId = claims.getId();
         if (tokenId == null || tokenId.isBlank()) {
+            businessMetrics.recordRefreshFailure();
             throw new BizException(401, "refresh token 无效");
         }
         Long userId = ((Number) claims.get("uid")).longValue();
@@ -103,26 +117,34 @@ public class AuthService {
                 .eq(AuthRefreshToken::getRevoked, 0)
                 .last("limit 1"));
         if (stored == null) {
+            businessMetrics.recordRefreshFailure();
             throw new BizException(401, "refresh token 已失效");
         }
         if (stored.getExpireAt() == null || stored.getExpireAt().isBefore(LocalDateTime.now())) {
             revokeById(stored.getId());
+            businessMetrics.recordRefreshFailure();
             throw new BizException(401, "refresh token 已过期");
         }
         if (!sha256Base64(refreshToken).equals(stored.getTokenHash())) {
             revokeById(stored.getId());
+            businessMetrics.recordRefreshFailure();
             throw new BizException(401, "refresh token 校验失败");
         }
 
         SysUser user = userMapper.selectById(userId);
         if (user == null || user.getStatus() == null || user.getStatus() != 1) {
             revokeById(stored.getId());
+            businessMetrics.recordRefreshFailure();
             throw new BizException(403, "账号不可用");
         }
         SysRole role = roleMapper.selectById(user.getRoleId());
         String roleCode = role == null ? "DEPT_USER" : role.getRoleCode();
 
-        // refresh token 单次使用：先撤销旧 token，再发新 token（轮换）
+        /**
+         * refresh token 采用单次使用策略。
+         * 只有在持久化的 token 记录仍然有效且 hash 校验通过时，才会进入轮换流程。
+         * 一旦校验通过，先撤销旧 token，再签发新 token，避免旧 refresh token 被重复利用。
+         */
         revokeById(stored.getId());
         return issueTokens(user, roleCode);
     }
@@ -334,5 +356,14 @@ public class AuthService {
         } catch (IllegalArgumentException e) {
             return false;
         }
+    }
+
+    private HttpServletRequest currentRequest() {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        return attributes == null ? null : attributes.getRequest();
+    }
+
+    private String defaultString(String value) {
+        return value == null ? "" : value;
     }
 }
