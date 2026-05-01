@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RateLimitingFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.security.ratelimit</a> &gt; <span class="el_source">RateLimitingFilter.java</span></div><h1>RateLimitingFilter.java</h1><pre class="source lang-java linenums">package com.campus.material.security.ratelimit;
+
+import com.campus.material.common.ApiResponse;
+import com.campus.material.common.ErrorCode;
+import com.campus.material.security.LoginUser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.HexFormat;
+import java.util.Set;
+
+@Component
+public class RateLimitingFilter extends OncePerRequestFilter {
+
+    private static final int TOO_MANY_REQUESTS_STATUS = 429;
+<span class="fc" id="L28">    private static final Set&lt;String&gt; HIGH_RISK_PATHS = Set.of(</span>
+            &quot;/api/warning/scan&quot;,
+            &quot;/api/auth/logout&quot;,
+            &quot;/api/auth/token-cleanup&quot;
+    );
+
+    private final RequestRateLimiter requestRateLimiter;
+    private final RateLimitProperties properties;
+    private final ObjectMapper objectMapper;
+
+<span class="fc" id="L38">    public RateLimitingFilter(RequestRateLimiter requestRateLimiter, RateLimitProperties properties, ObjectMapper objectMapper) {</span>
+<span class="fc" id="L39">        this.requestRateLimiter = requestRateLimiter;</span>
+<span class="fc" id="L40">        this.properties = properties;</span>
+<span class="fc" id="L41">        this.objectMapper = objectMapper;</span>
+<span class="fc" id="L42">    }</span>
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+<span class="pc bpc" id="L46" title="2 of 4 branches missed.">        return !properties.isEnabled() || !request.getRequestURI().startsWith(&quot;/api/&quot;);</span>
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+<span class="fc" id="L52">        HttpServletRequest effectiveRequest = request;</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        if (requiresBodyCaching(request)) {</span>
+<span class="fc" id="L54">            effectiveRequest = new CachedBodyHttpServletRequest(request);</span>
+        }
+
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        if (isLoginRequest(effectiveRequest)) {</span>
+<span class="fc" id="L58">            String username = extractField(effectiveRequest, &quot;username&quot;);</span>
+<span class="fc" id="L59">            String key = &quot;login:&quot; + resolveClientIp(effectiveRequest) + &quot;:&quot; + username;</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">            if (!requestRateLimiter.tryConsume(key, properties.getLoginCapacity(), properties.getLoginWindowSeconds())) {</span>
+<span class="fc" id="L61">                writeRateLimited(response, &quot;登录请求过于频繁，请稍后重试&quot;);</span>
+<span class="fc" id="L62">                return;</span>
+            }
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        } else if (isRefreshRequest(effectiveRequest)) {</span>
+<span class="fc" id="L65">            String refreshToken = extractField(effectiveRequest, &quot;refreshToken&quot;);</span>
+<span class="fc" id="L66">            String key = &quot;refresh:&quot; + resolveClientIp(effectiveRequest) + &quot;:&quot; + hashToken(refreshToken);</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            if (!requestRateLimiter.tryConsume(key, properties.getRefreshCapacity(), properties.getRefreshWindowSeconds())) {</span>
+<span class="fc" id="L68">                writeRateLimited(response, &quot;刷新令牌请求过于频繁，请稍后重试&quot;);</span>
+<span class="fc" id="L69">                return;</span>
+            }
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        } else if (isHighRiskRequest(effectiveRequest)) {</span>
+<span class="fc" id="L72">            String subject = resolvePrincipalKey();</span>
+<span class="fc" id="L73">            String key = &quot;high-risk:&quot; + effectiveRequest.getRequestURI() + &quot;:&quot; + subject;</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">            if (!requestRateLimiter.tryConsume(key, properties.getHighRiskCapacity(), properties.getHighRiskWindowSeconds())) {</span>
+<span class="fc" id="L75">                writeRateLimited(response, &quot;高风险操作触发限流，请稍后重试&quot;);</span>
+<span class="fc" id="L76">                return;</span>
+            }
+        }
+
+<span class="fc" id="L80">        filterChain.doFilter(effectiveRequest, response);</span>
+<span class="fc" id="L81">    }</span>
+
+    private boolean requiresBodyCaching(HttpServletRequest request) {
+<span class="fc bfc" id="L84" title="All 4 branches covered.">        return isLoginRequest(request) || isRefreshRequest(request);</span>
+    }
+
+    private boolean isLoginRequest(HttpServletRequest request) {
+<span class="fc bfc" id="L88" title="All 4 branches covered.">        return &quot;POST&quot;.equalsIgnoreCase(request.getMethod()) &amp;&amp; &quot;/api/auth/login&quot;.equals(request.getRequestURI());</span>
+    }
+
+    private boolean isRefreshRequest(HttpServletRequest request) {
+<span class="fc bfc" id="L92" title="All 4 branches covered.">        return &quot;POST&quot;.equalsIgnoreCase(request.getMethod()) &amp;&amp; &quot;/api/auth/refresh&quot;.equals(request.getRequestURI());</span>
+    }
+
+    private boolean isHighRiskRequest(HttpServletRequest request) {
+<span class="fc bfc" id="L96" title="All 4 branches covered.">        return &quot;POST&quot;.equalsIgnoreCase(request.getMethod()) &amp;&amp; HIGH_RISK_PATHS.contains(request.getRequestURI());</span>
+    }
+
+    private String extractField(HttpServletRequest request, String fieldName) {
+<span class="pc bpc" id="L100" title="2 of 4 branches missed.">        if (!(request instanceof CachedBodyHttpServletRequest cachedRequest) || cachedRequest.getCachedBody().length == 0) {</span>
+<span class="nc" id="L101">            return &quot;anonymous&quot;;</span>
+        }
+        try {
+<span class="fc" id="L104">            JsonNode node = objectMapper.readTree(cachedRequest.getCachedBody());</span>
+<span class="fc" id="L105">            JsonNode field = node.get(fieldName);</span>
+<span class="pc bpc" id="L106" title="2 of 4 branches missed.">            return field == null || field.asText().isBlank() ? &quot;anonymous&quot; : field.asText().trim();</span>
+<span class="nc" id="L107">        } catch (Exception ignored) {</span>
+<span class="nc" id="L108">            return &quot;anonymous&quot;;</span>
+        }
+    }
+
+    private String resolveClientIp(HttpServletRequest request) {
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">        if (properties.isTrustForwardHeaders()) {</span>
+<span class="nc" id="L114">            String forwarded = request.getHeader(&quot;X-Forwarded-For&quot;);</span>
+<span class="nc bnc" id="L115" title="All 4 branches missed.">            if (forwarded != null &amp;&amp; !forwarded.isBlank()) {</span>
+<span class="nc" id="L116">                return forwarded.split(&quot;,&quot;)[0].trim();</span>
+            }
+        }
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">        return request.getRemoteAddr() == null ? &quot;unknown&quot; : request.getRemoteAddr();</span>
+    }
+
+    private String resolvePrincipalKey() {
+<span class="fc" id="L123">        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="pc bpc" id="L124" title="2 of 4 branches missed.">        if (authentication == null || authentication.getPrincipal() == null) {</span>
+<span class="nc" id="L125">            return &quot;ip-only&quot;;</span>
+        }
+<span class="fc" id="L127">        Object principal = authentication.getPrincipal();</span>
+<span class="pc bpc" id="L128" title="2 of 4 branches missed.">        if (principal instanceof LoginUser loginUser &amp;&amp; loginUser.getUserId() != null) {</span>
+<span class="fc" id="L129">            return &quot;user:&quot; + loginUser.getUserId();</span>
+        }
+<span class="nc" id="L131">        return &quot;anonymous&quot;;</span>
+    }
+
+    private String hashToken(String token) {
+<span class="pc bpc" id="L135" title="2 of 4 branches missed.">        if (token == null || token.isBlank()) {</span>
+<span class="nc" id="L136">            return &quot;anonymous&quot;;</span>
+        }
+        try {
+<span class="fc" id="L139">            MessageDigest digest = MessageDigest.getInstance(&quot;SHA-256&quot;);</span>
+<span class="fc" id="L140">            byte[] hash = digest.digest(token.getBytes(StandardCharsets.UTF_8));</span>
+<span class="fc" id="L141">            return HexFormat.of().formatHex(hash);</span>
+<span class="nc" id="L142">        } catch (Exception ignored) {</span>
+<span class="nc" id="L143">            return &quot;anonymous&quot;;</span>
+        }
+    }
+
+    private void writeRateLimited(HttpServletResponse response, String message) throws IOException {
+<span class="fc" id="L148">        response.setStatus(TOO_MANY_REQUESTS_STATUS);</span>
+<span class="fc" id="L149">        response.setCharacterEncoding(StandardCharsets.UTF_8.name());</span>
+<span class="fc" id="L150">        response.setContentType(MediaType.APPLICATION_JSON_VALUE);</span>
+<span class="fc" id="L151">        response.getWriter().write(objectMapper.writeValueAsString(</span>
+<span class="fc" id="L152">                ApiResponse.fail(ErrorCode.TOO_MANY_REQUESTS.getCode(), message)</span>
+        ));
+<span class="fc" id="L154">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

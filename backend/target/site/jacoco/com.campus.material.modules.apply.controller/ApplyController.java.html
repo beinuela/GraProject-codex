@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApplyController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.apply.controller</a> &gt; <span class="el_source">ApplyController.java</span></div><h1>ApplyController.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.apply.controller;
+
+import com.campus.material.common.ApiResponse;
+import com.campus.material.common.PageQuery;
+import com.campus.material.common.PageResult;
+import com.campus.material.common.RemarkRequest;
+import com.campus.material.modules.apply.dto.ApplyCreateRequest;
+import com.campus.material.modules.apply.entity.ApplyOrder;
+import com.campus.material.modules.apply.service.ApplyService;
+import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping(&quot;/api/apply&quot;)
+public class ApplyController {
+
+    private final ApplyService applyService;
+    private final com.campus.material.modules.log.service.OperationLogService operationLogService;
+
+<span class="fc" id="L24">    public ApplyController(ApplyService applyService, com.campus.material.modules.log.service.OperationLogService operationLogService) {</span>
+<span class="fc" id="L25">        this.applyService = applyService;</span>
+<span class="fc" id="L26">        this.operationLogService = operationLogService;</span>
+<span class="fc" id="L27">    }</span>
+
+    @GetMapping(&quot;/list&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')&quot;)
+    public ApiResponse&lt;PageResult&lt;ApplyOrder&gt;&gt; list(@Valid PageQuery pageQuery) {
+<span class="fc" id="L32">        return ApiResponse.ok(applyService.list(pageQuery));</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')&quot;)
+    public ApiResponse&lt;Map&lt;String, Object&gt;&gt; detail(@PathVariable Long id) {
+<span class="nc" id="L38">        return ApiResponse.ok(applyService.detail(id));</span>
+    }
+
+    @PostMapping
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','DEPT_USER')&quot;)
+    public ApiResponse&lt;Map&lt;String, Object&gt;&gt; create(@Valid @RequestBody ApplyCreateRequest request) {
+<span class="fc" id="L44">        return ApiResponse.ok(applyService.create(request));</span>
+    }
+
+    @PostMapping(&quot;/{id}/submit&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','DEPT_USER')&quot;)
+    public ApiResponse&lt;Void&gt; submit(@PathVariable Long id) {
+<span class="fc" id="L50">        applyService.submit(id);</span>
+<span class="fc" id="L51">        return ApiResponse.ok(null);</span>
+    }
+
+    @PostMapping(&quot;/{id}/approve&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','APPROVER')&quot;)
+    public ApiResponse&lt;Void&gt; approve(@PathVariable Long id,
+                                     @RequestParam(required = false) String remark,
+                                     @RequestBody(required = false) RemarkRequest body) {
+<span class="fc" id="L59">        applyService.approve(id, resolveRemark(remark, body));</span>
+<span class="fc" id="L60">        return ApiResponse.ok(null);</span>
+    }
+
+    @PostMapping(&quot;/{id}/reject&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','APPROVER')&quot;)
+    public ApiResponse&lt;Void&gt; reject(@PathVariable Long id,
+                                    @RequestParam(required = false) String remark,
+                                    @RequestBody(required = false) RemarkRequest body) {
+<span class="fc" id="L68">        applyService.reject(id, resolveRemark(remark, body));</span>
+<span class="fc" id="L69">        return ApiResponse.ok(null);</span>
+    }
+
+    @PostMapping(&quot;/{id}/receive&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','DEPT_USER')&quot;)
+    public ApiResponse&lt;Void&gt; receive(@PathVariable Long id) {
+<span class="fc" id="L75">        applyService.receive(id);</span>
+<span class="fc" id="L76">        return ApiResponse.ok(null);</span>
+    }
+
+    @GetMapping(&quot;/{id}/timeline&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')&quot;)
+    public ApiResponse&lt;List&lt;com.campus.material.modules.log.entity.OperationLog&gt;&gt; timeline(@PathVariable Long id) {
+<span class="nc" id="L82">        return ApiResponse.ok(operationLogService.getTimeline(&quot;APPLY&quot;, id));</span>
+    }
+
+    private String resolveRemark(String remark, RemarkRequest body) {
+<span class="pc bpc" id="L86" title="1 of 6 branches missed.">        if (body != null &amp;&amp; body.getRemark() != null &amp;&amp; !body.getRemark().isBlank()) {</span>
+<span class="fc" id="L87">            return body.getRemark();</span>
+        }
+<span class="fc" id="L89">        return remark;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

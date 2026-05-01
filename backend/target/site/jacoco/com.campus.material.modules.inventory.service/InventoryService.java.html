@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InventoryService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.inventory.service</a> &gt; <span class="el_source">InventoryService.java</span></div><h1>InventoryService.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.inventory.service;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.campus.material.common.BizException;
+import com.campus.material.common.OrderStatus;
+import com.campus.material.common.PageQuery;
+import com.campus.material.common.PageResult;
+import com.campus.material.common.WarningType;
+import com.campus.material.monitoring.BusinessMetrics;
+import com.campus.material.modules.apply.entity.ApplyOrder;
+import com.campus.material.modules.apply.entity.ApplyOrderItem;
+import com.campus.material.modules.apply.mapper.ApplyOrderItemMapper;
+import com.campus.material.modules.apply.mapper.ApplyOrderMapper;
+import com.campus.material.modules.inventory.dto.InventoryAdjustRequest;
+import com.campus.material.modules.inventory.dto.StockInRequest;
+import com.campus.material.modules.inventory.dto.StockOutRequest;
+import com.campus.material.modules.inventory.entity.*;
+import com.campus.material.modules.inventory.mapper.*;
+import com.campus.material.modules.log.service.OperationLogService;
+import com.campus.material.modules.material.entity.MaterialInfo;
+import com.campus.material.modules.material.mapper.MaterialInfoMapper;
+import com.campus.material.modules.warning.entity.WarningRecord;
+import com.campus.material.modules.warning.mapper.WarningRecordMapper;
+import com.campus.material.security.AuthUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+@Service
+public class InventoryService {
+
+    private final InventoryMapper inventoryMapper;
+    private final InventoryBatchMapper batchMapper;
+    private final StockInMapper stockInMapper;
+    private final StockInItemMapper stockInItemMapper;
+    private final StockOutMapper stockOutMapper;
+    private final StockOutItemMapper stockOutItemMapper;
+    private final MaterialInfoMapper materialInfoMapper;
+    private final WarningRecordMapper warningRecordMapper;
+    private final ApplyOrderMapper applyOrderMapper;
+    private final ApplyOrderItemMapper applyOrderItemMapper;
+    private final OperationLogService operationLogService;
+    private final BusinessMetrics businessMetrics;
+
+    public InventoryService(InventoryMapper inventoryMapper, InventoryBatchMapper batchMapper, StockInMapper stockInMapper,
+                            StockInItemMapper stockInItemMapper, StockOutMapper stockOutMapper, StockOutItemMapper stockOutItemMapper,
+                            MaterialInfoMapper materialInfoMapper, WarningRecordMapper warningRecordMapper,
+                            ApplyOrderMapper applyOrderMapper, ApplyOrderItemMapper applyOrderItemMapper,
+<span class="fc" id="L54">                            OperationLogService operationLogService, BusinessMetrics businessMetrics) {</span>
+<span class="fc" id="L55">        this.inventoryMapper = inventoryMapper;</span>
+<span class="fc" id="L56">        this.batchMapper = batchMapper;</span>
+<span class="fc" id="L57">        this.stockInMapper = stockInMapper;</span>
+<span class="fc" id="L58">        this.stockInItemMapper = stockInItemMapper;</span>
+<span class="fc" id="L59">        this.stockOutMapper = stockOutMapper;</span>
+<span class="fc" id="L60">        this.stockOutItemMapper = stockOutItemMapper;</span>
+<span class="fc" id="L61">        this.materialInfoMapper = materialInfoMapper;</span>
+<span class="fc" id="L62">        this.warningRecordMapper = warningRecordMapper;</span>
+<span class="fc" id="L63">        this.applyOrderMapper = applyOrderMapper;</span>
+<span class="fc" id="L64">        this.applyOrderItemMapper = applyOrderItemMapper;</span>
+<span class="fc" id="L65">        this.operationLogService = operationLogService;</span>
+<span class="fc" id="L66">        this.businessMetrics = businessMetrics;</span>
+<span class="fc" id="L67">    }</span>
+
+    public PageResult&lt;Map&lt;String, Object&gt;&gt; list(PageQuery pageQuery, Long materialId, Long warehouseId) {
+<span class="fc" id="L70">        LambdaQueryWrapper&lt;Inventory&gt; wrapper = new LambdaQueryWrapper&lt;Inventory&gt;().orderByDesc(Inventory::getId);</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        if (materialId != null) {</span>
+<span class="nc" id="L72">            wrapper.eq(Inventory::getMaterialId, materialId);</span>
+        }
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if (warehouseId != null) {</span>
+<span class="nc" id="L75">            wrapper.eq(Inventory::getWarehouseId, warehouseId);</span>
+        }
+<span class="fc" id="L77">        Page&lt;Inventory&gt; inventoryPage = inventoryMapper.selectPage(new Page&lt;&gt;(pageQuery.getPage(), pageQuery.getSize()), wrapper);</span>
+<span class="fc" id="L78">        List&lt;Inventory&gt; inventoryList = inventoryPage.getRecords();</span>
+<span class="fc" id="L79">        List&lt;Long&gt; materialIds = inventoryList.stream().map(Inventory::getMaterialId).distinct().toList();</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">        Map&lt;Long, MaterialInfo&gt; materialMap = materialIds.isEmpty()</span>
+<span class="nc" id="L81">                ? new HashMap&lt;&gt;()</span>
+<span class="fc" id="L82">                : materialInfoMapper.selectBatchIds(materialIds).stream().collect(Collectors.toMap(MaterialInfo::getId, m -&gt; m));</span>
+<span class="fc" id="L83">        List&lt;Map&lt;String, Object&gt;&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        for (Inventory inv : inventoryList) {</span>
+<span class="fc" id="L85">            Map&lt;String, Object&gt; row = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L86">            row.put(&quot;id&quot;, inv.getId());</span>
+<span class="fc" id="L87">            row.put(&quot;materialId&quot;, inv.getMaterialId());</span>
+<span class="fc" id="L88">            MaterialInfo info = materialMap.get(inv.getMaterialId());</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">            row.put(&quot;materialName&quot;, info == null ? &quot;&quot; : info.getMaterialName());</span>
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">            row.put(&quot;safetyStock&quot;, info == null ? 0 : info.getSafetyStock());</span>
+<span class="fc" id="L91">            row.put(&quot;warehouseId&quot;, inv.getWarehouseId());</span>
+<span class="fc" id="L92">            row.put(&quot;currentQty&quot;, inv.getCurrentQty());</span>
+<span class="fc" id="L93">            row.put(&quot;lockedQty&quot;, inv.getLockedQty());</span>
+<span class="fc" id="L94">            result.add(row);</span>
+<span class="fc" id="L95">        }</span>
+<span class="fc" id="L96">        return PageResult.of(result, inventoryPage.getTotal(), inventoryPage.getCurrent(), inventoryPage.getSize());</span>
+    }
+
+    public List&lt;InventoryBatch&gt; batches(Long materialId, Long warehouseId) {
+<span class="nc bnc" id="L100" title="All 2 branches missed.">        return batchMapper.selectList(new LambdaQueryWrapper&lt;InventoryBatch&gt;()</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">                .eq(materialId != null, InventoryBatch::getMaterialId, materialId)</span>
+<span class="nc" id="L102">                .eq(warehouseId != null, InventoryBatch::getWarehouseId, warehouseId)</span>
+<span class="nc" id="L103">                .gt(InventoryBatch::getRemainQty, 0)</span>
+<span class="nc" id="L104">                .orderByAsc(InventoryBatch::getExpireDate)</span>
+<span class="nc" id="L105">                .orderByAsc(InventoryBatch::getId));</span>
+    }
+
+    public PageResult&lt;StockIn&gt; listStockIn(PageQuery pageQuery) {
+<span class="nc" id="L109">        Page&lt;StockIn&gt; page = stockInMapper.selectPage(</span>
+<span class="nc" id="L110">                new Page&lt;&gt;(pageQuery.getPage(), pageQuery.getSize()),</span>
+<span class="nc" id="L111">                new LambdaQueryWrapper&lt;StockIn&gt;().orderByDesc(StockIn::getId)</span>
+        );
+<span class="nc" id="L113">        return PageResult.from(page);</span>
+    }
+
+    public PageResult&lt;StockOut&gt; listStockOut(PageQuery pageQuery) {
+<span class="nc" id="L117">        Page&lt;StockOut&gt; page = stockOutMapper.selectPage(</span>
+<span class="nc" id="L118">                new Page&lt;&gt;(pageQuery.getPage(), pageQuery.getSize()),</span>
+<span class="nc" id="L119">                new LambdaQueryWrapper&lt;StockOut&gt;().orderByDesc(StockOut::getId)</span>
+        );
+<span class="nc" id="L121">        return PageResult.from(page);</span>
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void stockIn(StockInRequest request) {
+<span class="nc" id="L126">        StockIn stockIn = new StockIn();</span>
+<span class="nc" id="L127">        stockIn.setWarehouseId(request.getWarehouseId());</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        stockIn.setSourceType(request.getSourceType() == null ? &quot;PURCHASE&quot; : request.getSourceType());</span>
+<span class="nc" id="L129">        stockIn.setOperatorId(AuthUtil.currentUserId());</span>
+<span class="nc" id="L130">        stockIn.setRemark(request.getRemark());</span>
+<span class="nc" id="L131">        stockInMapper.insert(stockIn);</span>
+
+<span class="nc bnc" id="L133" title="All 2 branches missed.">        for (StockInRequest.Item item : request.getItems()) {</span>
+<span class="nc" id="L134">            StockInItem inItem = new StockInItem();</span>
+<span class="nc" id="L135">            inItem.setStockInId(stockIn.getId());</span>
+<span class="nc" id="L136">            inItem.setMaterialId(item.getMaterialId());</span>
+<span class="nc bnc" id="L137" title="All 4 branches missed.">            inItem.setBatchNo(item.getBatchNo() == null || item.getBatchNo().isBlank()</span>
+<span class="nc" id="L138">                    ? &quot;B&quot; + System.currentTimeMillis() : item.getBatchNo());</span>
+<span class="nc" id="L139">            inItem.setQuantity(item.getQuantity());</span>
+<span class="nc" id="L140">            inItem.setProductionDate(item.getProductionDate());</span>
+<span class="nc" id="L141">            inItem.setExpireDate(item.getExpireDate());</span>
+<span class="nc" id="L142">            stockInItemMapper.insert(inItem);</span>
+
+<span class="nc" id="L144">            Inventory inventory = getOrInitInventory(item.getMaterialId(), request.getWarehouseId());</span>
+<span class="nc" id="L145">            inventory.setCurrentQty(inventory.getCurrentQty() + item.getQuantity());</span>
+<span class="nc" id="L146">            ensureUpdated(inventoryMapper.updateById(inventory), &quot;库存汇总更新失败，请重试&quot;);</span>
+
+<span class="nc" id="L148">            InventoryBatch batch = new InventoryBatch();</span>
+<span class="nc" id="L149">            batch.setMaterialId(item.getMaterialId());</span>
+<span class="nc" id="L150">            batch.setWarehouseId(request.getWarehouseId());</span>
+<span class="nc" id="L151">            batch.setBatchNo(inItem.getBatchNo());</span>
+<span class="nc" id="L152">            batch.setInQty(item.getQuantity());</span>
+<span class="nc" id="L153">            batch.setRemainQty(item.getQuantity());</span>
+<span class="nc" id="L154">            batch.setProductionDate(item.getProductionDate());</span>
+<span class="nc" id="L155">            batch.setExpireDate(item.getExpireDate());</span>
+<span class="nc" id="L156">            batchMapper.insert(batch);</span>
+<span class="nc" id="L157">        }</span>
+
+<span class="nc" id="L159">        operationLogService.log(AuthUtil.currentUserId(), &quot;INVENTORY&quot;, &quot;STOCK_IN&quot;, &quot;入库单:&quot; + stockIn.getId());</span>
+<span class="nc" id="L160">        businessMetrics.recordInventoryStockIn();</span>
+<span class="nc" id="L161">    }</span>
+
+    @Transactional(rollbackFor = Exception.class)
+    public void stockOut(StockOutRequest request) {
+<span class="fc" id="L165">        StockOut stockOut = new StockOut();</span>
+<span class="fc" id="L166">        stockOut.setApplyOrderId(request.getApplyOrderId());</span>
+<span class="fc" id="L167">        stockOut.setWarehouseId(request.getWarehouseId());</span>
+<span class="fc" id="L168">        stockOut.setOperatorId(AuthUtil.currentUserId());</span>
+<span class="fc" id="L169">        stockOut.setRemark(request.getRemark());</span>
+<span class="fc" id="L170">        stockOutMapper.insert(stockOut);</span>
+<span class="fc" id="L171">        Map&lt;Long, ApplyOrderItem&gt; applyItemMap = loadApplyItemsByMaterial(request.getApplyOrderId());</span>
+<span class="fc" id="L172">        ApplyOrder applyOrder = loadApplyOrderForOutbound(request.getApplyOrderId(), request.getWarehouseId());</span>
+
+        /*
+         * 出库链路需要同时维护批次余量、库存汇总以及申领实发数量的一致性。
+         * 处理顺序固定为：校验库存 -&gt; 按 FEFO 扣减批次 -&gt; 更新库存汇总 -&gt; 回写申领实发数量。
+         * 申领单明细在事务开始时一次性预取，避免按物资逐条查询带来的重复回表。
+         */
+<span class="fc bfc" id="L179" title="All 2 branches covered.">        for (StockOutRequest.Item item : request.getItems()) {</span>
+<span class="fc" id="L180">            Inventory inventory = inventoryMapper.selectOne(new LambdaQueryWrapper&lt;Inventory&gt;()</span>
+<span class="fc" id="L181">                    .eq(Inventory::getMaterialId, item.getMaterialId())</span>
+<span class="fc" id="L182">                    .eq(Inventory::getWarehouseId, request.getWarehouseId())</span>
+<span class="fc" id="L183">                    .last(&quot;limit 1&quot;));</span>
+<span class="pc bpc" id="L184" title="1 of 2 branches missed.">            int availableQty = inventory == null ? 0 : inventory.getCurrentQty() - inventory.getLockedQty();</span>
+<span class="pc bpc" id="L185" title="4 of 10 branches missed.">            if (inventory == null || (!isApplyOutbound(request) &amp;&amp; availableQty &lt; item.getQuantity()) || (isApplyOutbound(request) &amp;&amp; inventory.getCurrentQty() &lt; item.getQuantity())) {</span>
+<span class="fc" id="L186">                createLowStockWarning(item.getMaterialId(), request.getWarehouseId(), &quot;出库时库存不足&quot;);</span>
+<span class="fc" id="L187">                throw new BizException(&quot;物资ID &quot; + item.getMaterialId() + &quot; 库存不足&quot;);</span>
+            }
+<span class="pc bpc" id="L189" title="1 of 2 branches missed.">            if (isApplyOutbound(request)) {</span>
+<span class="fc" id="L190">                ApplyOrderItem applyItem = requireApplyItem(applyItemMap, item.getMaterialId());</span>
+<span class="fc" id="L191">                int remainingReserved = applyItem.getApplyQty() - safeQty(applyItem.getActualQty());</span>
+<span class="pc bpc" id="L192" title="1 of 2 branches missed.">                if (remainingReserved &lt; item.getQuantity()) {</span>
+<span class="nc" id="L193">                    throw new BizException(&quot;物资ID &quot; + item.getMaterialId() + &quot; 超出申领单已锁定数量&quot;);</span>
+                }
+<span class="pc bpc" id="L195" title="1 of 2 branches missed.">                if (inventory.getLockedQty() &lt; item.getQuantity()) {</span>
+<span class="nc" id="L196">                    throw new BizException(&quot;物资ID &quot; + item.getMaterialId() + &quot; 锁定库存不足，请刷新后重试&quot;);</span>
+                }
+            }
+
+<span class="fc" id="L200">            List&lt;InventoryBatch&gt; candidates = batchMapper.selectList(new LambdaQueryWrapper&lt;InventoryBatch&gt;()</span>
+<span class="fc" id="L201">                    .eq(InventoryBatch::getMaterialId, item.getMaterialId())</span>
+<span class="fc" id="L202">                    .eq(InventoryBatch::getWarehouseId, request.getWarehouseId())</span>
+<span class="fc" id="L203">                    .gt(InventoryBatch::getRemainQty, 0)</span>
+<span class="fc" id="L204">                    .ge(InventoryBatch::getExpireDate, LocalDate.now())</span>
+<span class="fc" id="L205">                    .orderByAsc(InventoryBatch::getExpireDate)</span>
+<span class="fc" id="L206">                    .orderByAsc(InventoryBatch::getId));</span>
+
+<span class="fc" id="L208">            int remain = item.getQuantity();</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">            for (InventoryBatch batch : candidates) {</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">                if (remain &lt;= 0) {</span>
+<span class="fc" id="L211">                    break;</span>
+                }
+<span class="fc" id="L213">                int use = Math.min(remain, batch.getRemainQty());</span>
+<span class="fc" id="L214">                batch.setRemainQty(batch.getRemainQty() - use);</span>
+<span class="fc" id="L215">                ensureUpdated(batchMapper.updateById(batch), &quot;批次库存已被其他操作修改，请重试&quot;);</span>
+<span class="fc" id="L216">                remain -= use;</span>
+<span class="fc" id="L217">            }</span>
+<span class="pc bpc" id="L218" title="1 of 2 branches missed.">            if (remain &gt; 0) {</span>
+<span class="nc" id="L219">                throw new BizException(&quot;批次库存不足，无法完成出库操作&quot;);</span>
+            }
+
+<span class="fc" id="L222">            inventory.setCurrentQty(inventory.getCurrentQty() - item.getQuantity());</span>
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">            if (isApplyOutbound(request)) {</span>
+<span class="fc" id="L224">                inventory.setLockedQty(inventory.getLockedQty() - item.getQuantity());</span>
+            }
+<span class="fc" id="L226">            ensureUpdated(inventoryMapper.updateById(inventory), &quot;库存已被其他操作修改，请重试&quot;);</span>
+
+<span class="fc" id="L228">            StockOutItem outItem = new StockOutItem();</span>
+<span class="fc" id="L229">            outItem.setStockOutId(stockOut.getId());</span>
+<span class="fc" id="L230">            outItem.setMaterialId(item.getMaterialId());</span>
+<span class="fc" id="L231">            outItem.setQuantity(item.getQuantity());</span>
+<span class="fc" id="L232">            stockOutItemMapper.insert(outItem);</span>
+
+<span class="pc bpc" id="L234" title="1 of 2 branches missed.">            if (request.getApplyOrderId() != null) {</span>
+<span class="fc" id="L235">                ApplyOrderItem applyItem = requireApplyItem(applyItemMap, item.getMaterialId());</span>
+<span class="fc" id="L236">                int old = safeQty(applyItem.getActualQty());</span>
+<span class="fc" id="L237">                applyItem.setActualQty(old + item.getQuantity());</span>
+<span class="fc" id="L238">                ensureUpdated(applyOrderItemMapper.updateById(applyItem), &quot;申领实发数量更新失败，请重试&quot;);</span>
+            }
+
+<span class="fc" id="L241">            checkSafetyWarning(item.getMaterialId(), request.getWarehouseId());</span>
+<span class="fc" id="L242">        }</span>
+
+<span class="pc bpc" id="L244" title="1 of 2 branches missed.">        if (applyOrder != null) {</span>
+<span class="fc" id="L245">            applyOrder.setStatus(OrderStatus.OUTBOUND);</span>
+<span class="fc" id="L246">            ensureUpdated(applyOrderMapper.updateById(applyOrder), &quot;申领单状态更新失败，请重试&quot;);</span>
+        }
+<span class="fc" id="L248">        operationLogService.log(AuthUtil.currentUserId(), &quot;INVENTORY&quot;, &quot;STOCK_OUT&quot;, &quot;出库单:&quot; + stockOut.getId());</span>
+<span class="fc" id="L249">        businessMetrics.recordInventoryStockOut();</span>
+<span class="fc" id="L250">    }</span>
+
+    @Transactional(rollbackFor = Exception.class)
+    public void adjust(InventoryAdjustRequest request) {
+<span class="nc" id="L254">        Inventory inventory = inventoryMapper.selectById(request.getInventoryId());</span>
+<span class="nc bnc" id="L255" title="All 2 branches missed.">        if (inventory == null) {</span>
+<span class="nc" id="L256">            throw new BizException(&quot;库存记录不存在&quot;);</span>
+        }
+<span class="nc" id="L258">        inventory.setCurrentQty(request.getActualQty());</span>
+<span class="nc" id="L259">        ensureUpdated(inventoryMapper.updateById(inventory), &quot;库存盘点更新失败，请重试&quot;);</span>
+<span class="nc" id="L260">        operationLogService.log(AuthUtil.currentUserId(), &quot;INVENTORY&quot;, &quot;CHECK&quot;, &quot;库存盘点ID:&quot; + request.getInventoryId());</span>
+<span class="nc" id="L261">    }</span>
+
+    public List&lt;InventoryBatch&gt; recommendOutbound(Long materialId, Long warehouseId) {
+<span class="nc" id="L264">        return batchMapper.selectList(new LambdaQueryWrapper&lt;InventoryBatch&gt;()</span>
+<span class="nc" id="L265">                .eq(InventoryBatch::getMaterialId, materialId)</span>
+<span class="nc" id="L266">                .eq(InventoryBatch::getWarehouseId, warehouseId)</span>
+<span class="nc" id="L267">                .gt(InventoryBatch::getRemainQty, 0)</span>
+<span class="nc" id="L268">                .ge(InventoryBatch::getExpireDate, LocalDate.now())</span>
+<span class="nc" id="L269">                .orderByAsc(InventoryBatch::getExpireDate)</span>
+<span class="nc" id="L270">                .orderByAsc(InventoryBatch::getId));</span>
+    }
+
+    public Inventory getOrInitInventory(Long materialId, Long warehouseId) {
+<span class="nc" id="L274">        Inventory inventory = inventoryMapper.selectOne(new LambdaQueryWrapper&lt;Inventory&gt;()</span>
+<span class="nc" id="L275">                .eq(Inventory::getMaterialId, materialId)</span>
+<span class="nc" id="L276">                .eq(Inventory::getWarehouseId, warehouseId)</span>
+<span class="nc" id="L277">                .last(&quot;limit 1&quot;));</span>
+<span class="nc bnc" id="L278" title="All 2 branches missed.">        if (inventory != null) {</span>
+<span class="nc" id="L279">            return inventory;</span>
+        }
+<span class="nc" id="L281">        Inventory created = new Inventory();</span>
+<span class="nc" id="L282">        created.setMaterialId(materialId);</span>
+<span class="nc" id="L283">        created.setWarehouseId(warehouseId);</span>
+<span class="nc" id="L284">        created.setCurrentQty(0);</span>
+<span class="nc" id="L285">        created.setLockedQty(0);</span>
+<span class="nc" id="L286">        inventoryMapper.insert(created);</span>
+<span class="nc" id="L287">        return created;</span>
+    }
+
+    public Long reserveForApplyOrder(List&lt;ApplyOrderItem&gt; applyItems) {
+<span class="fc" id="L291">        Map&lt;Long, Integer&gt; requestByMaterial = aggregateApplyQuantities(applyItems);</span>
+<span class="pc bpc" id="L292" title="1 of 2 branches missed.">        if (requestByMaterial.isEmpty()) {</span>
+<span class="nc" id="L293">            throw new BizException(&quot;申领单缺少物资明细&quot;);</span>
+        }
+
+<span class="fc" id="L296">        List&lt;Inventory&gt; inventoryRows = inventoryMapper.selectList(new LambdaQueryWrapper&lt;Inventory&gt;()</span>
+<span class="fc" id="L297">                .in(Inventory::getMaterialId, requestByMaterial.keySet()));</span>
+<span class="fc" id="L298">        Long warehouseId = selectReservationWarehouse(inventoryRows, requestByMaterial);</span>
+<span class="pc bpc" id="L299" title="1 of 2 branches missed.">        if (warehouseId == null) {</span>
+<span class="nc" id="L300">            throw new BizException(&quot;库存不足或未找到可满足申领的仓库&quot;);</span>
+        }
+
+<span class="fc" id="L303">        Map&lt;Long, Inventory&gt; inventoryByMaterial = inventoryRows.stream()</span>
+<span class="fc" id="L304">                .filter(row -&gt; warehouseId.equals(row.getWarehouseId()))</span>
+<span class="fc" id="L305">                .collect(Collectors.toMap(Inventory::getMaterialId, Function.identity()));</span>
+
+<span class="fc bfc" id="L307" title="All 2 branches covered.">        for (Map.Entry&lt;Long, Integer&gt; entry : requestByMaterial.entrySet()) {</span>
+<span class="fc" id="L308">            Inventory inventory = inventoryByMaterial.get(entry.getKey());</span>
+<span class="pc bpc" id="L309" title="1 of 2 branches missed.">            if (inventory == null) {</span>
+<span class="nc" id="L310">                throw new BizException(&quot;物资ID &quot; + entry.getKey() + &quot; 库存记录不存在&quot;);</span>
+            }
+<span class="fc" id="L312">            ensureUpdated(</span>
+<span class="fc" id="L313">                    inventoryMapper.reserveLockedQty(inventory.getId(), entry.getValue(), safeQty(inventory.getVersion())),</span>
+                    &quot;库存已被其他申请占用，请刷新后重试&quot;
+            );
+<span class="fc" id="L316">        }</span>
+<span class="fc" id="L317">        return warehouseId;</span>
+    }
+
+    public void releaseApplyReservation(Long warehouseId, List&lt;ApplyOrderItem&gt; applyItems) {
+<span class="pc bpc" id="L321" title="1 of 2 branches missed.">        if (warehouseId == null) {</span>
+<span class="nc" id="L322">            return;</span>
+        }
+<span class="fc" id="L324">        Map&lt;Long, Integer&gt; releaseByMaterial = aggregateRemainingReservation(applyItems);</span>
+<span class="pc bpc" id="L325" title="1 of 2 branches missed.">        if (releaseByMaterial.isEmpty()) {</span>
+<span class="fc" id="L326">            return;</span>
+        }
+
+<span class="nc" id="L329">        List&lt;Inventory&gt; inventoryRows = inventoryMapper.selectList(new LambdaQueryWrapper&lt;Inventory&gt;()</span>
+<span class="nc" id="L330">                .eq(Inventory::getWarehouseId, warehouseId)</span>
+<span class="nc" id="L331">                .in(Inventory::getMaterialId, releaseByMaterial.keySet()));</span>
+<span class="nc" id="L332">        Map&lt;Long, Inventory&gt; inventoryByMaterial = inventoryRows.stream()</span>
+<span class="nc" id="L333">                .collect(Collectors.toMap(Inventory::getMaterialId, Function.identity()));</span>
+
+<span class="nc bnc" id="L335" title="All 2 branches missed.">        for (Map.Entry&lt;Long, Integer&gt; entry : releaseByMaterial.entrySet()) {</span>
+<span class="nc" id="L336">            Inventory inventory = inventoryByMaterial.get(entry.getKey());</span>
+<span class="nc bnc" id="L337" title="All 2 branches missed.">            if (inventory == null) {</span>
+<span class="nc" id="L338">                throw new BizException(&quot;物资ID &quot; + entry.getKey() + &quot; 库存记录不存在，无法释放锁定库存&quot;);</span>
+            }
+<span class="nc" id="L340">            ensureUpdated(</span>
+<span class="nc" id="L341">                    inventoryMapper.releaseLockedQty(inventory.getId(), entry.getValue(), safeQty(inventory.getVersion())),</span>
+                    &quot;锁定库存释放失败，请刷新后重试&quot;
+            );
+<span class="nc" id="L344">        }</span>
+<span class="nc" id="L345">    }</span>
+
+    private void checkSafetyWarning(Long materialId, Long warehouseId) {
+<span class="fc" id="L348">        MaterialInfo material = materialInfoMapper.selectById(materialId);</span>
+<span class="fc" id="L349">        Inventory inventory = inventoryMapper.selectOne(new LambdaQueryWrapper&lt;Inventory&gt;()</span>
+<span class="fc" id="L350">                .eq(Inventory::getMaterialId, materialId)</span>
+<span class="fc" id="L351">                .eq(Inventory::getWarehouseId, warehouseId)</span>
+<span class="fc" id="L352">                .last(&quot;limit 1&quot;));</span>
+<span class="pc bpc" id="L353" title="2 of 4 branches missed.">        if (material == null || inventory == null) {</span>
+<span class="nc" id="L354">            return;</span>
+        }
+<span class="pc bpc" id="L356" title="2 of 4 branches missed.">        if (material.getSafetyStock() != null &amp;&amp; inventory.getCurrentQty() &lt; material.getSafetyStock()) {</span>
+<span class="fc" id="L357">            createLowStockWarning(materialId, warehouseId, &quot;库存低于安全库存阈值&quot;);</span>
+        }
+<span class="fc" id="L359">    }</span>
+
+    private void createLowStockWarning(Long materialId, Long warehouseId, String content) {
+<span class="fc" id="L362">        WarningRecord warning = new WarningRecord();</span>
+<span class="fc" id="L363">        warning.setWarningType(WarningType.STOCK_LOW);</span>
+<span class="fc" id="L364">        warning.setMaterialId(materialId);</span>
+<span class="fc" id="L365">        warning.setWarehouseId(warehouseId);</span>
+<span class="fc" id="L366">        warning.setContent(content);</span>
+<span class="fc" id="L367">        warning.setHandleStatus(&quot;UNHANDLED&quot;);</span>
+<span class="fc" id="L368">        warningRecordMapper.insert(warning);</span>
+<span class="fc" id="L369">    }</span>
+
+    private Map&lt;Long, ApplyOrderItem&gt; loadApplyItemsByMaterial(Long applyOrderId) {
+<span class="fc bfc" id="L372" title="All 2 branches covered.">        if (applyOrderId == null) {</span>
+<span class="fc" id="L373">            return Map.of();</span>
+        }
+<span class="fc" id="L375">        return applyOrderItemMapper.selectList(new LambdaQueryWrapper&lt;ApplyOrderItem&gt;()</span>
+<span class="fc" id="L376">                        .eq(ApplyOrderItem::getApplyOrderId, applyOrderId))</span>
+<span class="fc" id="L377">                .stream()</span>
+<span class="fc" id="L378">                .collect(Collectors.toMap(</span>
+                        ApplyOrderItem::getMaterialId,
+<span class="fc" id="L380">                        Function.identity(),</span>
+<span class="nc" id="L381">                        (left, right) -&gt; left</span>
+                ));
+    }
+
+    private Map&lt;Long, Integer&gt; aggregateApplyQuantities(List&lt;ApplyOrderItem&gt; applyItems) {
+<span class="fc" id="L386">        return applyItems.stream().collect(Collectors.toMap(</span>
+                ApplyOrderItem::getMaterialId,
+<span class="fc" id="L388">                item -&gt; safeQty(item.getApplyQty()),</span>
+                Integer::sum,
+                LinkedHashMap::new
+        ));
+    }
+
+    private Map&lt;Long, Integer&gt; aggregateRemainingReservation(List&lt;ApplyOrderItem&gt; applyItems) {
+<span class="fc" id="L395">        Map&lt;Long, Integer&gt; remaining = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L396" title="All 2 branches covered.">        for (ApplyOrderItem item : applyItems) {</span>
+<span class="fc" id="L397">            int reservedQty = safeQty(item.getApplyQty()) - safeQty(item.getActualQty());</span>
+<span class="pc bpc" id="L398" title="1 of 2 branches missed.">            if (reservedQty &gt; 0) {</span>
+<span class="nc" id="L399">                remaining.merge(item.getMaterialId(), reservedQty, Integer::sum);</span>
+            }
+<span class="fc" id="L401">        }</span>
+<span class="fc" id="L402">        return remaining;</span>
+    }
+
+    private Long selectReservationWarehouse(List&lt;Inventory&gt; inventoryRows, Map&lt;Long, Integer&gt; requestByMaterial) {
+<span class="fc" id="L406">        Map&lt;Long, Map&lt;Long, Inventory&gt;&gt; inventoryByWarehouse = inventoryRows.stream()</span>
+<span class="pc" id="L407">                .collect(Collectors.groupingBy(Inventory::getWarehouseId, Collectors.toMap(Inventory::getMaterialId, Function.identity(), (left, right) -&gt; left)));</span>
+
+<span class="fc" id="L409">        return inventoryByWarehouse.entrySet().stream()</span>
+<span class="fc" id="L410">                .filter(entry -&gt; canSatisfyWarehouse(entry.getValue(), requestByMaterial))</span>
+<span class="fc" id="L411">                .map(entry -&gt; Map.entry(entry.getKey(), warehouseSlack(entry.getValue(), requestByMaterial)))</span>
+<span class="fc" id="L412">                .sorted((left, right) -&gt; {</span>
+<span class="fc" id="L413">                    int bySlack = Integer.compare(right.getValue(), left.getValue());</span>
+<span class="pc bpc" id="L414" title="1 of 2 branches missed.">                    return bySlack != 0 ? bySlack : Long.compare(left.getKey(), right.getKey());</span>
+                })
+<span class="fc" id="L416">                .map(Map.Entry::getKey)</span>
+<span class="fc" id="L417">                .findFirst()</span>
+<span class="fc" id="L418">                .orElse(null);</span>
+    }
+
+    private boolean canSatisfyWarehouse(Map&lt;Long, Inventory&gt; inventoryByMaterial, Map&lt;Long, Integer&gt; requestByMaterial) {
+<span class="fc bfc" id="L422" title="All 2 branches covered.">        for (Map.Entry&lt;Long, Integer&gt; entry : requestByMaterial.entrySet()) {</span>
+<span class="fc" id="L423">            Inventory inventory = inventoryByMaterial.get(entry.getKey());</span>
+<span class="pc bpc" id="L424" title="2 of 4 branches missed.">            if (inventory == null || inventory.getCurrentQty() - inventory.getLockedQty() &lt; entry.getValue()) {</span>
+<span class="nc" id="L425">                return false;</span>
+            }
+<span class="fc" id="L427">        }</span>
+<span class="fc" id="L428">        return true;</span>
+    }
+
+    private int warehouseSlack(Map&lt;Long, Inventory&gt; inventoryByMaterial, Map&lt;Long, Integer&gt; requestByMaterial) {
+<span class="fc" id="L432">        int slack = 0;</span>
+<span class="fc bfc" id="L433" title="All 2 branches covered.">        for (Map.Entry&lt;Long, Integer&gt; entry : requestByMaterial.entrySet()) {</span>
+<span class="fc" id="L434">            Inventory inventory = inventoryByMaterial.get(entry.getKey());</span>
+<span class="fc" id="L435">            slack += inventory.getCurrentQty() - inventory.getLockedQty() - entry.getValue();</span>
+<span class="fc" id="L436">        }</span>
+<span class="fc" id="L437">        return slack;</span>
+    }
+
+    private ApplyOrder loadApplyOrderForOutbound(Long applyOrderId, Long warehouseId) {
+<span class="fc bfc" id="L441" title="All 2 branches covered.">        if (applyOrderId == null) {</span>
+<span class="fc" id="L442">            return null;</span>
+        }
+<span class="fc" id="L444">        ApplyOrder applyOrder = applyOrderMapper.selectById(applyOrderId);</span>
+<span class="pc bpc" id="L445" title="1 of 2 branches missed.">        if (applyOrder == null) {</span>
+<span class="nc" id="L446">            throw new BizException(&quot;申领单不存在&quot;);</span>
+        }
+<span class="pc bpc" id="L448" title="1 of 2 branches missed.">        if (!Set.of(OrderStatus.APPROVED, OrderStatus.OUTBOUND).contains(applyOrder.getStatus())) {</span>
+<span class="nc" id="L449">            throw new BizException(&quot;当前申领单状态不允许出库&quot;);</span>
+        }
+<span class="pc bpc" id="L451" title="2 of 4 branches missed.">        if (applyOrder.getReservedWarehouseId() != null &amp;&amp; !applyOrder.getReservedWarehouseId().equals(warehouseId)) {</span>
+<span class="nc" id="L452">            throw new BizException(&quot;申领单已锁定至其他仓库，请按锁定仓库执行出库&quot;);</span>
+        }
+<span class="fc" id="L454">        return applyOrder;</span>
+    }
+
+    private ApplyOrderItem requireApplyItem(Map&lt;Long, ApplyOrderItem&gt; applyItemMap, Long materialId) {
+<span class="fc" id="L458">        ApplyOrderItem item = applyItemMap.get(materialId);</span>
+<span class="pc bpc" id="L459" title="1 of 2 branches missed.">        if (item == null) {</span>
+<span class="nc" id="L460">            throw new BizException(&quot;申领单中不存在物资ID &quot; + materialId);</span>
+        }
+<span class="fc" id="L462">        return item;</span>
+    }
+
+    private boolean isApplyOutbound(StockOutRequest request) {
+<span class="fc bfc" id="L466" title="All 2 branches covered.">        return request.getApplyOrderId() != null;</span>
+    }
+
+    private int safeQty(Integer quantity) {
+<span class="pc bpc" id="L470" title="1 of 2 branches missed.">        return quantity == null ? 0 : quantity;</span>
+    }
+
+    private void ensureUpdated(int updatedRows, String message) {
+<span class="fc bfc" id="L474" title="All 2 branches covered.">        if (updatedRows != 1) {</span>
+<span class="fc" id="L475">            throw new BizException(message);</span>
+        }
+<span class="fc" id="L477">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

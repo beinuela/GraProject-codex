@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WarningService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.warning.service</a> &gt; <span class="el_source">WarningService.java</span></div><h1>WarningService.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.warning.service;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.campus.material.common.PageQuery;
+import com.campus.material.common.PageResult;
+import com.campus.material.common.WarningType;
+import com.campus.material.monitoring.BusinessMetrics;
+import com.campus.material.modules.inventory.entity.Inventory;
+import com.campus.material.modules.inventory.entity.InventoryBatch;
+import com.campus.material.modules.inventory.entity.StockOutItem;
+import com.campus.material.modules.inventory.mapper.InventoryBatchMapper;
+import com.campus.material.modules.inventory.mapper.InventoryMapper;
+import com.campus.material.modules.inventory.mapper.StockOutItemMapper;
+import com.campus.material.modules.log.service.OperationLogService;
+import com.campus.material.modules.material.entity.MaterialInfo;
+import com.campus.material.modules.material.mapper.MaterialInfoMapper;
+import com.campus.material.modules.warning.entity.WarningRecord;
+import com.campus.material.modules.warning.mapper.WarningRecordMapper;
+import com.campus.material.security.AuthUtil;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+@Service
+public class WarningService {
+
+    private final WarningRecordMapper warningRecordMapper;
+    private final InventoryMapper inventoryMapper;
+    private final MaterialInfoMapper materialInfoMapper;
+    private final InventoryBatchMapper batchMapper;
+    private final StockOutItemMapper stockOutItemMapper;
+    private final OperationLogService operationLogService;
+    private final BusinessMetrics businessMetrics;
+
+    public WarningService(WarningRecordMapper warningRecordMapper, InventoryMapper inventoryMapper, MaterialInfoMapper materialInfoMapper,
+                          InventoryBatchMapper batchMapper, StockOutItemMapper stockOutItemMapper,
+<span class="fc" id="L48">                          OperationLogService operationLogService, BusinessMetrics businessMetrics) {</span>
+<span class="fc" id="L49">        this.warningRecordMapper = warningRecordMapper;</span>
+<span class="fc" id="L50">        this.inventoryMapper = inventoryMapper;</span>
+<span class="fc" id="L51">        this.materialInfoMapper = materialInfoMapper;</span>
+<span class="fc" id="L52">        this.batchMapper = batchMapper;</span>
+<span class="fc" id="L53">        this.stockOutItemMapper = stockOutItemMapper;</span>
+<span class="fc" id="L54">        this.operationLogService = operationLogService;</span>
+<span class="fc" id="L55">        this.businessMetrics = businessMetrics;</span>
+<span class="fc" id="L56">    }</span>
+
+    public PageResult&lt;WarningRecord&gt; list(PageQuery pageQuery, String type, String status) {
+<span class="nc" id="L59">        Page&lt;WarningRecord&gt; page = warningRecordMapper.selectPage(</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">                new Page&lt;&gt;(pageQuery.getPage(), pageQuery.getSize()),</span>
+                new LambdaQueryWrapper&lt;WarningRecord&gt;()
+<span class="nc bnc" id="L62" title="All 4 branches missed.">                        .eq(type != null &amp;&amp; !type.isBlank(), WarningRecord::getWarningType, type)</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">                        .eq(status != null &amp;&amp; !status.isBlank(), WarningRecord::getHandleStatus, status)</span>
+<span class="nc" id="L64">                        .orderByDesc(WarningRecord::getId)</span>
+        );
+<span class="nc" id="L66">        return PageResult.from(page);</span>
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Scheduled(cron = &quot;0 0/30 * * * ?&quot;)
+    public void scan() {
+<span class="fc" id="L72">        Instant startedAt = Instant.now();</span>
+<span class="fc" id="L73">        long createdWarnings = 0;</span>
+<span class="fc" id="L74">        createdWarnings += scanLowStock();</span>
+<span class="fc" id="L75">        createdWarnings += scanBacklog();</span>
+<span class="fc" id="L76">        createdWarnings += scanExpiring();</span>
+<span class="fc" id="L77">        createdWarnings += scanExpired();</span>
+<span class="fc" id="L78">        createdWarnings += scanAbnormalUsage();</span>
+<span class="fc" id="L79">        businessMetrics.recordWarningScan(Duration.between(startedAt, Instant.now()), createdWarnings);</span>
+<span class="fc" id="L80">    }</span>
+
+    public void handle(Long id, String remark) {
+<span class="fc" id="L83">        WarningRecord warningRecord = warningRecordMapper.selectById(id);</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        if (warningRecord == null) {</span>
+<span class="nc" id="L85">            return;</span>
+        }
+<span class="fc" id="L87">        warningRecord.setHandleStatus(&quot;HANDLED&quot;);</span>
+<span class="fc" id="L88">        warningRecord.setHandlerId(AuthUtil.currentUserId());</span>
+<span class="fc" id="L89">        warningRecord.setHandleRemark(remark);</span>
+<span class="fc" id="L90">        warningRecordMapper.updateById(warningRecord);</span>
+<span class="fc" id="L91">        operationLogService.log(AuthUtil.currentUserId(), &quot;WARNING&quot;, &quot;HANDLE&quot;, &quot;处理预警:&quot; + id);</span>
+<span class="fc" id="L92">    }</span>
+
+    private long scanLowStock() {
+<span class="fc" id="L95">        List&lt;Inventory&gt; inventories = inventoryMapper.selectList(new LambdaQueryWrapper&lt;Inventory&gt;());</span>
+<span class="fc" id="L96">        Map&lt;Long, MaterialInfo&gt; materialMap = loadMaterialMap(inventories);</span>
+<span class="fc" id="L97">        long created = 0;</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        for (Inventory inventory : inventories) {</span>
+<span class="fc" id="L99">            MaterialInfo material = materialMap.get(inventory.getMaterialId());</span>
+<span class="pc bpc" id="L100" title="2 of 4 branches missed.">            if (material == null || material.getSafetyStock() == null) {</span>
+<span class="nc" id="L101">                continue;</span>
+            }
+<span class="fc bfc" id="L103" title="All 2 branches covered.">            if (inventory.getCurrentQty() &lt; material.getSafetyStock()) {</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">                if (createWarningIfAbsent(WarningType.STOCK_LOW, inventory.getMaterialId(), inventory.getWarehouseId(),</span>
+<span class="fc" id="L105">                        &quot;库存低于安全库存阈值，当前库存:&quot; + inventory.getCurrentQty() + &quot; 安全库存:&quot; + material.getSafetyStock())) {</span>
+<span class="fc" id="L106">                    created++;</span>
+                }
+            }
+<span class="fc" id="L109">        }</span>
+<span class="fc" id="L110">        return created;</span>
+    }
+
+    private long scanBacklog() {
+<span class="fc" id="L114">        List&lt;Inventory&gt; inventories = inventoryMapper.selectList(new LambdaQueryWrapper&lt;Inventory&gt;());</span>
+<span class="fc" id="L115">        Map&lt;Long, MaterialInfo&gt; materialMap = loadMaterialMap(inventories);</span>
+<span class="fc" id="L116">        long created = 0;</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">        for (Inventory inventory : inventories) {</span>
+<span class="fc" id="L118">            MaterialInfo material = materialMap.get(inventory.getMaterialId());</span>
+<span class="pc bpc" id="L119" title="2 of 4 branches missed.">            if (material == null || material.getSafetyStock() == null) {</span>
+<span class="nc" id="L120">                continue;</span>
+            }
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">            if (inventory.getCurrentQty() &gt; material.getSafetyStock() * 3) {</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">                if (createWarningIfAbsent(WarningType.STOCK_BACKLOG, inventory.getMaterialId(), inventory.getWarehouseId(),</span>
+                        &quot;库存积压预警，当前库存量超过安全库存3倍&quot;)) {
+<span class="nc" id="L125">                    created++;</span>
+                }
+            }
+<span class="fc" id="L128">        }</span>
+<span class="fc" id="L129">        return created;</span>
+    }
+
+    private long scanExpiring() {
+<span class="fc" id="L133">        LocalDate today = LocalDate.now();</span>
+<span class="fc" id="L134">        LocalDate threshold = today.plusDays(30);</span>
+<span class="fc" id="L135">        long created = 0;</span>
+<span class="fc" id="L136">        List&lt;InventoryBatch&gt; batches = batchMapper.selectList(new LambdaQueryWrapper&lt;InventoryBatch&gt;()</span>
+<span class="fc" id="L137">                .gt(InventoryBatch::getRemainQty, 0)</span>
+<span class="fc" id="L138">                .ge(InventoryBatch::getExpireDate, today)</span>
+<span class="fc" id="L139">                .le(InventoryBatch::getExpireDate, threshold));</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        for (InventoryBatch batch : batches) {</span>
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">            if (createWarningIfAbsent(WarningType.EXPIRING_SOON, batch.getMaterialId(), batch.getWarehouseId(),</span>
+<span class="fc" id="L142">                    &quot;物资即将过期，批次号:&quot; + batch.getBatchNo() + &quot; 过期日期:&quot; + batch.getExpireDate())) {</span>
+<span class="fc" id="L143">                created++;</span>
+            }
+<span class="fc" id="L145">        }</span>
+<span class="fc" id="L146">        return created;</span>
+    }
+
+    private long scanExpired() {
+<span class="fc" id="L150">        LocalDate today = LocalDate.now();</span>
+<span class="fc" id="L151">        long created = 0;</span>
+<span class="fc" id="L152">        List&lt;InventoryBatch&gt; batches = batchMapper.selectList(new LambdaQueryWrapper&lt;InventoryBatch&gt;()</span>
+<span class="fc" id="L153">                .gt(InventoryBatch::getRemainQty, 0)</span>
+<span class="fc" id="L154">                .lt(InventoryBatch::getExpireDate, today));</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">        for (InventoryBatch batch : batches) {</span>
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">            if (createWarningIfAbsent(WarningType.EXPIRED, batch.getMaterialId(), batch.getWarehouseId(),</span>
+<span class="fc" id="L157">                    &quot;物资已过期，批次号:&quot; + batch.getBatchNo() + &quot; 过期日期:&quot; + batch.getExpireDate())) {</span>
+<span class="fc" id="L158">                created++;</span>
+            }
+<span class="fc" id="L160">        }</span>
+<span class="fc" id="L161">        return created;</span>
+    }
+
+    private long scanAbnormalUsage() {
+<span class="fc" id="L165">        LocalDateTime now = LocalDateTime.now();</span>
+<span class="fc" id="L166">        LocalDateTime weekStart = now.minusDays(7);</span>
+<span class="fc" id="L167">        LocalDateTime monthStart = now.minusDays(30);</span>
+<span class="fc" id="L168">        List&lt;StockOutItem&gt; weekItems = stockOutItemMapper.selectList(new LambdaQueryWrapper&lt;StockOutItem&gt;()</span>
+<span class="fc" id="L169">                .ge(StockOutItem::getCreatedAt, weekStart));</span>
+<span class="fc" id="L170">        List&lt;StockOutItem&gt; monthItems = stockOutItemMapper.selectList(new LambdaQueryWrapper&lt;StockOutItem&gt;()</span>
+<span class="fc" id="L171">                .ge(StockOutItem::getCreatedAt, monthStart));</span>
+
+<span class="fc" id="L173">        final long[] created = {0};</span>
+<span class="fc" id="L174">        weekItems.stream().map(StockOutItem::getMaterialId).distinct().forEach(materialId -&gt; {</span>
+<span class="nc" id="L175">            int weekSum = weekItems.stream().filter(it -&gt; materialId.equals(it.getMaterialId())).mapToInt(StockOutItem::getQuantity).sum();</span>
+<span class="nc" id="L176">            int monthSum = monthItems.stream().filter(it -&gt; materialId.equals(it.getMaterialId())).mapToInt(StockOutItem::getQuantity).sum();</span>
+<span class="nc" id="L177">            double avgWeek = monthSum / 4.0;</span>
+<span class="nc bnc" id="L178" title="All 4 branches missed.">            if (avgWeek &gt; 0 &amp;&amp; weekSum &gt; avgWeek * 1.5) {</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">                if (createWarningIfAbsent(WarningType.ABNORMAL_USAGE, materialId, null,</span>
+<span class="nc" id="L180">                        &quot;近7天出库量异常，本周出库:&quot; + weekSum + &quot; 月均周出库:&quot; + String.format(&quot;%.2f&quot;, avgWeek))) {</span>
+<span class="nc" id="L181">                    created[0]++;</span>
+                }
+            }
+<span class="nc" id="L184">        });</span>
+<span class="fc" id="L185">        return created[0];</span>
+    }
+
+    private boolean createWarningIfAbsent(String type, Long materialId, Long warehouseId, String content) {
+<span class="fc" id="L189">        WarningRecord existed = warningRecordMapper.selectOne(new LambdaQueryWrapper&lt;WarningRecord&gt;()</span>
+<span class="fc" id="L190">                .eq(WarningRecord::getWarningType, type)</span>
+<span class="pc bpc" id="L191" title="1 of 2 branches missed.">                .eq(WarningRecord::getMaterialId, materialId)</span>
+<span class="fc" id="L192">                .eq(warehouseId != null, WarningRecord::getWarehouseId, warehouseId)</span>
+<span class="fc" id="L193">                .eq(WarningRecord::getHandleStatus, &quot;UNHANDLED&quot;)</span>
+<span class="fc" id="L194">                .last(&quot;limit 1&quot;));</span>
+<span class="pc bpc" id="L195" title="1 of 2 branches missed.">        if (existed != null) {</span>
+<span class="nc" id="L196">            return false;</span>
+        }
+<span class="fc" id="L198">        WarningRecord warningRecord = new WarningRecord();</span>
+<span class="fc" id="L199">        warningRecord.setWarningType(type);</span>
+<span class="fc" id="L200">        warningRecord.setMaterialId(materialId);</span>
+<span class="fc" id="L201">        warningRecord.setWarehouseId(warehouseId);</span>
+<span class="fc" id="L202">        warningRecord.setContent(content);</span>
+<span class="fc" id="L203">        warningRecord.setHandleStatus(&quot;UNHANDLED&quot;);</span>
+<span class="fc" id="L204">        warningRecordMapper.insert(warningRecord);</span>
+<span class="fc" id="L205">        return true;</span>
+    }
+
+    private Map&lt;Long, MaterialInfo&gt; loadMaterialMap(List&lt;Inventory&gt; inventories) {
+<span class="fc" id="L209">        List&lt;Long&gt; materialIds = inventories.stream().map(Inventory::getMaterialId).distinct().toList();</span>
+<span class="pc bpc" id="L210" title="1 of 2 branches missed.">        if (materialIds.isEmpty()) {</span>
+<span class="nc" id="L211">            return new HashMap&lt;&gt;();</span>
+        }
+<span class="fc" id="L213">        return materialInfoMapper.selectBatchIds(materialIds).stream()</span>
+<span class="fc" id="L214">                .collect(Collectors.toMap(MaterialInfo::getId, Function.identity()));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

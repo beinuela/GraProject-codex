@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WarehouseService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.warehouse.service</a> &gt; <span class="el_source">WarehouseService.java</span></div><h1>WarehouseService.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.warehouse.service;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.campus.material.common.BizException;
+import com.campus.material.modules.log.service.OperationLogService;
+import com.campus.material.modules.warehouse.entity.Warehouse;
+import com.campus.material.modules.warehouse.mapper.WarehouseMapper;
+import com.campus.material.security.AuthUtil;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class WarehouseService {
+
+    private final WarehouseMapper warehouseMapper;
+    private final OperationLogService operationLogService;
+
+<span class="fc" id="L19">    public WarehouseService(WarehouseMapper warehouseMapper, OperationLogService operationLogService) {</span>
+<span class="fc" id="L20">        this.warehouseMapper = warehouseMapper;</span>
+<span class="fc" id="L21">        this.operationLogService = operationLogService;</span>
+<span class="fc" id="L22">    }</span>
+
+    public List&lt;Warehouse&gt; list() {
+<span class="nc" id="L25">        return warehouseMapper.selectList(new LambdaQueryWrapper&lt;Warehouse&gt;().orderByAsc(Warehouse::getId));</span>
+    }
+
+    public Warehouse save(Warehouse warehouse) {
+<span class="fc" id="L29">        validateWarehouse(warehouse);</span>
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        if (warehouse.getId() == null) {</span>
+<span class="fc" id="L31">            warehouseMapper.insert(warehouse);</span>
+<span class="fc" id="L32">            operationLogService.log(AuthUtil.currentUserId(), &quot;WAREHOUSE&quot;, &quot;CREATE&quot;, warehouse.getWarehouseName());</span>
+        } else {
+<span class="nc" id="L34">            warehouseMapper.updateById(warehouse);</span>
+<span class="nc" id="L35">            operationLogService.log(AuthUtil.currentUserId(), &quot;WAREHOUSE&quot;, &quot;UPDATE&quot;, warehouse.getWarehouseName());</span>
+        }
+<span class="fc" id="L37">        return warehouseMapper.selectById(warehouse.getId());</span>
+    }
+
+    public void delete(Long id) {
+<span class="nc" id="L41">        warehouseMapper.deleteById(id);</span>
+<span class="nc" id="L42">        operationLogService.log(AuthUtil.currentUserId(), &quot;WAREHOUSE&quot;, &quot;DELETE&quot;, String.valueOf(id));</span>
+<span class="nc" id="L43">    }</span>
+
+    private void validateWarehouse(Warehouse warehouse) {
+<span class="pc bpc" id="L46" title="2 of 4 branches missed.">        if (warehouse.getWarehouseName() == null || warehouse.getWarehouseName().isBlank()) {</span>
+<span class="nc" id="L47">            throw new BizException(400, &quot;仓库名称不能为空&quot;);</span>
+        }
+<span class="fc" id="L49">        String warehouseName = warehouse.getWarehouseName().trim();</span>
+<span class="fc" id="L50">        Warehouse duplicated = warehouseMapper.selectOne(new LambdaQueryWrapper&lt;Warehouse&gt;()</span>
+<span class="fc" id="L51">                .eq(Warehouse::getWarehouseName, warehouseName)</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">                .ne(warehouse.getId() != null, Warehouse::getId, warehouse.getId())</span>
+<span class="fc" id="L53">                .last(&quot;limit 1&quot;));</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        if (duplicated != null) {</span>
+<span class="fc" id="L55">            throw new BizException(409, &quot;仓库名称已存在，请勿重复添加&quot;);</span>
+        }
+<span class="fc" id="L57">        warehouse.setWarehouseName(warehouseName);</span>
+<span class="fc" id="L58">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

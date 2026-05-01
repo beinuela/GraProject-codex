@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.auth</a> &gt; <span class="el_source">AuthService.java</span></div><h1>AuthService.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.auth;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.campus.material.common.BizException;
+import com.campus.material.monitoring.BusinessMetrics;
+import com.campus.material.modules.auth.dto.LoginRequest;
+import com.campus.material.modules.auth.dto.LoginResponse;
+import com.campus.material.modules.auth.entity.AuthRefreshToken;
+import com.campus.material.modules.auth.mapper.AuthRefreshTokenMapper;
+import com.campus.material.modules.log.service.LoginLogService;
+import com.campus.material.modules.rbac.entity.SysRole;
+import com.campus.material.modules.rbac.entity.SysUser;
+import com.campus.material.modules.rbac.mapper.SysRoleMapper;
+import com.campus.material.modules.rbac.mapper.SysUserMapper;
+import com.campus.material.security.AuthUtil;
+import com.campus.material.security.JwtProperties;
+import com.campus.material.security.JwtTokenProvider;
+import com.campus.material.security.LoginUser;
+import io.jsonwebtoken.Claims;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import jakarta.servlet.http.HttpServletRequest;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+@Service
+public class AuthService {
+
+    private final SysUserMapper userMapper;
+    private final SysRoleMapper roleMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final LoginLogService loginLogService;
+    private final AuthRefreshTokenMapper authRefreshTokenMapper;
+    private final JwtProperties jwtProperties;
+    private final AuthRefreshTokenCleanupTask authRefreshTokenCleanupTask;
+    private final BusinessMetrics businessMetrics;
+
+    public AuthService(SysUserMapper userMapper, SysRoleMapper roleMapper, PasswordEncoder passwordEncoder,
+                       JwtTokenProvider jwtTokenProvider, LoginLogService loginLogService,
+                       AuthRefreshTokenMapper authRefreshTokenMapper, JwtProperties jwtProperties,
+                       AuthRefreshTokenCleanupTask authRefreshTokenCleanupTask,
+<span class="fc" id="L56">                       BusinessMetrics businessMetrics) {</span>
+<span class="fc" id="L57">        this.userMapper = userMapper;</span>
+<span class="fc" id="L58">        this.roleMapper = roleMapper;</span>
+<span class="fc" id="L59">        this.passwordEncoder = passwordEncoder;</span>
+<span class="fc" id="L60">        this.jwtTokenProvider = jwtTokenProvider;</span>
+<span class="fc" id="L61">        this.loginLogService = loginLogService;</span>
+<span class="fc" id="L62">        this.authRefreshTokenMapper = authRefreshTokenMapper;</span>
+<span class="fc" id="L63">        this.jwtProperties = jwtProperties;</span>
+<span class="fc" id="L64">        this.authRefreshTokenCleanupTask = authRefreshTokenCleanupTask;</span>
+<span class="fc" id="L65">        this.businessMetrics = businessMetrics;</span>
+<span class="fc" id="L66">    }</span>
+
+    @Transactional(rollbackFor = Exception.class)
+    public LoginResponse login(LoginRequest request) {
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">        String username = request.getUsername() == null ? null : request.getUsername().trim();</span>
+<span class="fc" id="L71">        HttpServletRequest servletRequest = currentRequest();</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        String loginIp = servletRequest == null ? &quot;&quot; : servletRequest.getRemoteAddr();</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        String userAgent = servletRequest == null ? &quot;&quot; : defaultString(servletRequest.getHeader(&quot;User-Agent&quot;));</span>
+<span class="fc" id="L74">        SysUser user = userMapper.selectOne(new LambdaQueryWrapper&lt;SysUser&gt;().eq(SysUser::getUsername, username));</span>
+<span class="fc bfc" id="L75" title="All 4 branches covered.">        if (user == null || !passwordMatched(request.getPassword(), user.getPassword())) {</span>
+<span class="fc" id="L76">            businessMetrics.recordLoginFailure();</span>
+<span class="fc" id="L77">            loginLogService.record(null, username, loginIp, &quot;FAILURE&quot;, userAgent);</span>
+<span class="fc" id="L78">            throw new BizException(401, &quot;用户名或密码错误&quot;);</span>
+        }
+<span class="pc bpc" id="L80" title="1 of 4 branches missed.">        if (user.getStatus() == null || user.getStatus() != 1) {</span>
+<span class="fc" id="L81">            businessMetrics.recordLoginFailure();</span>
+<span class="fc" id="L82">            loginLogService.record(user.getId(), user.getUsername(), loginIp, &quot;FAILURE&quot;, userAgent);</span>
+<span class="fc" id="L83">            throw new BizException(403, &quot;账号已被禁用&quot;);</span>
+        }
+<span class="fc" id="L85">        SysRole role = roleMapper.selectById(user.getRoleId());</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">        String roleCode = role == null ? &quot;DEPT_USER&quot; : role.getRoleCode();</span>
+<span class="fc" id="L87">        LoginResponse response = issueTokens(user, roleCode);</span>
+<span class="fc" id="L88">        businessMetrics.recordLoginSuccess();</span>
+<span class="fc" id="L89">        loginLogService.record(user.getId(), user.getUsername(), loginIp, &quot;SUCCESS&quot;, userAgent);</span>
+<span class="fc" id="L90">        return response;</span>
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public LoginResponse refresh(String refreshToken) {
+        Claims claims;
+        try {
+<span class="fc" id="L97">            claims = jwtTokenProvider.parseToken(refreshToken);</span>
+<span class="fc" id="L98">        } catch (Exception e) {</span>
+<span class="fc" id="L99">            businessMetrics.recordRefreshFailure();</span>
+<span class="fc" id="L100">            throw new BizException(401, &quot;refresh token 无效或已过期&quot;);</span>
+<span class="fc" id="L101">        }</span>
+<span class="fc" id="L102">        String tokenType = (String) claims.get(&quot;typ&quot;);</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">        if (!&quot;refresh&quot;.equals(tokenType)) {</span>
+<span class="fc" id="L104">            businessMetrics.recordRefreshFailure();</span>
+<span class="fc" id="L105">            throw new BizException(401, &quot;token 类型错误&quot;);</span>
+        }
+<span class="fc" id="L107">        String tokenId = claims.getId();</span>
+<span class="pc bpc" id="L108" title="1 of 4 branches missed.">        if (tokenId == null || tokenId.isBlank()) {</span>
+<span class="fc" id="L109">            businessMetrics.recordRefreshFailure();</span>
+<span class="fc" id="L110">            throw new BizException(401, &quot;refresh token 无效&quot;);</span>
+        }
+<span class="fc" id="L112">        Long userId = ((Number) claims.get(&quot;uid&quot;)).longValue();</span>
+
+<span class="fc" id="L114">        AuthRefreshToken stored = authRefreshTokenMapper.selectOne(new LambdaQueryWrapper&lt;AuthRefreshToken&gt;()</span>
+<span class="fc" id="L115">                .eq(AuthRefreshToken::getUserId, userId)</span>
+<span class="fc" id="L116">                .eq(AuthRefreshToken::getTokenId, tokenId)</span>
+<span class="fc" id="L117">                .eq(AuthRefreshToken::getRevoked, 0)</span>
+<span class="fc" id="L118">                .last(&quot;limit 1&quot;));</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        if (stored == null) {</span>
+<span class="fc" id="L120">            businessMetrics.recordRefreshFailure();</span>
+<span class="fc" id="L121">            throw new BizException(401, &quot;refresh token 已失效&quot;);</span>
+        }
+<span class="pc bpc" id="L123" title="2 of 4 branches missed.">        if (stored.getExpireAt() == null || stored.getExpireAt().isBefore(LocalDateTime.now())) {</span>
+<span class="nc" id="L124">            revokeById(stored.getId());</span>
+<span class="nc" id="L125">            businessMetrics.recordRefreshFailure();</span>
+<span class="nc" id="L126">            throw new BizException(401, &quot;refresh token 已过期&quot;);</span>
+        }
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">        if (!sha256Base64(refreshToken).equals(stored.getTokenHash())) {</span>
+<span class="nc" id="L129">            revokeById(stored.getId());</span>
+<span class="nc" id="L130">            businessMetrics.recordRefreshFailure();</span>
+<span class="nc" id="L131">            throw new BizException(401, &quot;refresh token 校验失败&quot;);</span>
+        }
+
+<span class="fc" id="L134">        SysUser user = userMapper.selectById(userId);</span>
+<span class="pc bpc" id="L135" title="3 of 6 branches missed.">        if (user == null || user.getStatus() == null || user.getStatus() != 1) {</span>
+<span class="nc" id="L136">            revokeById(stored.getId());</span>
+<span class="nc" id="L137">            businessMetrics.recordRefreshFailure();</span>
+<span class="nc" id="L138">            throw new BizException(403, &quot;账号不可用&quot;);</span>
+        }
+<span class="fc" id="L140">        SysRole role = roleMapper.selectById(user.getRoleId());</span>
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">        String roleCode = role == null ? &quot;DEPT_USER&quot; : role.getRoleCode();</span>
+
+        /**
+         * refresh token 采用单次使用策略。
+         * 只有在持久化的 token 记录仍然有效且 hash 校验通过时，才会进入轮换流程。
+         * 一旦校验通过，先撤销旧 token，再签发新 token，避免旧 refresh token 被重复利用。
+         */
+<span class="fc" id="L148">        revokeById(stored.getId());</span>
+<span class="fc" id="L149">        return issueTokens(user, roleCode);</span>
+    }
+
+    private LoginResponse issueTokens(SysUser user, String roleCode) {
+<span class="pc bpc" id="L153" title="1 of 2 branches missed.">        if (!jwtProperties.isMultiDeviceLogin()) {</span>
+<span class="nc" id="L154">            revokeAllActiveTokensByUserId(user.getId());</span>
+        }
+
+<span class="fc" id="L157">        String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getUsername(), roleCode);</span>
+<span class="fc" id="L158">        String refreshJti = UUID.randomUUID().toString();</span>
+<span class="fc" id="L159">        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId(), user.getUsername(), roleCode, refreshJti);</span>
+
+<span class="fc" id="L161">        AuthRefreshToken entity = new AuthRefreshToken();</span>
+<span class="fc" id="L162">        entity.setUserId(user.getId());</span>
+<span class="fc" id="L163">        entity.setTokenId(refreshJti);</span>
+<span class="fc" id="L164">        entity.setTokenHash(sha256Base64(refreshToken));</span>
+<span class="fc" id="L165">        entity.setExpireAt(LocalDateTime.now().plusDays(jwtProperties.getRefreshExpireDays()));</span>
+<span class="fc" id="L166">        entity.setRevoked(0);</span>
+<span class="fc" id="L167">        authRefreshTokenMapper.insert(entity);</span>
+
+<span class="fc" id="L169">        return LoginResponse.builder()</span>
+<span class="fc" id="L170">                .token(accessToken)</span>
+<span class="fc" id="L171">                .accessToken(accessToken)</span>
+<span class="fc" id="L172">                .refreshToken(refreshToken)</span>
+<span class="fc" id="L173">                .tokenType(&quot;Bearer&quot;)</span>
+<span class="fc" id="L174">                .expiresIn(jwtProperties.getAccessExpireMinutes() * 60)</span>
+<span class="fc" id="L175">                .userId(user.getId())</span>
+<span class="fc" id="L176">                .username(user.getUsername())</span>
+<span class="fc" id="L177">                .realName(user.getRealName())</span>
+<span class="fc" id="L178">                .roleCode(roleCode)</span>
+<span class="fc" id="L179">                .build();</span>
+    }
+
+    private void revokeAllActiveTokensByUserId(Long userId) {
+<span class="nc" id="L183">        authRefreshTokenMapper.update(null, new LambdaUpdateWrapper&lt;AuthRefreshToken&gt;()</span>
+<span class="nc" id="L184">                .eq(AuthRefreshToken::getUserId, userId)</span>
+<span class="nc" id="L185">                .eq(AuthRefreshToken::getRevoked, 0)</span>
+<span class="nc" id="L186">                .set(AuthRefreshToken::getRevoked, 1));</span>
+<span class="nc" id="L187">    }</span>
+
+    private void revokeById(Long id) {
+<span class="fc" id="L190">        authRefreshTokenMapper.update(null, new LambdaUpdateWrapper&lt;AuthRefreshToken&gt;()</span>
+<span class="fc" id="L191">                .eq(AuthRefreshToken::getId, id)</span>
+<span class="fc" id="L192">                .set(AuthRefreshToken::getRevoked, 1));</span>
+<span class="fc" id="L193">    }</span>
+
+    private String sha256Base64(String value) {
+        try {
+<span class="fc" id="L197">            MessageDigest digest = MessageDigest.getInstance(&quot;SHA-256&quot;);</span>
+<span class="fc" id="L198">            byte[] bytes = digest.digest(value.getBytes(StandardCharsets.UTF_8));</span>
+<span class="fc" id="L199">            return Base64.getEncoder().encodeToString(bytes);</span>
+<span class="nc" id="L200">        } catch (Exception e) {</span>
+<span class="nc" id="L201">            throw new BizException(500, &quot;token 处理失败&quot;);</span>
+        }
+    }
+
+    public Map&lt;String, Object&gt; me() {
+<span class="nc" id="L206">        LoginUser current = AuthUtil.currentUser();</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">        if (current == null) {</span>
+<span class="nc" id="L208">            throw new BizException(401, &quot;未登录&quot;);</span>
+        }
+<span class="nc" id="L210">        SysUser user = userMapper.selectById(current.getUserId());</span>
+<span class="nc" id="L211">        SysRole role = roleMapper.selectById(user.getRoleId());</span>
+<span class="nc" id="L212">        Map&lt;String, Object&gt; map = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L213">        map.put(&quot;id&quot;, user.getId());</span>
+<span class="nc" id="L214">        map.put(&quot;username&quot;, user.getUsername());</span>
+<span class="nc" id="L215">        map.put(&quot;realName&quot;, user.getRealName());</span>
+<span class="nc" id="L216">        map.put(&quot;deptId&quot;, user.getDeptId());</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">        map.put(&quot;roleCode&quot;, role == null ? &quot;DEPT_USER&quot; : role.getRoleCode());</span>
+<span class="nc" id="L218">        return map;</span>
+    }
+
+    public List&lt;Map&lt;String, String&gt;&gt; menus() {
+<span class="nc" id="L222">        LoginUser current = AuthUtil.currentUser();</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">        if (current == null) {</span>
+<span class="nc" id="L224">            throw new BizException(401, &quot;未登录&quot;);</span>
+        }
+<span class="nc" id="L226">        return buildMenusByRole(current.getRoleCode());</span>
+    }
+
+    public void logoutCurrentUser() {
+<span class="nc" id="L230">        Long uid = AuthUtil.currentUserId();</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">        if (uid == null) {</span>
+<span class="nc" id="L232">            return;</span>
+        }
+<span class="nc" id="L234">        authRefreshTokenMapper.update(null, new LambdaUpdateWrapper&lt;AuthRefreshToken&gt;()</span>
+<span class="nc" id="L235">                .eq(AuthRefreshToken::getUserId, uid)</span>
+<span class="nc" id="L236">                .eq(AuthRefreshToken::getRevoked, 0)</span>
+<span class="nc" id="L237">                .set(AuthRefreshToken::getRevoked, 1));</span>
+<span class="nc" id="L238">    }</span>
+
+            public Map&lt;String, Object&gt; tokenPolicyOverview() {
+<span class="nc" id="L241">            LocalDateTime now = LocalDateTime.now();</span>
+<span class="nc" id="L242">            Long total = authRefreshTokenMapper.selectCount(new LambdaQueryWrapper&lt;AuthRefreshToken&gt;());</span>
+<span class="nc" id="L243">            Long active = authRefreshTokenMapper.selectCount(new LambdaQueryWrapper&lt;AuthRefreshToken&gt;()</span>
+<span class="nc" id="L244">                .eq(AuthRefreshToken::getRevoked, 0)</span>
+<span class="nc" id="L245">                .gt(AuthRefreshToken::getExpireAt, now));</span>
+<span class="nc" id="L246">            Long revoked = authRefreshTokenMapper.selectCount(new LambdaQueryWrapper&lt;AuthRefreshToken&gt;()</span>
+<span class="nc" id="L247">                .eq(AuthRefreshToken::getRevoked, 1));</span>
+<span class="nc" id="L248">            Long expired = authRefreshTokenMapper.selectCount(new LambdaQueryWrapper&lt;AuthRefreshToken&gt;()</span>
+<span class="nc" id="L249">                .eq(AuthRefreshToken::getRevoked, 0)</span>
+<span class="nc" id="L250">                .le(AuthRefreshToken::getExpireAt, now));</span>
+
+<span class="nc" id="L252">            Map&lt;String, Object&gt; map = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L253">            map.put(&quot;multiDeviceLogin&quot;, jwtProperties.isMultiDeviceLogin());</span>
+<span class="nc" id="L254">            map.put(&quot;accessExpireMinutes&quot;, jwtProperties.getAccessExpireMinutes());</span>
+<span class="nc" id="L255">            map.put(&quot;refreshExpireDays&quot;, jwtProperties.getRefreshExpireDays());</span>
+<span class="nc" id="L256">            map.put(&quot;cleanupCron&quot;, jwtProperties.getCleanupCron());</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">            map.put(&quot;tokenTotal&quot;, total == null ? 0 : total);</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">            map.put(&quot;activeTokenCount&quot;, active == null ? 0 : active);</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">            map.put(&quot;revokedTokenCount&quot;, revoked == null ? 0 : revoked);</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">            map.put(&quot;expiredTokenCount&quot;, expired == null ? 0 : expired);</span>
+<span class="nc" id="L261">            return map;</span>
+            }
+
+            public Map&lt;String, Object&gt; triggerTokenCleanup() {
+<span class="nc" id="L265">            int removed = authRefreshTokenCleanupTask.cleanupNow();</span>
+<span class="nc" id="L266">            Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L267">            result.put(&quot;removed&quot;, removed);</span>
+<span class="nc" id="L268">            result.put(&quot;cleanedAt&quot;, LocalDateTime.now());</span>
+<span class="nc" id="L269">            return result;</span>
+            }
+
+    private List&lt;Map&lt;String, String&gt;&gt; buildMenusByRole(String role) {
+<span class="nc" id="L273">        List&lt;Map&lt;String, String&gt;&gt; all = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L274">        addMenu(all, &quot;dashboard&quot;, &quot;仪表盘&quot;, &quot;/dashboard&quot;, &quot;首页&quot;);</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">        if (&quot;ADMIN&quot;.equals(role)) {</span>
+            // 系统管理
+<span class="nc" id="L277">            addMenu(all, &quot;users&quot;, &quot;用户管理&quot;, &quot;/rbac/users&quot;, &quot;系统管理&quot;);</span>
+<span class="nc" id="L278">            addMenu(all, &quot;depts&quot;, &quot;部门管理&quot;, &quot;/rbac/depts&quot;, &quot;系统管理&quot;);</span>
+            // 基础数据
+<span class="nc" id="L280">            addMenu(all, &quot;campus&quot;, &quot;校区管理&quot;, &quot;/campus/list&quot;, &quot;基础数据&quot;);</span>
+<span class="nc" id="L281">            addMenu(all, &quot;category&quot;, &quot;物资分类&quot;, &quot;/material/category&quot;, &quot;基础数据&quot;);</span>
+<span class="nc" id="L282">            addMenu(all, &quot;material&quot;, &quot;物资信息&quot;, &quot;/material/info&quot;, &quot;基础数据&quot;);</span>
+<span class="nc" id="L283">            addMenu(all, &quot;supplier&quot;, &quot;供应商管理&quot;, &quot;/supplier/list&quot;, &quot;基础数据&quot;);</span>
+            // 仓储管理
+<span class="nc" id="L285">            addMenu(all, &quot;warehouse&quot;, &quot;仓库管理&quot;, &quot;/warehouse/list&quot;, &quot;仓储管理&quot;);</span>
+<span class="nc" id="L286">            addMenu(all, &quot;location&quot;, &quot;库位管理&quot;, &quot;/warehouse/location&quot;, &quot;仓储管理&quot;);</span>
+<span class="nc" id="L287">            addMenu(all, &quot;inventory&quot;, &quot;库存查询&quot;, &quot;/inventory/list&quot;, &quot;仓储管理&quot;);</span>
+<span class="nc" id="L288">            addMenu(all, &quot;stockin&quot;, &quot;入库管理&quot;, &quot;/inventory/stock-in&quot;, &quot;仓储管理&quot;);</span>
+<span class="nc" id="L289">            addMenu(all, &quot;stockout&quot;, &quot;出库管理&quot;, &quot;/inventory/stock-out&quot;, &quot;仓储管理&quot;);</span>
+            // 业务操作
+<span class="nc" id="L291">            addMenu(all, &quot;apply&quot;, &quot;申领审批&quot;, &quot;/apply/list&quot;, &quot;业务操作&quot;);</span>
+<span class="nc" id="L292">            addMenu(all, &quot;transfer&quot;, &quot;调拨管理&quot;, &quot;/transfer/list&quot;, &quot;业务操作&quot;);</span>
+            // 安全监控
+<span class="nc" id="L294">            addMenu(all, &quot;warning&quot;, &quot;预警管理&quot;, &quot;/warning/list&quot;, &quot;安全监控&quot;);</span>
+<span class="nc" id="L295">            addMenu(all, &quot;event&quot;, &quot;事件管理&quot;, &quot;/event/list&quot;, &quot;安全监控&quot;);</span>
+<span class="nc" id="L296">            addMenu(all, &quot;analytics&quot;, &quot;统计分析&quot;, &quot;/analytics/charts&quot;, &quot;安全监控&quot;);</span>
+            // 系统工具
+<span class="nc" id="L298">            addMenu(all, &quot;oplog&quot;, &quot;操作日志&quot;, &quot;/log/operation&quot;, &quot;系统工具&quot;);</span>
+<span class="nc" id="L299">            addMenu(all, &quot;loginlog&quot;, &quot;登录日志&quot;, &quot;/log/login&quot;, &quot;系统工具&quot;);</span>
+<span class="nc" id="L300">            addMenu(all, &quot;notification&quot;, &quot;消息通知&quot;, &quot;/notification/list&quot;, &quot;系统工具&quot;);</span>
+<span class="nc" id="L301">            addMenu(all, &quot;sysconfig&quot;, &quot;系统配置&quot;, &quot;/config/list&quot;, &quot;系统工具&quot;);</span>
+<span class="nc" id="L302">            addMenu(all, &quot;securityPolicy&quot;, &quot;安全策略&quot;, &quot;/security/policy&quot;, &quot;系统工具&quot;);</span>
+<span class="nc" id="L303">            return all;</span>
+        }
+<span class="nc bnc" id="L305" title="All 2 branches missed.">        if (&quot;WAREHOUSE_ADMIN&quot;.equals(role)) {</span>
+<span class="nc" id="L306">            addMenu(all, &quot;material&quot;, &quot;物资信息&quot;, &quot;/material/info&quot;, &quot;基础数据&quot;);</span>
+<span class="nc" id="L307">            addMenu(all, &quot;supplier&quot;, &quot;供应商管理&quot;, &quot;/supplier/list&quot;, &quot;基础数据&quot;);</span>
+<span class="nc" id="L308">            addMenu(all, &quot;warehouse&quot;, &quot;仓库管理&quot;, &quot;/warehouse/list&quot;, &quot;仓储管理&quot;);</span>
+<span class="nc" id="L309">            addMenu(all, &quot;location&quot;, &quot;库位管理&quot;, &quot;/warehouse/location&quot;, &quot;仓储管理&quot;);</span>
+<span class="nc" id="L310">            addMenu(all, &quot;inventory&quot;, &quot;库存查询&quot;, &quot;/inventory/list&quot;, &quot;仓储管理&quot;);</span>
+<span class="nc" id="L311">            addMenu(all, &quot;stockin&quot;, &quot;入库管理&quot;, &quot;/inventory/stock-in&quot;, &quot;仓储管理&quot;);</span>
+<span class="nc" id="L312">            addMenu(all, &quot;stockout&quot;, &quot;出库管理&quot;, &quot;/inventory/stock-out&quot;, &quot;仓储管理&quot;);</span>
+<span class="nc" id="L313">            addMenu(all, &quot;transfer&quot;, &quot;调拨管理&quot;, &quot;/transfer/list&quot;, &quot;业务操作&quot;);</span>
+<span class="nc" id="L314">            addMenu(all, &quot;warning&quot;, &quot;预警管理&quot;, &quot;/warning/list&quot;, &quot;安全监控&quot;);</span>
+<span class="nc" id="L315">            addMenu(all, &quot;event&quot;, &quot;事件管理&quot;, &quot;/event/list&quot;, &quot;安全监控&quot;);</span>
+<span class="nc" id="L316">            addMenu(all, &quot;analytics&quot;, &quot;统计分析&quot;, &quot;/analytics/charts&quot;, &quot;安全监控&quot;);</span>
+<span class="nc" id="L317">            addMenu(all, &quot;notification&quot;, &quot;消息通知&quot;, &quot;/notification/list&quot;, &quot;系统工具&quot;);</span>
+<span class="nc" id="L318">            return all;</span>
+        }
+<span class="nc bnc" id="L320" title="All 2 branches missed.">        if (&quot;APPROVER&quot;.equals(role)) {</span>
+<span class="nc" id="L321">            addMenu(all, &quot;apply&quot;, &quot;申领审批&quot;, &quot;/apply/list&quot;, &quot;业务操作&quot;);</span>
+<span class="nc" id="L322">            addMenu(all, &quot;transfer&quot;, &quot;调拨管理&quot;, &quot;/transfer/list&quot;, &quot;业务操作&quot;);</span>
+<span class="nc" id="L323">            addMenu(all, &quot;warning&quot;, &quot;预警管理&quot;, &quot;/warning/list&quot;, &quot;安全监控&quot;);</span>
+<span class="nc" id="L324">            addMenu(all, &quot;analytics&quot;, &quot;统计分析&quot;, &quot;/analytics/charts&quot;, &quot;安全监控&quot;);</span>
+<span class="nc" id="L325">            return all;</span>
+        }
+<span class="nc" id="L327">        addMenu(all, &quot;apply&quot;, &quot;申领审批&quot;, &quot;/apply/list&quot;, &quot;业务操作&quot;);</span>
+<span class="nc" id="L328">        addMenu(all, &quot;analytics&quot;, &quot;统计分析&quot;, &quot;/analytics/charts&quot;, &quot;安全监控&quot;);</span>
+<span class="nc" id="L329">        return all;</span>
+    }
+
+    private void addMenu(List&lt;Map&lt;String, String&gt;&gt; menus, String key, String title, String path, String group) {
+<span class="nc" id="L333">        Map&lt;String, String&gt; map = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L334">        map.put(&quot;key&quot;, key);</span>
+<span class="nc" id="L335">        map.put(&quot;title&quot;, title);</span>
+<span class="nc" id="L336">        map.put(&quot;path&quot;, path);</span>
+<span class="nc" id="L337">        map.put(&quot;group&quot;, group);</span>
+<span class="nc" id="L338">        menus.add(map);</span>
+<span class="nc" id="L339">    }</span>
+
+    private boolean passwordMatched(String raw, String encodedOrPlain) {
+<span class="pc bpc" id="L342" title="2 of 4 branches missed.">        if (raw == null || encodedOrPlain == null) {</span>
+<span class="nc" id="L343">            return false;</span>
+        }
+
+<span class="fc" id="L346">        String stored = encodedOrPlain.trim();</span>
+
+        // 兼容 DelegatingPasswordEncoder 存储格式: {bcrypt}$2a$...
+<span class="pc bpc" id="L349" title="1 of 2 branches missed.">        if (stored.startsWith(&quot;{bcrypt}&quot;)) {</span>
+<span class="nc" id="L350">            stored = stored.substring(&quot;{bcrypt}&quot;.length());</span>
+        }
+
+        // 仅支持 BCrypt 加密密码校验
+        try {
+<span class="fc" id="L355">            return passwordEncoder.matches(raw, stored);</span>
+<span class="nc" id="L356">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L357">            return false;</span>
+        }
+    }
+
+    private HttpServletRequest currentRequest() {
+<span class="fc" id="L362">        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();</span>
+<span class="fc bfc" id="L363" title="All 2 branches covered.">        return attributes == null ? null : attributes.getRequest();</span>
+    }
+
+    private String defaultString(String value) {
+<span class="pc bpc" id="L367" title="1 of 2 branches missed.">        return value == null ? &quot;&quot; : value;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

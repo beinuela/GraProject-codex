@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SystemConfigService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.config.service</a> &gt; <span class="el_source">SystemConfigService.java</span></div><h1>SystemConfigService.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.config.service;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.campus.material.modules.config.entity.SystemConfig;
+import com.campus.material.modules.config.mapper.SystemConfigMapper;
+import com.campus.material.modules.log.service.OperationLogService;
+import com.campus.material.security.AuthUtil;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class SystemConfigService {
+
+    private final SystemConfigMapper configMapper;
+    private final OperationLogService logService;
+
+<span class="fc" id="L18">    public SystemConfigService(SystemConfigMapper configMapper, OperationLogService logService) {</span>
+<span class="fc" id="L19">        this.configMapper = configMapper;</span>
+<span class="fc" id="L20">        this.logService = logService;</span>
+<span class="fc" id="L21">    }</span>
+
+    public List&lt;SystemConfig&gt; list(String group) {
+<span class="nc" id="L24">        LambdaQueryWrapper&lt;SystemConfig&gt; qw = new LambdaQueryWrapper&lt;&gt;();</span>
+<span class="nc bnc" id="L25" title="All 4 branches missed.">        if (group != null &amp;&amp; !group.isBlank()) {</span>
+<span class="nc" id="L26">            qw.eq(SystemConfig::getConfigGroup, group);</span>
+        }
+<span class="nc" id="L28">        return configMapper.selectList(qw.orderByAsc(SystemConfig::getConfigGroup).orderByAsc(SystemConfig::getId));</span>
+    }
+
+    public String getValue(String key) {
+<span class="nc" id="L32">        SystemConfig config = configMapper.selectOne(</span>
+<span class="nc" id="L33">                new LambdaQueryWrapper&lt;SystemConfig&gt;().eq(SystemConfig::getConfigKey, key)</span>
+        );
+<span class="nc bnc" id="L35" title="All 2 branches missed.">        return config != null ? config.getConfigValue() : null;</span>
+    }
+
+    public void save(SystemConfig config) {
+<span class="nc" id="L39">        Long uid = AuthUtil.currentUserId();</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (config.getId() == null) {</span>
+<span class="nc" id="L41">            configMapper.insert(config);</span>
+<span class="nc" id="L42">            logService.log(uid, &quot;CONFIG&quot;, &quot;CREATE&quot;, &quot;閺傛澘顤冮柊宥囩枂:&quot; + config.getConfigKey());</span>
+        } else {
+<span class="nc" id="L44">            configMapper.updateById(config);</span>
+<span class="nc" id="L45">            logService.log(uid, &quot;CONFIG&quot;, &quot;UPDATE&quot;, &quot;娣囶喗鏁奸柊宥囩枂:&quot; + config.getConfigKey());</span>
+        }
+<span class="nc" id="L47">    }</span>
+
+    public void delete(Long id) {
+<span class="nc" id="L50">        configMapper.deleteById(id);</span>
+<span class="nc" id="L51">        logService.log(AuthUtil.currentUserId(), &quot;CONFIG&quot;, &quot;DELETE&quot;, &quot;閸掔娀娅庨柊宥囩枂:&quot; + id);</span>
+<span class="nc" id="L52">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApplyService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.apply.service</a> &gt; <span class="el_source">ApplyService.java</span></div><h1>ApplyService.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.apply.service;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.campus.material.common.BizException;
+import com.campus.material.common.OrderStatus;
+import com.campus.material.common.PageQuery;
+import com.campus.material.common.PageResult;
+import com.campus.material.monitoring.BusinessMetrics;
+import com.campus.material.modules.apply.dto.ApplyCreateRequest;
+import com.campus.material.modules.apply.entity.ApplyOrder;
+import com.campus.material.modules.apply.entity.ApplyOrderItem;
+import com.campus.material.modules.apply.mapper.ApplyOrderItemMapper;
+import com.campus.material.modules.apply.mapper.ApplyOrderMapper;
+import com.campus.material.modules.inventory.service.InventoryService;
+import com.campus.material.modules.log.service.OperationLogService;
+import com.campus.material.security.AuthUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class ApplyService {
+
+    private final ApplyOrderMapper applyOrderMapper;
+    private final ApplyOrderItemMapper applyOrderItemMapper;
+    private final InventoryService inventoryService;
+    private final OperationLogService operationLogService;
+    private final BusinessMetrics businessMetrics;
+
+    public ApplyService(ApplyOrderMapper applyOrderMapper, ApplyOrderItemMapper applyOrderItemMapper,
+<span class="fc" id="L37">                        InventoryService inventoryService, OperationLogService operationLogService, BusinessMetrics businessMetrics) {</span>
+<span class="fc" id="L38">        this.applyOrderMapper = applyOrderMapper;</span>
+<span class="fc" id="L39">        this.applyOrderItemMapper = applyOrderItemMapper;</span>
+<span class="fc" id="L40">        this.inventoryService = inventoryService;</span>
+<span class="fc" id="L41">        this.operationLogService = operationLogService;</span>
+<span class="fc" id="L42">        this.businessMetrics = businessMetrics;</span>
+<span class="fc" id="L43">    }</span>
+
+    public PageResult&lt;ApplyOrder&gt; list(PageQuery pageQuery) {
+<span class="fc" id="L46">        Page&lt;ApplyOrder&gt; page = applyOrderMapper.selectPage(</span>
+<span class="fc" id="L47">                new Page&lt;&gt;(pageQuery.getPage(), pageQuery.getSize()),</span>
+<span class="fc" id="L48">                new LambdaQueryWrapper&lt;ApplyOrder&gt;().orderByDesc(ApplyOrder::getId)</span>
+        );
+<span class="fc" id="L50">        return PageResult.from(page);</span>
+    }
+
+    public List&lt;ApplyOrderItem&gt; items(Long orderId) {
+<span class="fc" id="L54">        return applyOrderItemMapper.selectList(new LambdaQueryWrapper&lt;ApplyOrderItem&gt;().eq(ApplyOrderItem::getApplyOrderId, orderId));</span>
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public Map&lt;String, Object&gt; create(ApplyCreateRequest request) {
+<span class="fc" id="L59">        ApplyOrder order = new ApplyOrder();</span>
+<span class="fc" id="L60">        order.setDeptId(request.getDeptId());</span>
+<span class="fc" id="L61">        order.setApplicantId(AuthUtil.currentUserId());</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        order.setUrgencyLevel(request.getUrgencyLevel() == null ? 0 : request.getUrgencyLevel());</span>
+<span class="fc" id="L63">        order.setStatus(OrderStatus.DRAFT);</span>
+<span class="fc" id="L64">        order.setReason(request.getReason());</span>
+<span class="fc" id="L65">        order.setScenario(request.getScenario());</span>
+<span class="fc" id="L66">        order.setFastTrack(0);</span>
+<span class="fc" id="L67">        applyOrderMapper.insert(order);</span>
+
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        for (ApplyCreateRequest.Item item : request.getItems()) {</span>
+<span class="fc" id="L70">            ApplyOrderItem orderItem = new ApplyOrderItem();</span>
+<span class="fc" id="L71">            orderItem.setApplyOrderId(order.getId());</span>
+<span class="fc" id="L72">            orderItem.setMaterialId(item.getMaterialId());</span>
+<span class="fc" id="L73">            orderItem.setApplyQty(item.getApplyQty());</span>
+<span class="fc" id="L74">            orderItem.setActualQty(0);</span>
+<span class="fc" id="L75">            applyOrderItemMapper.insert(orderItem);</span>
+<span class="fc" id="L76">        }</span>
+<span class="fc" id="L77">        operationLogService.log(AuthUtil.currentUserId(), &quot;APPLY&quot;, &quot;CREATE&quot;, &quot;创建申领单:&quot; + order.getId());</span>
+<span class="fc" id="L78">        return detail(order.getId());</span>
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void submit(Long orderId) {
+<span class="fc" id="L83">        ApplyOrder order = mustGet(orderId);</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        if (!OrderStatus.DRAFT.equals(order.getStatus())) {</span>
+<span class="nc" id="L85">            throw new BizException(&quot;当前状态不允许提交&quot;);</span>
+        }
+<span class="fc" id="L87">        List&lt;ApplyOrderItem&gt; applyItems = items(orderId);</span>
+<span class="fc" id="L88">        Long reservedWarehouseId = inventoryService.reserveForApplyOrder(applyItems);</span>
+        /*
+         * 申领单在提交阶段完成第一次状态跃迁。
+         * 同时在事务内锁定库存，避免多个申请并发提交时出现超卖。
+         * 紧急等级达到阈值时直接走快速通道，服务端在同一事务内补齐审批人、审批意见与审批时间，
+         * 避免前端或后续异步任务再拼装半完成状态。
+         */
+<span class="fc" id="L95">        order.setReservedWarehouseId(reservedWarehouseId);</span>
+<span class="pc bpc" id="L96" title="2 of 4 branches missed.">        if (order.getUrgencyLevel() != null &amp;&amp; order.getUrgencyLevel() &gt;= 2) {</span>
+<span class="nc" id="L97">            order.setFastTrack(1);</span>
+<span class="nc" id="L98">            order.setStatus(OrderStatus.APPROVED);</span>
+<span class="nc" id="L99">            order.setApproverId(AuthUtil.currentUserId());</span>
+<span class="nc" id="L100">            order.setApproveRemark(&quot;紧急申领自动审批通过&quot;);</span>
+<span class="nc" id="L101">            order.setApproveTime(LocalDateTime.now());</span>
+        } else {
+<span class="fc" id="L103">            order.setStatus(OrderStatus.SUBMITTED);</span>
+        }
+<span class="fc" id="L105">        ensureUpdated(applyOrderMapper.updateById(order), &quot;申领单状态已被其他操作修改，请刷新后重试&quot;);</span>
+<span class="fc" id="L106">        operationLogService.log(AuthUtil.currentUserId(), &quot;APPLY&quot;, &quot;SUBMIT&quot;, &quot;提交申领单:&quot; + orderId);</span>
+<span class="fc" id="L107">        businessMetrics.recordApplySubmit();</span>
+<span class="fc" id="L108">    }</span>
+
+    @Transactional(rollbackFor = Exception.class)
+    public void approve(Long orderId, String remark) {
+<span class="fc" id="L112">        ApplyOrder order = mustGet(orderId);</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if (!OrderStatus.SUBMITTED.equals(order.getStatus())) {</span>
+<span class="fc" id="L114">            throw new BizException(&quot;当前状态不允许审批&quot;);</span>
+        }
+        // 审批只允许从 SUBMITTED 进入 APPROVED，避免重复审批覆盖原有审批信息。
+<span class="fc" id="L117">        order.setStatus(OrderStatus.APPROVED);</span>
+<span class="fc" id="L118">        order.setApproverId(AuthUtil.currentUserId());</span>
+<span class="fc" id="L119">        order.setApproveRemark(remark);</span>
+<span class="fc" id="L120">        order.setApproveTime(LocalDateTime.now());</span>
+<span class="fc" id="L121">        ensureUpdated(applyOrderMapper.updateById(order), &quot;申领单状态已被其他操作修改，请刷新后重试&quot;);</span>
+<span class="fc" id="L122">        operationLogService.log(AuthUtil.currentUserId(), &quot;APPLY&quot;, &quot;APPROVE&quot;, &quot;审批通过申领单:&quot; + orderId);</span>
+<span class="fc" id="L123">        businessMetrics.recordApplyApprove();</span>
+<span class="fc" id="L124">    }</span>
+
+    @Transactional(rollbackFor = Exception.class)
+    public void reject(Long orderId, String remark) {
+<span class="nc" id="L128">        ApplyOrder order = mustGet(orderId);</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">        if (!OrderStatus.SUBMITTED.equals(order.getStatus())) {</span>
+<span class="nc" id="L130">            throw new BizException(&quot;当前状态不允许驳回&quot;);</span>
+        }
+<span class="nc" id="L132">        inventoryService.releaseApplyReservation(order.getReservedWarehouseId(), items(orderId));</span>
+<span class="nc" id="L133">        LocalDateTime approveTime = LocalDateTime.now();</span>
+        // 驳回和审批共享同一前置状态，确保单据不会在已审批或已出库后被反向改写。
+<span class="nc" id="L135">        ensureUpdated(applyOrderMapper.update(null, new LambdaUpdateWrapper&lt;ApplyOrder&gt;()</span>
+<span class="nc" id="L136">                        .eq(ApplyOrder::getId, orderId)</span>
+<span class="nc" id="L137">                        .eq(ApplyOrder::getVersion, order.getVersion())</span>
+<span class="nc" id="L138">                        .eq(ApplyOrder::getStatus, OrderStatus.SUBMITTED)</span>
+<span class="nc" id="L139">                        .set(ApplyOrder::getStatus, OrderStatus.REJECTED)</span>
+<span class="nc" id="L140">                        .set(ApplyOrder::getReservedWarehouseId, null)</span>
+<span class="nc" id="L141">                        .set(ApplyOrder::getApproverId, AuthUtil.currentUserId())</span>
+<span class="nc" id="L142">                        .set(ApplyOrder::getApproveRemark, remark)</span>
+<span class="nc" id="L143">                        .set(ApplyOrder::getApproveTime, approveTime)</span>
+<span class="nc" id="L144">                        .set(ApplyOrder::getVersion, order.getVersion() + 1)),</span>
+                &quot;申领单状态已被其他操作修改，请刷新后重试&quot;);
+<span class="nc" id="L146">        operationLogService.log(AuthUtil.currentUserId(), &quot;APPLY&quot;, &quot;REJECT&quot;, &quot;驳回申领单:&quot; + orderId);</span>
+<span class="nc" id="L147">    }</span>
+
+    @Transactional(rollbackFor = Exception.class)
+    public void receive(Long orderId) {
+<span class="fc" id="L151">        ApplyOrder order = mustGet(orderId);</span>
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">        if (!OrderStatus.OUTBOUND.equals(order.getStatus())) {</span>
+<span class="nc" id="L153">            throw new BizException(&quot;当前状态不允许签收&quot;);</span>
+        }
+<span class="fc" id="L155">        inventoryService.releaseApplyReservation(order.getReservedWarehouseId(), items(orderId));</span>
+<span class="fc" id="L156">        ensureUpdated(applyOrderMapper.update(null, new LambdaUpdateWrapper&lt;ApplyOrder&gt;()</span>
+<span class="fc" id="L157">                        .eq(ApplyOrder::getId, orderId)</span>
+<span class="fc" id="L158">                        .eq(ApplyOrder::getVersion, order.getVersion())</span>
+<span class="fc" id="L159">                        .eq(ApplyOrder::getStatus, OrderStatus.OUTBOUND)</span>
+<span class="fc" id="L160">                        .set(ApplyOrder::getStatus, OrderStatus.RECEIVED)</span>
+<span class="fc" id="L161">                        .set(ApplyOrder::getReservedWarehouseId, null)</span>
+<span class="fc" id="L162">                        .set(ApplyOrder::getVersion, order.getVersion() + 1)),</span>
+                &quot;申领单状态已被其他操作修改，请刷新后重试&quot;);
+<span class="fc" id="L164">        operationLogService.log(AuthUtil.currentUserId(), &quot;APPLY&quot;, &quot;RECEIVE&quot;, &quot;签收申领单:&quot; + orderId);</span>
+<span class="fc" id="L165">    }</span>
+
+    public Map&lt;String, Object&gt; detail(Long orderId) {
+<span class="fc" id="L168">        ApplyOrder order = mustGet(orderId);</span>
+<span class="fc" id="L169">        List&lt;ApplyOrderItem&gt; items = items(orderId);</span>
+<span class="fc" id="L170">        Map&lt;String, Object&gt; map = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L171">        map.put(&quot;order&quot;, order);</span>
+<span class="fc" id="L172">        map.put(&quot;items&quot;, items);</span>
+<span class="fc" id="L173">        return map;</span>
+    }
+
+    private ApplyOrder mustGet(Long orderId) {
+<span class="fc" id="L177">        ApplyOrder order = applyOrderMapper.selectById(orderId);</span>
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">        if (order == null) {</span>
+<span class="nc" id="L179">            throw new BizException(&quot;申领单不存在&quot;);</span>
+        }
+<span class="fc" id="L181">        return order;</span>
+    }
+
+    private void ensureUpdated(int updatedRows, String message) {
+<span class="pc bpc" id="L185" title="1 of 2 branches missed.">        if (updatedRows != 1) {</span>
+<span class="nc" id="L186">            throw new BizException(message);</span>
+        }
+<span class="fc" id="L188">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

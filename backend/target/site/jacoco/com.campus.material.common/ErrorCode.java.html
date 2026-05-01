@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ErrorCode.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.common</a> &gt; <span class="el_source">ErrorCode.java</span></div><h1>ErrorCode.java</h1><pre class="source lang-java linenums">package com.campus.material.common;
+
+import lombok.Getter;
+
+<span class="fc" id="L5">@Getter</span>
+public enum ErrorCode {
+
+<span class="fc" id="L8">    SUCCESS(200, &quot;操作成功&quot;),</span>
+<span class="fc" id="L9">    BAD_REQUEST(400, &quot;参数校验失败&quot;),</span>
+<span class="fc" id="L10">    UNAUTHORIZED(401, &quot;未认证或Token失效&quot;),</span>
+<span class="fc" id="L11">    FORBIDDEN(403, &quot;无权限访问该资源&quot;),</span>
+<span class="fc" id="L12">    NOT_FOUND(404, &quot;请求资源不存在&quot;),</span>
+<span class="fc" id="L13">    METHOD_NOT_ALLOWED(405, &quot;请求方法不被允许&quot;),</span>
+<span class="fc" id="L14">    TOO_MANY_REQUESTS(429, &quot;请求过于频繁，请稍后重试&quot;),</span>
+<span class="fc" id="L15">    BUSINESS_ERROR(409, &quot;业务冲突&quot;),</span>
+<span class="fc" id="L16">    INTERNAL_SERVER_ERROR(500, &quot;服务器内部错误&quot;);</span>
+
+    private final int code;
+    private final String defaultMessage;
+
+<span class="fc" id="L21">    ErrorCode(int code, String defaultMessage) {</span>
+<span class="fc" id="L22">        this.code = code;</span>
+<span class="fc" id="L23">        this.defaultMessage = defaultMessage;</span>
+<span class="fc" id="L24">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

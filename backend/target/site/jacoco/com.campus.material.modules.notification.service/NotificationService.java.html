@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NotificationService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.notification.service</a> &gt; <span class="el_source">NotificationService.java</span></div><h1>NotificationService.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.notification.service;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.campus.material.common.PageQuery;
+import com.campus.material.common.PageResult;
+import com.campus.material.modules.notification.entity.Notification;
+import com.campus.material.modules.notification.mapper.NotificationMapper;
+import com.campus.material.modules.rbac.entity.SysRole;
+import com.campus.material.modules.rbac.entity.SysUser;
+import com.campus.material.modules.rbac.mapper.SysRoleMapper;
+import com.campus.material.modules.rbac.mapper.SysUserMapper;
+import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+
+@Service
+public class NotificationService {
+
+    private final NotificationMapper notificationMapper;
+    private final SysUserMapper userMapper;
+    private final SysRoleMapper roleMapper;
+
+<span class="fc" id="L27">    public NotificationService(NotificationMapper notificationMapper, SysUserMapper userMapper, SysRoleMapper roleMapper) {</span>
+<span class="fc" id="L28">        this.notificationMapper = notificationMapper;</span>
+<span class="fc" id="L29">        this.userMapper = userMapper;</span>
+<span class="fc" id="L30">        this.roleMapper = roleMapper;</span>
+<span class="fc" id="L31">    }</span>
+
+    /** 按用户查询通知列表（未读优先、最新优先） */
+    public PageResult&lt;Notification&gt; listByUser(Long userId, PageQuery pageQuery) {
+<span class="fc" id="L35">        Page&lt;Notification&gt; page = notificationMapper.selectPage(</span>
+<span class="fc" id="L36">                new Page&lt;&gt;(pageQuery.getPage(), pageQuery.getSize()),</span>
+                new LambdaQueryWrapper&lt;Notification&gt;()
+<span class="fc" id="L38">                        .eq(Notification::getTargetUserId, userId)</span>
+<span class="fc" id="L39">                        .orderByAsc(Notification::getIsRead)</span>
+<span class="fc" id="L40">                        .orderByDesc(Notification::getId)</span>
+        );
+<span class="fc" id="L42">        return PageResult.from(page);</span>
+    }
+
+    /** 统计用户未读通知数量 */
+    public long countUnread(Long userId) {
+<span class="fc" id="L47">        return notificationMapper.selectCount(</span>
+                new LambdaQueryWrapper&lt;Notification&gt;()
+<span class="fc" id="L49">                        .eq(Notification::getTargetUserId, userId)</span>
+<span class="fc" id="L50">                        .eq(Notification::getIsRead, 0)</span>
+        );
+    }
+
+    /** 将单条通知标记为已读 */
+    public void markRead(Long id, Long userId) {
+<span class="fc" id="L56">        Notification n = notificationMapper.selectOne(new LambdaQueryWrapper&lt;Notification&gt;()</span>
+<span class="fc" id="L57">                .eq(Notification::getId, id)</span>
+<span class="fc" id="L58">                .eq(Notification::getTargetUserId, userId)</span>
+<span class="fc" id="L59">                .last(&quot;limit 1&quot;));</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if (n != null) {</span>
+<span class="fc" id="L61">            n.setIsRead(1);</span>
+<span class="fc" id="L62">            notificationMapper.updateById(n);</span>
+        }
+<span class="fc" id="L64">    }</span>
+
+    /** 将用户全部未读通知标记为已读 */
+    public void markAllRead(Long userId) {
+<span class="nc" id="L68">        notificationMapper.update(null, new LambdaUpdateWrapper&lt;Notification&gt;()</span>
+<span class="nc" id="L69">                .eq(Notification::getTargetUserId, userId)</span>
+<span class="nc" id="L70">                .eq(Notification::getIsRead, 0)</span>
+<span class="nc" id="L71">                .set(Notification::getIsRead, 1));</span>
+<span class="nc" id="L72">    }</span>
+
+    /** 删除单条通知 */
+    public void delete(Long id, Long userId) {
+<span class="nc" id="L76">        notificationMapper.delete(new LambdaQueryWrapper&lt;Notification&gt;()</span>
+<span class="nc" id="L77">                .eq(Notification::getId, id)</span>
+<span class="nc" id="L78">                .eq(Notification::getTargetUserId, userId));</span>
+<span class="nc" id="L79">    }</span>
+
+    /** 发送通知；当 bizType 为空时默认使用 SYSTEM */
+    public void send(Long targetUserId, String title, String content, String bizType, Long bizId) {
+<span class="fc" id="L83">        Notification n = new Notification();</span>
+<span class="fc" id="L84">        n.setTargetUserId(targetUserId);</span>
+<span class="fc" id="L85">        n.setTitle(title);</span>
+<span class="fc" id="L86">        n.setContent(content);</span>
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        n.setMsgType(bizType != null ? bizType : &quot;SYSTEM&quot;);</span>
+<span class="fc" id="L88">        n.setBizType(bizType);</span>
+<span class="fc" id="L89">        n.setBizId(bizId);</span>
+<span class="fc" id="L90">        n.setIsRead(0);</span>
+<span class="fc" id="L91">        notificationMapper.insert(n);</span>
+<span class="fc" id="L92">    }</span>
+
+    public void sendToRoleCodes(Collection&lt;String&gt; roleCodes, Long extraUserId,
+                                String title, String content, String bizType, Long bizId) {
+<span class="fc" id="L96">        LinkedHashSet&lt;Long&gt; targetUserIds = new LinkedHashSet&lt;&gt;();</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">        if (extraUserId != null) {</span>
+<span class="fc" id="L98">            targetUserIds.add(extraUserId);</span>
+        }
+<span class="pc bpc" id="L100" title="2 of 4 branches missed.">        if (roleCodes != null &amp;&amp; !roleCodes.isEmpty()) {</span>
+<span class="fc" id="L101">            List&lt;Long&gt; roleIds = roleMapper.selectList(new LambdaQueryWrapper&lt;SysRole&gt;()</span>
+<span class="fc" id="L102">                            .in(SysRole::getRoleCode, roleCodes))</span>
+<span class="fc" id="L103">                    .stream()</span>
+<span class="fc" id="L104">                    .map(SysRole::getId)</span>
+<span class="fc" id="L105">                    .toList();</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">            if (!roleIds.isEmpty()) {</span>
+<span class="fc" id="L107">                userMapper.selectList(new LambdaQueryWrapper&lt;SysUser&gt;()</span>
+<span class="fc" id="L108">                                .in(SysUser::getRoleId, roleIds)</span>
+<span class="fc" id="L109">                                .eq(SysUser::getStatus, 1))</span>
+<span class="fc" id="L110">                        .stream()</span>
+<span class="fc" id="L111">                        .map(SysUser::getId)</span>
+<span class="fc" id="L112">                        .forEach(targetUserIds::add);</span>
+            }
+        }
+<span class="fc" id="L115">        targetUserIds.forEach(userId -&gt; send(userId, title, content, bizType, bizId));</span>
+<span class="fc" id="L116">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

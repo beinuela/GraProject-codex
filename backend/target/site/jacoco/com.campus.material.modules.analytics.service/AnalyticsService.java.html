@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AnalyticsService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.analytics.service</a> &gt; <span class="el_source">AnalyticsService.java</span></div><h1>AnalyticsService.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.analytics.service;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
+
+@Service
+public class AnalyticsService {
+
+<span class="fc" id="L21">    private static final DateTimeFormatter MONTH_KEY_FORMATTER = DateTimeFormatter.ofPattern(&quot;yyyy-MM&quot;);</span>
+
+    private final JdbcTemplate jdbcTemplate;
+
+<span class="fc" id="L25">    public AnalyticsService(JdbcTemplate jdbcTemplate) {</span>
+<span class="fc" id="L26">        this.jdbcTemplate = jdbcTemplate;</span>
+<span class="fc" id="L27">    }</span>
+
+    public Map&lt;String, Object&gt; overview() {
+<span class="nc" id="L30">        Map&lt;String, Object&gt; map = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L31">        map.put(&quot;userCount&quot;, count(&quot;select count(1) from sys_user where deleted=0&quot;));</span>
+<span class="nc" id="L32">        map.put(&quot;materialCount&quot;, count(&quot;select count(1) from material_info where deleted=0&quot;));</span>
+<span class="nc" id="L33">        map.put(&quot;warehouseCount&quot;, count(&quot;select count(1) from warehouse where deleted=0&quot;));</span>
+<span class="nc" id="L34">        map.put(&quot;unhandledWarningCount&quot;, count(&quot;select count(1) from warning_record where deleted=0 and handle_status='UNHANDLED'&quot;));</span>
+<span class="nc" id="L35">        map.put(&quot;pendingApplyCount&quot;, count(&quot;select count(1) from apply_order where deleted=0 and status='SUBMITTED'&quot;));</span>
+<span class="nc" id="L36">        map.put(&quot;pendingTransferCount&quot;, count(&quot;select count(1) from transfer_order where deleted=0 and status='SUBMITTED'&quot;));</span>
+<span class="nc" id="L37">        return map;</span>
+    }
+
+    public List&lt;Map&lt;String, Object&gt;&gt; inventoryRatio() {
+<span class="nc" id="L41">        String sql = &quot;&quot;&quot;</span>
+                select m.material_name as name, sum(i.current_qty) as totalQty
+                from inventory i
+                join material_info m on i.material_id = m.id and m.deleted=0
+                where i.deleted=0
+                group by m.material_name
+                order by sum(i.current_qty) desc
+                &quot;&quot;&quot;;
+<span class="nc" id="L49">        return jdbcTemplate.query(sql, (rs, rowNum) -&gt; {</span>
+<span class="nc" id="L50">            Map&lt;String, Object&gt; item = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L51">            item.put(&quot;name&quot;, rs.getString(&quot;name&quot;));</span>
+<span class="nc" id="L52">            item.put(&quot;value&quot;, rs.getLong(&quot;totalQty&quot;));</span>
+<span class="nc" id="L53">            return item;</span>
+        });
+    }
+
+    public List&lt;Map&lt;String, Object&gt;&gt; inboundOutboundTrend() {
+<span class="nc" id="L58">        LocalDateTime cutoff = LocalDateTime.now().minusMonths(6);</span>
+<span class="nc" id="L59">        Map&lt;String, long[]&gt; monthly = new TreeMap&lt;&gt;();</span>
+
+<span class="nc" id="L61">        jdbcTemplate.query(&quot;&quot;&quot;</span>
+                        select si.created_at as createdAt, sii.quantity as quantity
+                        from stock_in_item sii
+                        join stock_in si on sii.stock_in_id = si.id and si.deleted=0
+                        where sii.deleted=0 and si.created_at &gt;= ?
+                        &quot;&quot;&quot;,
+<span class="nc" id="L67">                (RowCallbackHandler) rs -&gt; mergeMonthlyQty(monthly, rs.getObject(&quot;createdAt&quot;, LocalDateTime.class), rs.getLong(&quot;quantity&quot;), 0),</span>
+                cutoff
+        );
+
+<span class="nc" id="L71">        jdbcTemplate.query(&quot;&quot;&quot;</span>
+                        select so.created_at as createdAt, soi.quantity as quantity
+                        from stock_out_item soi
+                        join stock_out so on soi.stock_out_id = so.id and so.deleted=0
+                        where soi.deleted=0 and so.created_at &gt;= ?
+                        &quot;&quot;&quot;,
+<span class="nc" id="L77">                (RowCallbackHandler) rs -&gt; mergeMonthlyQty(monthly, rs.getObject(&quot;createdAt&quot;, LocalDateTime.class), rs.getLong(&quot;quantity&quot;), 1),</span>
+                cutoff
+        );
+
+<span class="nc" id="L81">        List&lt;Map&lt;String, Object&gt;&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L82">        monthly.forEach((monthKey, qty) -&gt; {</span>
+<span class="nc" id="L83">            Map&lt;String, Object&gt; item = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L84">            item.put(&quot;month_key&quot;, monthKey);</span>
+<span class="nc" id="L85">            item.put(&quot;inQty&quot;, qty[0]);</span>
+<span class="nc" id="L86">            item.put(&quot;outQty&quot;, qty[1]);</span>
+<span class="nc" id="L87">            result.add(item);</span>
+<span class="nc" id="L88">        });</span>
+<span class="nc" id="L89">        return result;</span>
+    }
+
+    public List&lt;Map&lt;String, Object&gt;&gt; departmentRanking() {
+<span class="nc" id="L93">        String sql = &quot;&quot;&quot;</span>
+                select d.dept_name as deptName, sum(aoi.actual_qty) as totalQty
+                from apply_order_item aoi
+                join apply_order ao on aoi.apply_order_id = ao.id and ao.deleted=0
+                join sys_dept d on ao.dept_id = d.id and d.deleted=0
+                where aoi.deleted=0
+                group by d.dept_name
+                order by sum(aoi.actual_qty) desc
+                limit 10
+                &quot;&quot;&quot;;
+<span class="nc" id="L103">        return jdbcTemplate.query(sql, (rs, rowNum) -&gt; {</span>
+<span class="nc" id="L104">            Map&lt;String, Object&gt; item = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L105">            item.put(&quot;deptName&quot;, rs.getString(&quot;deptName&quot;));</span>
+<span class="nc" id="L106">            item.put(&quot;totalQty&quot;, rs.getLong(&quot;totalQty&quot;));</span>
+<span class="nc" id="L107">            return item;</span>
+        });
+    }
+
+    public List&lt;Map&lt;String, Object&gt;&gt; expiryStats() {
+<span class="nc" id="L112">        LocalDate today = LocalDate.now();</span>
+<span class="nc" id="L113">        LocalDate expiringDeadline = today.plusDays(30);</span>
+<span class="nc" id="L114">        Map&lt;String, long[]&gt; totals = new LinkedHashMap&lt;&gt;();</span>
+
+<span class="nc" id="L116">        jdbcTemplate.query(&quot;&quot;&quot;</span>
+                        select m.material_name as materialName, b.expire_date as expireDate, b.remain_qty as remainQty
+                        from inventory_batch b
+                        join material_info m on b.material_id = m.id and m.deleted=0
+                        where b.deleted=0
+                        &quot;&quot;&quot;,
+                (RowCallbackHandler) rs -&gt; {
+<span class="nc" id="L123">                    String materialName = rs.getString(&quot;materialName&quot;);</span>
+<span class="nc" id="L124">                    LocalDate expireDate = rs.getObject(&quot;expireDate&quot;, LocalDate.class);</span>
+<span class="nc" id="L125">                    long remainQty = rs.getLong(&quot;remainQty&quot;);</span>
+<span class="nc" id="L126">                    long[] qty = totals.computeIfAbsent(materialName, key -&gt; new long[2]);</span>
+<span class="nc bnc" id="L127" title="All 4 branches missed.">                    if (expireDate != null &amp;&amp; expireDate.isBefore(today)) {</span>
+<span class="nc" id="L128">                        qty[0] += remainQty;</span>
+                    }
+<span class="nc bnc" id="L130" title="All 6 branches missed.">                    if (expireDate != null &amp;&amp; !expireDate.isBefore(today) &amp;&amp; !expireDate.isAfter(expiringDeadline)) {</span>
+<span class="nc" id="L131">                        qty[1] += remainQty;</span>
+                    }
+<span class="nc" id="L133">                }</span>
+        );
+
+<span class="nc" id="L136">        return totals.entrySet().stream()</span>
+<span class="nc" id="L137">                .sorted((left, right) -&gt; Long.compare(right.getValue()[1], left.getValue()[1]))</span>
+<span class="nc" id="L138">                .map(entry -&gt; {</span>
+<span class="nc" id="L139">                    Map&lt;String, Object&gt; item = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L140">                    item.put(&quot;materialName&quot;, entry.getKey());</span>
+<span class="nc" id="L141">                    item.put(&quot;expiredQty&quot;, entry.getValue()[0]);</span>
+<span class="nc" id="L142">                    item.put(&quot;expiringQty&quot;, entry.getValue()[1]);</span>
+<span class="nc" id="L143">                    return item;</span>
+                })
+<span class="nc" id="L145">                .toList();</span>
+    }
+
+    public List&lt;Map&lt;String, Object&gt;&gt; warehouseDistribution() {
+<span class="nc" id="L149">        String sql = &quot;&quot;&quot;</span>
+                select w.warehouse_name as warehouseName, sum(i.current_qty) as totalQty
+                from inventory i
+                join warehouse w on i.warehouse_id = w.id and w.deleted=0
+                where i.deleted=0
+                group by w.warehouse_name
+                order by sum(i.current_qty) desc
+                &quot;&quot;&quot;;
+<span class="nc" id="L157">        return jdbcTemplate.query(sql, (rs, rowNum) -&gt; {</span>
+<span class="nc" id="L158">            Map&lt;String, Object&gt; item = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L159">            item.put(&quot;warehouseName&quot;, rs.getString(&quot;warehouseName&quot;));</span>
+<span class="nc" id="L160">            item.put(&quot;totalQty&quot;, rs.getLong(&quot;totalQty&quot;));</span>
+<span class="nc" id="L161">            return item;</span>
+        });
+    }
+
+    public List&lt;Map&lt;String, Object&gt;&gt; emergencyConsumption() {
+<span class="nc" id="L166">        LocalDateTime cutoff = LocalDateTime.now().minusMonths(6);</span>
+<span class="nc" id="L167">        Map&lt;String, long[]&gt; monthly = new TreeMap&lt;&gt;();</span>
+
+<span class="nc" id="L169">        jdbcTemplate.query(&quot;&quot;&quot;</span>
+                        select so.created_at as createdAt, soi.quantity as quantity
+                        from stock_out_item soi
+                        join stock_out so on soi.stock_out_id = so.id and so.deleted=0
+                        join apply_order ao on so.apply_order_id = ao.id and ao.deleted=0
+                        where soi.deleted=0 and ao.urgency_level &gt;= 2 and so.created_at &gt;= ?
+                        &quot;&quot;&quot;,
+<span class="nc" id="L176">                (RowCallbackHandler) rs -&gt; mergeMonthlyQty(monthly, rs.getObject(&quot;createdAt&quot;, LocalDateTime.class), rs.getLong(&quot;quantity&quot;), 0),</span>
+                cutoff
+        );
+
+<span class="nc" id="L180">        List&lt;Map&lt;String, Object&gt;&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L181">        monthly.forEach((monthKey, qty) -&gt; {</span>
+<span class="nc" id="L182">            Map&lt;String, Object&gt; item = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L183">            item.put(&quot;monthKey&quot;, monthKey);</span>
+<span class="nc" id="L184">            item.put(&quot;totalQty&quot;, qty[0]);</span>
+<span class="nc" id="L185">            result.add(item);</span>
+<span class="nc" id="L186">        });</span>
+<span class="nc" id="L187">        return result;</span>
+    }
+
+    private Long count(String sql) {
+<span class="nc" id="L191">        Long value = jdbcTemplate.queryForObject(Objects.requireNonNull(sql), Long.class);</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">        return value == null ? 0L : value;</span>
+    }
+
+    private void mergeMonthlyQty(Map&lt;String, long[]&gt; monthly, LocalDateTime createdAt, long quantity, int index) {
+<span class="nc bnc" id="L196" title="All 2 branches missed.">        if (createdAt == null) {</span>
+<span class="nc" id="L197">            return;</span>
+        }
+<span class="nc" id="L199">        String monthKey = MONTH_KEY_FORMATTER.format(createdAt);</span>
+<span class="nc" id="L200">        long[] qty = monthly.computeIfAbsent(monthKey, key -&gt; new long[2]);</span>
+<span class="nc" id="L201">        qty[index] += quantity;</span>
+<span class="nc" id="L202">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

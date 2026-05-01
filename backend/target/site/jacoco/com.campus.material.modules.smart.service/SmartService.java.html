@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SmartService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.smart.service</a> &gt; <span class="el_source">SmartService.java</span></div><h1>SmartService.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.smart.service;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+@Service
+public class SmartService {
+
+<span class="fc" id="L20">    private static final DateTimeFormatter MONTH_KEY_FORMATTER = DateTimeFormatter.ofPattern(&quot;yyyy-MM&quot;);</span>
+
+    private final JdbcTemplate jdbcTemplate;
+
+<span class="fc" id="L24">    public SmartService(JdbcTemplate jdbcTemplate) {</span>
+<span class="fc" id="L25">        this.jdbcTemplate = jdbcTemplate;</span>
+<span class="fc" id="L26">    }</span>
+
+    public Map&lt;String, Object&gt; forecast(Long materialId, int months) {
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        if (months &lt;= 0) {</span>
+<span class="nc" id="L30">            months = 3;</span>
+        }
+
+<span class="nc" id="L33">        Map&lt;String, long[]&gt; monthly = new TreeMap&lt;&gt;();</span>
+<span class="nc" id="L34">        jdbcTemplate.query(&quot;&quot;&quot;</span>
+                        select so.created_at as createdAt, soi.quantity as quantity
+                        from stock_out_item soi
+                        join stock_out so on soi.stock_out_id = so.id and so.deleted=0
+                        where soi.deleted=0 and soi.material_id = ? and so.created_at &gt;= ?
+                        &quot;&quot;&quot;,
+<span class="nc" id="L40">                (RowCallbackHandler) rs -&gt; mergeMonthlyQty(monthly, rs.getObject(&quot;createdAt&quot;, LocalDateTime.class), rs.getLong(&quot;quantity&quot;)),</span>
+                materialId,
+<span class="nc" id="L42">                LocalDateTime.now().minusMonths(6)</span>
+        );
+
+<span class="nc" id="L45">        List&lt;Map&lt;String, Object&gt;&gt; history = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L46">        monthly.forEach((monthKey, qty) -&gt; {</span>
+<span class="nc" id="L47">            Map&lt;String, Object&gt; item = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L48">            item.put(&quot;monthKey&quot;, monthKey);</span>
+<span class="nc" id="L49">            item.put(&quot;qty&quot;, qty[0]);</span>
+<span class="nc" id="L50">            history.add(item);</span>
+<span class="nc" id="L51">        });</span>
+
+<span class="nc" id="L53">        double avg = history.stream()</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">                .mapToDouble(row -&gt; row.get(&quot;qty&quot;) == null ? 0 : ((Number) row.get(&quot;qty&quot;)).doubleValue())</span>
+<span class="nc" id="L55">                .average()</span>
+<span class="nc" id="L56">                .orElse(0D);</span>
+
+<span class="nc" id="L58">        List&lt;Map&lt;String, Object&gt;&gt; future = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L59">        LocalDate cursor = LocalDate.now().withDayOfMonth(1).plusMonths(1);</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        for (int i = 0; i &lt; months; i++) {</span>
+<span class="nc" id="L61">            Map&lt;String, Object&gt; item = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L62">            item.put(&quot;monthKey&quot;, MONTH_KEY_FORMATTER.format(cursor.plusMonths(i)));</span>
+<span class="nc" id="L63">            item.put(&quot;predictQty&quot;, Math.round(avg));</span>
+<span class="nc" id="L64">            future.add(item);</span>
+        }
+
+<span class="nc" id="L67">        Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L68">        result.put(&quot;history&quot;, history);</span>
+<span class="nc" id="L69">        result.put(&quot;movingAverage&quot;, avg);</span>
+<span class="nc" id="L70">        result.put(&quot;forecast&quot;, future);</span>
+<span class="nc" id="L71">        return result;</span>
+    }
+
+    public List&lt;Map&lt;String, Object&gt;&gt; replenishmentSuggestions(Integer guaranteeDays) {
+<span class="nc bnc" id="L75" title="All 4 branches missed.">        int days = guaranteeDays == null || guaranteeDays &lt;= 0 ? 7 : guaranteeDays;</span>
+<span class="nc" id="L76">        String sql = &quot;&quot;&quot;</span>
+                select m.id as materialId,
+                       m.material_name as materialName,
+                       m.safety_stock as safetyStock,
+                       coalesce(inv.totalQty, 0) as currentStock,
+                       coalesce(out30.outQty, 0) as outQty30
+                from material_info m
+                left join (
+                    select material_id, sum(current_qty) as totalQty
+                    from inventory
+                    where deleted=0
+                    group by material_id
+                ) inv on m.id = inv.material_id
+                left join (
+                    select soi.material_id, sum(soi.quantity) as outQty
+                    from stock_out_item soi
+                    join stock_out so on soi.stock_out_id = so.id and so.deleted=0
+                    where soi.deleted=0 and so.created_at &gt;= ?
+                    group by soi.material_id
+                ) out30 on m.id = out30.material_id
+                where m.deleted=0
+                &quot;&quot;&quot;;
+
+<span class="nc" id="L99">        List&lt;Map&lt;String, Object&gt;&gt; list = jdbcTemplate.query(sql, (rs, rowNum) -&gt; {</span>
+<span class="nc" id="L100">            Map&lt;String, Object&gt; item = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L101">            item.put(&quot;materialId&quot;, rs.getLong(&quot;materialId&quot;));</span>
+<span class="nc" id="L102">            item.put(&quot;materialName&quot;, rs.getString(&quot;materialName&quot;));</span>
+<span class="nc" id="L103">            item.put(&quot;safetyStock&quot;, rs.getInt(&quot;safetyStock&quot;));</span>
+<span class="nc" id="L104">            item.put(&quot;currentStock&quot;, rs.getInt(&quot;currentStock&quot;));</span>
+<span class="nc" id="L105">            item.put(&quot;outQty30&quot;, rs.getInt(&quot;outQty30&quot;));</span>
+<span class="nc" id="L106">            return item;</span>
+<span class="nc" id="L107">        }, LocalDateTime.now().minusDays(30));</span>
+
+<span class="nc bnc" id="L109" title="All 2 branches missed.">        for (Map&lt;String, Object&gt; row : list) {</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">            int safety = row.get(&quot;safetyStock&quot;) == null ? 0 : ((Number) row.get(&quot;safetyStock&quot;)).intValue();</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">            int stock = row.get(&quot;currentStock&quot;) == null ? 0 : ((Number) row.get(&quot;currentStock&quot;)).intValue();</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">            int out30 = row.get(&quot;outQty30&quot;) == null ? 0 : ((Number) row.get(&quot;outQty30&quot;)).intValue();</span>
+<span class="nc" id="L113">            double avgDaily = out30 / 30.0;</span>
+<span class="nc" id="L114">            int target = (int) Math.ceil(safety + avgDaily * days);</span>
+<span class="nc" id="L115">            int suggest = Math.max(0, target - stock);</span>
+<span class="nc" id="L116">            row.put(&quot;avgDailyUsage&quot;, avgDaily);</span>
+<span class="nc" id="L117">            row.put(&quot;targetStock&quot;, target);</span>
+<span class="nc" id="L118">            row.put(&quot;suggestQty&quot;, suggest);</span>
+<span class="nc" id="L119">        }</span>
+
+<span class="nc" id="L121">        list.sort((left, right) -&gt; Integer.compare(((Number) right.get(&quot;suggestQty&quot;)).intValue(), ((Number) left.get(&quot;suggestQty&quot;)).intValue()));</span>
+<span class="nc" id="L122">        return list;</span>
+    }
+
+    private void mergeMonthlyQty(Map&lt;String, long[]&gt; monthly, LocalDateTime createdAt, long quantity) {
+<span class="nc bnc" id="L126" title="All 2 branches missed.">        if (createdAt == null) {</span>
+<span class="nc" id="L127">            return;</span>
+        }
+<span class="nc" id="L129">        String monthKey = MONTH_KEY_FORMATTER.format(createdAt);</span>
+<span class="nc" id="L130">        long[] qty = monthly.computeIfAbsent(monthKey, key -&gt; new long[1]);</span>
+<span class="nc" id="L131">        qty[0] += quantity;</span>
+<span class="nc" id="L132">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

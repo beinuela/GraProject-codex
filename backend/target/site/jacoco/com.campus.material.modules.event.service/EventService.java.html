@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EventService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.event.service</a> &gt; <span class="el_source">EventService.java</span></div><h1>EventService.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.event.service;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.campus.material.modules.event.entity.EventRecord;
+import com.campus.material.modules.event.mapper.EventMapper;
+import com.campus.material.modules.log.service.OperationLogService;
+import com.campus.material.modules.notification.service.NotificationService;
+import com.campus.material.security.AuthUtil;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+public class EventService {
+
+    private final EventMapper eventMapper;
+    private final OperationLogService logService;
+    private final NotificationService notificationService;
+
+    public EventService(EventMapper eventMapper, OperationLogService logService,
+<span class="fc" id="L22">                                  NotificationService notificationService) {</span>
+<span class="fc" id="L23">        this.eventMapper = eventMapper;</span>
+<span class="fc" id="L24">        this.logService = logService;</span>
+<span class="fc" id="L25">        this.notificationService = notificationService;</span>
+<span class="fc" id="L26">    }</span>
+
+    public List&lt;EventRecord&gt; list(String status, String eventType) {
+<span class="nc" id="L29">        LambdaQueryWrapper&lt;EventRecord&gt; qw = new LambdaQueryWrapper&lt;&gt;();</span>
+<span class="nc bnc" id="L30" title="All 4 branches missed.">        if (status != null &amp;&amp; !status.isBlank()) {</span>
+<span class="nc" id="L31">            qw.eq(EventRecord::getStatus, status);</span>
+        }
+<span class="nc bnc" id="L33" title="All 4 branches missed.">        if (eventType != null &amp;&amp; !eventType.isBlank()) {</span>
+<span class="nc" id="L34">            qw.eq(EventRecord::getEventType, eventType);</span>
+        }
+<span class="nc" id="L36">        return eventMapper.selectList(qw.orderByDesc(EventRecord::getEventTime));</span>
+    }
+
+    public EventRecord getById(Long id) {
+<span class="nc" id="L40">        return eventMapper.selectById(id);</span>
+    }
+
+    public void create(EventRecord event) {
+<span class="fc" id="L44">        Long uid = AuthUtil.currentUserId();</span>
+<span class="fc" id="L45">        event.setReporterId(uid);</span>
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">        if (event.getStatus() == null) {</span>
+<span class="fc" id="L47">            event.setStatus(&quot;OPEN&quot;);</span>
+        }
+<span class="fc" id="L49">        eventMapper.insert(event);</span>
+<span class="fc" id="L50">        logService.log(uid, &quot;EVENT&quot;, &quot;CREATE&quot;, &quot;创建物资事件:&quot; + event.getEventTitle());</span>
+<span class="fc" id="L51">        notificationService.sendToRoleCodes(</span>
+<span class="fc" id="L52">                List.of(&quot;ADMIN&quot;, &quot;WAREHOUSE_ADMIN&quot;),</span>
+                uid,
+                &quot;物资事件通知&quot;,
+<span class="fc" id="L55">                event.getEventTitle() + &quot; - 请及时处理&quot;,</span>
+                &quot;EVENT&quot;,
+<span class="fc" id="L57">                event.getId()</span>
+        );
+<span class="fc" id="L59">    }</span>
+
+    public void handle(Long id, String handleResult) {
+<span class="nc" id="L62">        EventRecord event = eventMapper.selectById(id);</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        if (event == null) return;</span>
+<span class="nc" id="L64">        event.setStatus(&quot;IN_PROGRESS&quot;);</span>
+<span class="nc" id="L65">        event.setHandlerId(AuthUtil.currentUserId());</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        event.setHandleResult(handleResult == null ? &quot;&quot; : handleResult);</span>
+<span class="nc" id="L67">        eventMapper.updateById(event);</span>
+<span class="nc" id="L68">        logService.log(AuthUtil.currentUserId(), &quot;EVENT&quot;, &quot;HANDLE&quot;, &quot;处理事件:&quot; + id);</span>
+<span class="nc" id="L69">    }</span>
+
+    public void close(Long id, String handleResult) {
+<span class="nc" id="L72">        EventRecord event = eventMapper.selectById(id);</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        if (event == null) return;</span>
+<span class="nc" id="L74">        event.setStatus(&quot;CLOSED&quot;);</span>
+<span class="nc" id="L75">        event.setHandleResult(handleResult);</span>
+<span class="nc" id="L76">        event.setCloseTime(LocalDateTime.now());</span>
+<span class="nc" id="L77">        eventMapper.updateById(event);</span>
+<span class="nc" id="L78">        logService.log(AuthUtil.currentUserId(), &quot;EVENT&quot;, &quot;CLOSE&quot;, &quot;关闭事件:&quot; + id);</span>
+<span class="nc" id="L79">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

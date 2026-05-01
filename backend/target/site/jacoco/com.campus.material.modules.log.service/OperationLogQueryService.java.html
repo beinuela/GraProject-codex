@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OperationLogQueryService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.log.service</a> &gt; <span class="el_source">OperationLogQueryService.java</span></div><h1>OperationLogQueryService.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.log.service;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.campus.material.common.PageQuery;
+import com.campus.material.common.PageResult;
+import com.campus.material.modules.log.entity.OperationLog;
+import com.campus.material.modules.log.mapper.OperationLogMapper;
+import org.springframework.stereotype.Service;
+
+@Service
+public class OperationLogQueryService {
+
+    private final OperationLogMapper operationLogMapper;
+
+<span class="fc" id="L16">    public OperationLogQueryService(OperationLogMapper operationLogMapper) {</span>
+<span class="fc" id="L17">        this.operationLogMapper = operationLogMapper;</span>
+<span class="fc" id="L18">    }</span>
+
+    public PageResult&lt;OperationLog&gt; list(PageQuery pageQuery, String keyword) {
+<span class="nc" id="L21">        Page&lt;OperationLog&gt; page = operationLogMapper.selectPage(</span>
+<span class="nc bnc" id="L22" title="All 2 branches missed.">                new Page&lt;&gt;(pageQuery.getPage(), pageQuery.getSize()),</span>
+                new LambdaQueryWrapper&lt;OperationLog&gt;()
+<span class="nc bnc" id="L24" title="All 2 branches missed.">                        .and(keyword != null &amp;&amp; !keyword.isBlank(), wrapper -&gt; wrapper</span>
+<span class="nc" id="L25">                                .like(OperationLog::getModule, keyword)</span>
+<span class="nc" id="L26">                                .or()</span>
+<span class="nc" id="L27">                                .like(OperationLog::getOperation, keyword)</span>
+<span class="nc" id="L28">                                .or()</span>
+<span class="nc" id="L29">                                .like(OperationLog::getDetail, keyword))</span>
+<span class="nc" id="L30">                        .orderByDesc(OperationLog::getId)</span>
+        );
+<span class="nc" id="L32">        return PageResult.from(page);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

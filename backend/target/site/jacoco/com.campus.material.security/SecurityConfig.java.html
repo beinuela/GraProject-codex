@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SecurityConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.security</a> &gt; <span class="el_source">SecurityConfig.java</span></div><h1>SecurityConfig.java</h1><pre class="source lang-java linenums">package com.campus.material.security;
+
+import com.campus.material.common.ApiResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import com.campus.material.security.ratelimit.RateLimitingFilter;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Configuration
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RateLimitingFilter rateLimitingFilter;
+    private final RequestContextFilter requestContextFilter;
+    private final String allowedOrigins;
+    private final String allowedMethods;
+    private final String allowedHeaders;
+    private final boolean allowCredentials;
+
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            RateLimitingFilter rateLimitingFilter,
+            RequestContextFilter requestContextFilter,
+            @Value(&quot;${security.cors.allowed-origins:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173}&quot;) String allowedOrigins,
+            @Value(&quot;${security.cors.allowed-methods:GET,POST,PUT,DELETE,OPTIONS}&quot;) String allowedMethods,
+            @Value(&quot;${security.cors.allowed-headers:Authorization,Content-Type,X-Requested-With}&quot;) String allowedHeaders,
+<span class="fc" id="L50">            @Value(&quot;${security.cors.allow-credentials:false}&quot;) boolean allowCredentials) {</span>
+<span class="fc" id="L51">        this.jwtAuthenticationFilter = jwtAuthenticationFilter;</span>
+<span class="fc" id="L52">        this.rateLimitingFilter = rateLimitingFilter;</span>
+<span class="fc" id="L53">        this.requestContextFilter = requestContextFilter;</span>
+<span class="fc" id="L54">        this.allowedOrigins = allowedOrigins;</span>
+<span class="fc" id="L55">        this.allowedMethods = allowedMethods;</span>
+<span class="fc" id="L56">        this.allowedHeaders = allowedHeaders;</span>
+<span class="fc" id="L57">        this.allowCredentials = allowCredentials;</span>
+<span class="fc" id="L58">    }</span>
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+<span class="fc" id="L62">        http.csrf(csrf -&gt; csrf.disable())</span>
+<span class="fc" id="L63">                .cors(cors -&gt; {})</span>
+<span class="fc" id="L64">                .headers(headers -&gt; headers</span>
+<span class="fc" id="L65">                        .frameOptions(frameOptions -&gt; frameOptions.deny())</span>
+<span class="fc" id="L66">                        .referrerPolicy(policy -&gt; policy.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))</span>
+<span class="fc" id="L67">                        .contentSecurityPolicy(csp -&gt; csp.policyDirectives(&quot;default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'&quot;))</span>
+<span class="fc" id="L68">                        .addHeaderWriter(new StaticHeadersWriter(&quot;Permissions-Policy&quot;,</span>
+                                &quot;accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()&quot;)))
+<span class="fc" id="L70">                .sessionManagement(sm -&gt; sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))</span>
+<span class="fc" id="L71">                .authorizeHttpRequests(auth -&gt; auth</span>
+<span class="fc" id="L72">                        .requestMatchers(&quot;/api/auth/login&quot;, &quot;/api/auth/refresh&quot;, &quot;/doc.html&quot;, &quot;/v3/api-docs/**&quot;, &quot;/swagger-ui/**&quot;, &quot;/swagger-ui.html&quot;).permitAll()</span>
+<span class="fc" id="L73">                        .requestMatchers(&quot;/actuator/health&quot;, &quot;/actuator/info&quot;, &quot;/actuator/prometheus&quot;).permitAll()</span>
+<span class="fc" id="L74">                        .anyRequest().authenticated())</span>
+<span class="fc" id="L75">                .exceptionHandling(ex -&gt; ex</span>
+<span class="fc" id="L76">                        .authenticationEntryPoint((request, response, authException) -&gt; writeJsonSafe(response, 401, &quot;未认证或token已失效&quot;))</span>
+<span class="pc" id="L77">                        .accessDeniedHandler((request, response, accessDeniedException) -&gt; writeJsonSafe(response, 403, &quot;无权限访问该资源&quot;)))</span>
+<span class="fc" id="L78">                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)</span>
+<span class="fc" id="L79">                .addFilterAfter(rateLimitingFilter, JwtAuthenticationFilter.class)</span>
+<span class="fc" id="L80">                .addFilterAfter(requestContextFilter, RateLimitingFilter.class);</span>
+<span class="fc" id="L81">        return http.build();</span>
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+<span class="fc" id="L86">        return configuration.getAuthenticationManager();</span>
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+<span class="fc" id="L91">        return new BCryptPasswordEncoder();</span>
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+<span class="fc" id="L96">        CorsConfiguration config = new CorsConfiguration();</span>
+<span class="fc" id="L97">        config.setAllowedOrigins(splitCsv(allowedOrigins));</span>
+<span class="fc" id="L98">        config.setAllowedMethods(splitCsv(allowedMethods));</span>
+<span class="fc" id="L99">        config.setAllowedHeaders(splitCsv(allowedHeaders));</span>
+<span class="fc" id="L100">        config.setExposedHeaders(List.of(&quot;X-Request-Id&quot;));</span>
+<span class="fc" id="L101">        config.setAllowCredentials(allowCredentials);</span>
+<span class="fc" id="L102">        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
+<span class="fc" id="L103">        source.registerCorsConfiguration(&quot;/**&quot;, config);</span>
+<span class="fc" id="L104">        return source;</span>
+    }
+
+    private List&lt;String&gt; splitCsv(String text) {
+<span class="fc" id="L108">        return Arrays.stream(text.split(&quot;,&quot;))</span>
+<span class="fc" id="L109">                .map(String::trim)</span>
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">                .filter(s -&gt; !s.isEmpty())</span>
+<span class="fc" id="L111">                .collect(Collectors.toList());</span>
+    }
+
+    private void writeJsonSafe(HttpServletResponse response, int code, String message) {
+        try {
+<span class="fc" id="L116">            response.setCharacterEncoding(StandardCharsets.UTF_8.name());</span>
+<span class="fc" id="L117">            response.setContentType(MediaType.APPLICATION_JSON_VALUE);</span>
+<span class="fc" id="L118">            response.setStatus(code);</span>
+<span class="fc" id="L119">            ObjectMapper mapper = new ObjectMapper();</span>
+<span class="fc" id="L120">            response.getWriter().write(mapper.writeValueAsString(ApiResponse.fail(code, message)));</span>
+<span class="nc" id="L121">        } catch (Exception ignored) {</span>
+            // no-op
+<span class="fc" id="L123">        }</span>
+<span class="fc" id="L124">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

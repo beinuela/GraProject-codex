@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtTokenProvider.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.security</a> &gt; <span class="el_source">JwtTokenProvider.java</span></div><h1>JwtTokenProvider.java</h1><pre class="source lang-java linenums">package com.campus.material.security;
+
+import com.campus.material.common.BizException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Date;
+import java.util.UUID;
+
+@Component
+public class JwtTokenProvider {
+
+    private final JwtProperties jwtProperties;
+
+<span class="fc" id="L21">    public JwtTokenProvider(JwtProperties jwtProperties) {</span>
+<span class="fc" id="L22">        this.jwtProperties = jwtProperties;</span>
+<span class="fc" id="L23">    }</span>
+
+    private SecretKey secretKey() {
+<span class="fc" id="L26">        String secret = jwtProperties.getSecret();</span>
+<span class="pc bpc" id="L27" title="1 of 4 branches missed.">        if (secret == null || secret.isBlank()) {</span>
+<span class="fc" id="L28">            throw new BizException(500, &quot;JWT_SECRET 未配置，请在环境变量中设置&quot;);</span>
+        }
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        if (secret.getBytes(StandardCharsets.UTF_8).length &lt; 32) {</span>
+<span class="fc" id="L31">            throw new BizException(500, &quot;JWT_SECRET 长度不足，至少需要 32 字节&quot;);</span>
+        }
+<span class="fc" id="L33">        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));</span>
+    }
+
+    public String generateAccessToken(Long userId, String username, String roleCode) {
+<span class="fc" id="L37">        Instant now = Instant.now();</span>
+<span class="fc" id="L38">        Instant expireAt = now.plusSeconds(jwtProperties.getAccessExpireMinutes() * 60L);</span>
+<span class="fc" id="L39">        return Jwts.builder()</span>
+<span class="fc" id="L40">                .setSubject(username)</span>
+<span class="fc" id="L41">                .claim(&quot;uid&quot;, userId)</span>
+<span class="fc" id="L42">                .claim(&quot;role&quot;, roleCode)</span>
+<span class="fc" id="L43">                .claim(&quot;typ&quot;, &quot;access&quot;)</span>
+<span class="fc" id="L44">                .setIssuedAt(Date.from(now))</span>
+<span class="fc" id="L45">                .setExpiration(Date.from(expireAt))</span>
+<span class="fc" id="L46">                .signWith(secretKey(), SignatureAlgorithm.HS256)</span>
+<span class="fc" id="L47">                .compact();</span>
+    }
+
+    public String generateRefreshToken(Long userId, String username, String roleCode, String jti) {
+<span class="fc" id="L51">        Instant now = Instant.now();</span>
+<span class="fc" id="L52">        Instant expireAt = now.plusSeconds(jwtProperties.getRefreshExpireDays() * 24L * 60L * 60L);</span>
+<span class="fc" id="L53">        return Jwts.builder()</span>
+<span class="fc" id="L54">                .setSubject(username)</span>
+<span class="fc" id="L55">                .claim(&quot;uid&quot;, userId)</span>
+<span class="fc" id="L56">                .claim(&quot;role&quot;, roleCode)</span>
+<span class="fc" id="L57">                .claim(&quot;typ&quot;, &quot;refresh&quot;)</span>
+<span class="pc bpc" id="L58" title="1 of 4 branches missed.">                .setId(jti == null || jti.isBlank() ? UUID.randomUUID().toString() : jti)</span>
+<span class="fc" id="L59">                .setIssuedAt(Date.from(now))</span>
+<span class="fc" id="L60">                .setExpiration(Date.from(expireAt))</span>
+<span class="fc" id="L61">                .signWith(secretKey(), SignatureAlgorithm.HS256)</span>
+<span class="fc" id="L62">                .compact();</span>
+    }
+
+    public Claims parseToken(String token) {
+<span class="fc" id="L66">        return Jwts.parserBuilder()</span>
+<span class="fc" id="L67">                .setSigningKey(secretKey())</span>
+<span class="fc" id="L68">                .build()</span>
+<span class="fc" id="L69">                .parseClaimsJws(token)</span>
+<span class="fc" id="L70">                .getBody();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

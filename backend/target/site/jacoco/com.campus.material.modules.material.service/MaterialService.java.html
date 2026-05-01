@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MaterialService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.material.service</a> &gt; <span class="el_source">MaterialService.java</span></div><h1>MaterialService.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.material.service;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.campus.material.common.BizException;
+import com.campus.material.modules.log.service.OperationLogService;
+import com.campus.material.modules.material.entity.MaterialCategory;
+import com.campus.material.modules.material.entity.MaterialInfo;
+import com.campus.material.modules.material.mapper.MaterialCategoryMapper;
+import com.campus.material.modules.material.mapper.MaterialInfoMapper;
+import com.campus.material.security.AuthUtil;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class MaterialService {
+
+    private final MaterialCategoryMapper categoryMapper;
+    private final MaterialInfoMapper materialInfoMapper;
+    private final OperationLogService operationLogService;
+
+<span class="fc" id="L22">    public MaterialService(MaterialCategoryMapper categoryMapper, MaterialInfoMapper materialInfoMapper, OperationLogService operationLogService) {</span>
+<span class="fc" id="L23">        this.categoryMapper = categoryMapper;</span>
+<span class="fc" id="L24">        this.materialInfoMapper = materialInfoMapper;</span>
+<span class="fc" id="L25">        this.operationLogService = operationLogService;</span>
+<span class="fc" id="L26">    }</span>
+
+    public List&lt;MaterialCategory&gt; listCategory() {
+<span class="nc" id="L29">        return categoryMapper.selectList(new LambdaQueryWrapper&lt;MaterialCategory&gt;().orderByAsc(MaterialCategory::getId));</span>
+    }
+
+    public MaterialCategory saveCategory(MaterialCategory category) {
+<span class="fc" id="L33">        validateCategory(category);</span>
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">        if (category.getId() == null) {</span>
+<span class="fc" id="L35">            categoryMapper.insert(category);</span>
+<span class="fc" id="L36">            operationLogService.log(AuthUtil.currentUserId(), &quot;MATERIAL&quot;, &quot;CREATE_CATEGORY&quot;, category.getCategoryName());</span>
+        } else {
+<span class="nc" id="L38">            categoryMapper.updateById(category);</span>
+<span class="nc" id="L39">            operationLogService.log(AuthUtil.currentUserId(), &quot;MATERIAL&quot;, &quot;UPDATE_CATEGORY&quot;, category.getCategoryName());</span>
+        }
+<span class="fc" id="L41">        return categoryMapper.selectById(category.getId());</span>
+    }
+
+    public void deleteCategory(Long id) {
+<span class="nc" id="L45">        categoryMapper.deleteById(id);</span>
+<span class="nc" id="L46">        operationLogService.log(AuthUtil.currentUserId(), &quot;MATERIAL&quot;, &quot;DELETE_CATEGORY&quot;, String.valueOf(id));</span>
+<span class="nc" id="L47">    }</span>
+
+    public List&lt;MaterialInfo&gt; listMaterial(String keyword) {
+<span class="nc" id="L50">        LambdaQueryWrapper&lt;MaterialInfo&gt; wrapper = new LambdaQueryWrapper&lt;MaterialInfo&gt;().orderByDesc(MaterialInfo::getId);</span>
+<span class="nc bnc" id="L51" title="All 4 branches missed.">        if (keyword != null &amp;&amp; !keyword.isBlank()) {</span>
+<span class="nc" id="L52">            wrapper.like(MaterialInfo::getMaterialName, keyword).or().like(MaterialInfo::getMaterialCode, keyword);</span>
+        }
+<span class="nc" id="L54">        return materialInfoMapper.selectList(wrapper);</span>
+    }
+
+    public MaterialInfo saveMaterial(MaterialInfo info) {
+<span class="nc" id="L58">        validateMaterial(info);</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        if (info.getId() == null) {</span>
+<span class="nc" id="L60">            materialInfoMapper.insert(info);</span>
+<span class="nc" id="L61">            operationLogService.log(AuthUtil.currentUserId(), &quot;MATERIAL&quot;, &quot;CREATE_MATERIAL&quot;, info.getMaterialName());</span>
+        } else {
+<span class="nc" id="L63">            materialInfoMapper.updateById(info);</span>
+<span class="nc" id="L64">            operationLogService.log(AuthUtil.currentUserId(), &quot;MATERIAL&quot;, &quot;UPDATE_MATERIAL&quot;, info.getMaterialName());</span>
+        }
+<span class="nc" id="L66">        return materialInfoMapper.selectById(info.getId());</span>
+    }
+
+    public void deleteMaterial(Long id) {
+<span class="nc" id="L70">        materialInfoMapper.deleteById(id);</span>
+<span class="nc" id="L71">        operationLogService.log(AuthUtil.currentUserId(), &quot;MATERIAL&quot;, &quot;DELETE_MATERIAL&quot;, String.valueOf(id));</span>
+<span class="nc" id="L72">    }</span>
+
+    private void validateCategory(MaterialCategory category) {
+<span class="pc bpc" id="L75" title="2 of 4 branches missed.">        if (category.getCategoryName() == null || category.getCategoryName().isBlank()) {</span>
+<span class="nc" id="L76">            throw new BizException(400, &quot;分类名称不能为空&quot;);</span>
+        }
+<span class="fc" id="L78">        String categoryName = category.getCategoryName().trim();</span>
+<span class="fc" id="L79">        MaterialCategory duplicated = categoryMapper.selectOne(new LambdaQueryWrapper&lt;MaterialCategory&gt;()</span>
+<span class="fc" id="L80">                .eq(MaterialCategory::getCategoryName, categoryName)</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">                .ne(category.getId() != null, MaterialCategory::getId, category.getId())</span>
+<span class="fc" id="L82">                .last(&quot;limit 1&quot;));</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        if (duplicated != null) {</span>
+<span class="fc" id="L84">            throw new BizException(409, &quot;分类名称已存在，请勿重复添加&quot;);</span>
+        }
+<span class="fc" id="L86">        category.setCategoryName(categoryName);</span>
+<span class="fc" id="L87">    }</span>
+
+    private void validateMaterial(MaterialInfo info) {
+<span class="nc bnc" id="L90" title="All 4 branches missed.">        if (info.getMaterialCode() == null || info.getMaterialCode().isBlank()) {</span>
+<span class="nc" id="L91">            throw new BizException(400, &quot;物资编码不能为空&quot;);</span>
+        }
+<span class="nc" id="L93">        String materialCode = info.getMaterialCode().trim();</span>
+<span class="nc" id="L94">        MaterialInfo duplicated = materialInfoMapper.selectOne(new LambdaQueryWrapper&lt;MaterialInfo&gt;()</span>
+<span class="nc" id="L95">                .eq(MaterialInfo::getMaterialCode, materialCode)</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">                .ne(info.getId() != null, MaterialInfo::getId, info.getId())</span>
+<span class="nc" id="L97">                .last(&quot;limit 1&quot;));</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        if (duplicated != null) {</span>
+<span class="nc" id="L99">            throw new BizException(409, &quot;物资编码已存在，请勿重复添加&quot;);</span>
+        }
+<span class="nc" id="L101">        info.setMaterialCode(materialCode);</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        if (info.getMaterialName() != null) {</span>
+<span class="nc" id="L103">            info.setMaterialName(info.getMaterialName().trim());</span>
+        }
+<span class="nc" id="L105">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

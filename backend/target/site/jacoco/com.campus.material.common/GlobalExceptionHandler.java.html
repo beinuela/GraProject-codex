@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.common</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.campus.material.common;
+
+import io.sentry.Sentry;
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.BindException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import java.util.stream.Collectors;
+
+<span class="fc" id="L22">@Slf4j</span>
+@RestControllerAdvice
+<span class="fc" id="L24">public class GlobalExceptionHandler {</span>
+
+    @ExceptionHandler(BizException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleBiz(BizException e) {
+<span class="fc" id="L28">        log.warn(&quot;业务异常 [{}]: {}&quot;, e.getCode(), e.getMessage());</span>
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">        if (e.getCode() &gt;= ErrorCode.INTERNAL_SERVER_ERROR.getCode()) {</span>
+<span class="nc" id="L30">            Sentry.captureException(e);</span>
+        }
+<span class="fc" id="L32">        return buildResponse(resolveStatus(e.getCode()), e.getCode(), e.getMessage());</span>
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
+<span class="fc" id="L37">        String message = e.getBindingResult().getFieldErrors().stream()</span>
+<span class="fc" id="L38">                .map(DefaultMessageSourceResolvable::getDefaultMessage)</span>
+<span class="fc" id="L39">                .collect(Collectors.joining(&quot;; &quot;));</span>
+<span class="fc" id="L40">        log.warn(&quot;参数校验异常: {}&quot;, message);</span>
+<span class="fc" id="L41">        return buildResponse(HttpStatus.BAD_REQUEST, ErrorCode.BAD_REQUEST.getCode(), &quot;参数验证失败: &quot; + message);</span>
+    }
+
+    @ExceptionHandler({
+            BindException.class,
+            ConstraintViolationException.class,
+            HttpMessageNotReadableException.class,
+            MethodArgumentTypeMismatchException.class
+    })
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleBadRequest(Exception e) {
+<span class="fc" id="L51">        String message = extractBadRequestMessage(e);</span>
+<span class="fc" id="L52">        log.warn(&quot;请求参数异常: {}&quot;, message);</span>
+<span class="fc" id="L53">        return buildResponse(HttpStatus.BAD_REQUEST, ErrorCode.BAD_REQUEST.getCode(), message);</span>
+    }
+
+    @ExceptionHandler({AuthorizationDeniedException.class, AccessDeniedException.class})
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleAccessDenied(Exception e) {
+<span class="fc" id="L58">        log.warn(&quot;权限不足: {}&quot;, e.getMessage());</span>
+<span class="fc" id="L59">        return buildResponse(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN.getCode(), &quot;无权限访问该资源&quot;);</span>
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleAuthentication(AuthenticationException e) {
+<span class="nc" id="L64">        log.warn(&quot;认证异常: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L65">        return buildResponse(HttpStatus.UNAUTHORIZED, ErrorCode.UNAUTHORIZED.getCode(), &quot;登录已失效，请重新登录&quot;);</span>
+    }
+
+    @ExceptionHandler(DuplicateKeyException.class)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleDuplicateKey(DuplicateKeyException e) {
+<span class="nc" id="L70">        log.warn(&quot;唯一约束冲突: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L71">        return buildResponse(HttpStatus.CONFLICT, ErrorCode.BUSINESS_ERROR.getCode(), &quot;数据已存在，请勿重复提交&quot;);</span>
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; handleUnknown(Exception e) {
+<span class="fc" id="L76">        log.error(&quot;服务器内部未知错误&quot;, e);</span>
+<span class="fc" id="L77">        Sentry.captureException(e);</span>
+<span class="fc" id="L78">        return buildResponse(</span>
+                HttpStatus.INTERNAL_SERVER_ERROR,
+<span class="fc" id="L80">                ErrorCode.INTERNAL_SERVER_ERROR.getCode(),</span>
+<span class="fc" id="L81">                ErrorCode.INTERNAL_SERVER_ERROR.getDefaultMessage()</span>
+        );
+    }
+
+    private ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; buildResponse(HttpStatus status, int code, String message) {
+<span class="fc" id="L86">        return ResponseEntity.status(status).body(ApiResponse.fail(code, message));</span>
+    }
+
+    private HttpStatus resolveStatus(int code) {
+<span class="pc bpc" id="L90" title="6 of 8 branches missed.">        return switch (code) {</span>
+<span class="nc" id="L91">            case 400 -&gt; HttpStatus.BAD_REQUEST;</span>
+<span class="fc" id="L92">            case 401 -&gt; HttpStatus.UNAUTHORIZED;</span>
+<span class="nc" id="L93">            case 403 -&gt; HttpStatus.FORBIDDEN;</span>
+<span class="nc" id="L94">            case 404 -&gt; HttpStatus.NOT_FOUND;</span>
+<span class="nc" id="L95">            case 405 -&gt; HttpStatus.METHOD_NOT_ALLOWED;</span>
+<span class="fc" id="L96">            case 409 -&gt; HttpStatus.CONFLICT;</span>
+<span class="nc" id="L97">            case 429 -&gt; HttpStatus.TOO_MANY_REQUESTS;</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">            default -&gt; code &gt;= 500 ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.CONFLICT;</span>
+        };
+    }
+
+    private String extractBadRequestMessage(Exception e) {
+<span class="fc bfc" id="L103" title="All 2 branches covered.">        if (e instanceof BindException bindException) {</span>
+<span class="fc" id="L104">            String fieldMessage = bindException.getBindingResult().getFieldErrors().stream()</span>
+<span class="fc" id="L105">                    .map(DefaultMessageSourceResolvable::getDefaultMessage)</span>
+<span class="fc" id="L106">                    .collect(Collectors.joining(&quot;; &quot;));</span>
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">            if (!fieldMessage.isBlank()) {</span>
+<span class="nc" id="L108">                return &quot;参数验证失败: &quot; + fieldMessage;</span>
+            }
+        }
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        if (e instanceof ConstraintViolationException constraintViolationException) {</span>
+<span class="fc" id="L112">            String fieldMessage = constraintViolationException.getConstraintViolations().stream()</span>
+<span class="pc" id="L113">                    .map(violation -&gt; violation.getMessage())</span>
+<span class="fc" id="L114">                    .collect(Collectors.joining(&quot;; &quot;));</span>
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">            if (!fieldMessage.isBlank()) {</span>
+<span class="nc" id="L116">                return &quot;参数验证失败: &quot; + fieldMessage;</span>
+            }
+        }
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        if (e instanceof HttpMessageNotReadableException) {</span>
+<span class="fc" id="L120">            return &quot;请求参数格式错误&quot;;</span>
+        }
+<span class="fc" id="L122">        return &quot;请求参数错误&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

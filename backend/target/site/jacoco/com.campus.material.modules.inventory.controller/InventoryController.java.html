@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InventoryController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.inventory.controller</a> &gt; <span class="el_source">InventoryController.java</span></div><h1>InventoryController.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.inventory.controller;
+
+import com.campus.material.common.ApiResponse;
+import com.campus.material.common.PageQuery;
+import com.campus.material.common.PageResult;
+import com.campus.material.modules.inventory.dto.InventoryAdjustRequest;
+import com.campus.material.modules.inventory.dto.StockInRequest;
+import com.campus.material.modules.inventory.dto.StockOutRequest;
+import com.campus.material.modules.inventory.entity.InventoryBatch;
+import com.campus.material.modules.inventory.entity.StockIn;
+import com.campus.material.modules.inventory.entity.StockOut;
+import com.campus.material.modules.inventory.service.InventoryService;
+import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping(&quot;/api/inventory&quot;)
+public class InventoryController {
+
+    private final InventoryService inventoryService;
+
+<span class="fc" id="L26">    public InventoryController(InventoryService inventoryService) {</span>
+<span class="fc" id="L27">        this.inventoryService = inventoryService;</span>
+<span class="fc" id="L28">    }</span>
+
+    @GetMapping(&quot;/list&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER')&quot;)
+    public ApiResponse&lt;PageResult&lt;Map&lt;String, Object&gt;&gt;&gt; list(@Valid PageQuery pageQuery,
+                                                             @RequestParam(required = false) Long materialId,
+                                                             @RequestParam(required = false) Long warehouseId) {
+<span class="fc" id="L35">        return ApiResponse.ok(inventoryService.list(pageQuery, materialId, warehouseId));</span>
+    }
+
+    @GetMapping(&quot;/batches&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER')&quot;)
+    public ApiResponse&lt;List&lt;InventoryBatch&gt;&gt; batches(@RequestParam(required = false) Long materialId,
+                                                     @RequestParam(required = false) Long warehouseId) {
+<span class="nc" id="L42">        return ApiResponse.ok(inventoryService.batches(materialId, warehouseId));</span>
+    }
+
+    @GetMapping(&quot;/stock-in&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')&quot;)
+    public ApiResponse&lt;PageResult&lt;StockIn&gt;&gt; listStockIn(@Valid PageQuery pageQuery) {
+<span class="nc" id="L48">        return ApiResponse.ok(inventoryService.listStockIn(pageQuery));</span>
+    }
+
+    @GetMapping(&quot;/stock-out&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')&quot;)
+    public ApiResponse&lt;PageResult&lt;StockOut&gt;&gt; listStockOut(@Valid PageQuery pageQuery) {
+<span class="nc" id="L54">        return ApiResponse.ok(inventoryService.listStockOut(pageQuery));</span>
+    }
+
+    @PostMapping(&quot;/stock-in&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','WAREHOUSE_ADMIN')&quot;)
+    public ApiResponse&lt;Void&gt; stockIn(@Valid @RequestBody StockInRequest request) {
+<span class="nc" id="L60">        inventoryService.stockIn(request);</span>
+<span class="nc" id="L61">        return ApiResponse.ok(null);</span>
+    }
+
+    @PostMapping(&quot;/stock-out&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','WAREHOUSE_ADMIN')&quot;)
+    public ApiResponse&lt;Void&gt; stockOut(@Valid @RequestBody StockOutRequest request) {
+<span class="fc" id="L67">        inventoryService.stockOut(request);</span>
+<span class="fc" id="L68">        return ApiResponse.ok(null);</span>
+    }
+
+    @PostMapping(&quot;/check&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','WAREHOUSE_ADMIN')&quot;)
+    public ApiResponse&lt;Void&gt; check(@Valid @RequestBody InventoryAdjustRequest request) {
+<span class="nc" id="L74">        inventoryService.adjust(request);</span>
+<span class="nc" id="L75">        return ApiResponse.ok(null);</span>
+    }
+
+    @GetMapping(&quot;/recommend-outbound&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','WAREHOUSE_ADMIN')&quot;)
+    public ApiResponse&lt;List&lt;InventoryBatch&gt;&gt; recommendOutbound(@RequestParam Long materialId,
+                                                               @RequestParam Long warehouseId) {
+<span class="nc" id="L82">        return ApiResponse.ok(inventoryService.recommendOutbound(materialId, warehouseId));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RbacController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.rbac.controller</a> &gt; <span class="el_source">RbacController.java</span></div><h1>RbacController.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.rbac.controller;
+
+import com.campus.material.common.ApiResponse;
+import com.campus.material.modules.rbac.entity.SysDept;
+import com.campus.material.modules.rbac.entity.SysRole;
+import com.campus.material.modules.rbac.entity.SysUser;
+import com.campus.material.modules.rbac.service.RbacService;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/api/rbac&quot;)
+public class RbacController {
+
+    private final RbacService rbacService;
+
+<span class="fc" id="L19">    public RbacController(RbacService rbacService) {</span>
+<span class="fc" id="L20">        this.rbacService = rbacService;</span>
+<span class="fc" id="L21">    }</span>
+
+    @GetMapping(&quot;/users&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ApiResponse&lt;List&lt;SysUser&gt;&gt; users() {
+<span class="nc" id="L26">        return ApiResponse.ok(rbacService.listUsers());</span>
+    }
+
+    @PostMapping(&quot;/users&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ApiResponse&lt;SysUser&gt; saveUser(@RequestBody SysUser user) {
+<span class="fc" id="L32">        return ApiResponse.ok(rbacService.saveUser(user));</span>
+    }
+
+    @DeleteMapping(&quot;/users/{id}&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ApiResponse&lt;Void&gt; deleteUser(@PathVariable Long id) {
+<span class="nc" id="L38">        rbacService.deleteUser(id);</span>
+<span class="nc" id="L39">        return ApiResponse.ok(null);</span>
+    }
+
+    @GetMapping(&quot;/roles&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','APPROVER')&quot;)
+    public ApiResponse&lt;List&lt;SysRole&gt;&gt; roles() {
+<span class="nc" id="L45">        return ApiResponse.ok(rbacService.listRoles());</span>
+    }
+
+    @PostMapping(&quot;/roles&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ApiResponse&lt;SysRole&gt; saveRole(@RequestBody SysRole role) {
+<span class="fc" id="L51">        return ApiResponse.ok(rbacService.saveRole(role));</span>
+    }
+
+    @GetMapping(&quot;/depts&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','APPROVER','DEPT_USER')&quot;)
+    public ApiResponse&lt;List&lt;SysDept&gt;&gt; depts() {
+<span class="nc" id="L57">        return ApiResponse.ok(rbacService.listDepts());</span>
+    }
+
+    @PostMapping(&quot;/depts&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ApiResponse&lt;SysDept&gt; saveDept(@RequestBody SysDept dept) {
+<span class="nc" id="L63">        return ApiResponse.ok(rbacService.saveDept(dept));</span>
+    }
+
+    @DeleteMapping(&quot;/depts/{id}&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ApiResponse&lt;Void&gt; deleteDept(@PathVariable Long id) {
+<span class="nc" id="L69">        rbacService.deleteDept(id);</span>
+<span class="nc" id="L70">        return ApiResponse.ok(null);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

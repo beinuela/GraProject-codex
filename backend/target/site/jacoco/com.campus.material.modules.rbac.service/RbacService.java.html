@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RbacService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.rbac.service</a> &gt; <span class="el_source">RbacService.java</span></div><h1>RbacService.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.rbac.service;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.campus.material.common.BizException;
+import com.campus.material.modules.log.service.OperationLogService;
+import com.campus.material.modules.rbac.entity.SysDept;
+import com.campus.material.modules.rbac.entity.SysRole;
+import com.campus.material.modules.rbac.entity.SysUser;
+import com.campus.material.modules.rbac.mapper.SysDeptMapper;
+import com.campus.material.modules.rbac.mapper.SysRoleMapper;
+import com.campus.material.modules.rbac.mapper.SysUserMapper;
+import com.campus.material.security.AuthUtil;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class RbacService {
+
+    private final SysUserMapper userMapper;
+    private final SysRoleMapper roleMapper;
+    private final SysDeptMapper deptMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final OperationLogService operationLogService;
+
+    public RbacService(SysUserMapper userMapper, SysRoleMapper roleMapper, SysDeptMapper deptMapper, PasswordEncoder passwordEncoder,
+<span class="fc" id="L28">                       OperationLogService operationLogService) {</span>
+<span class="fc" id="L29">        this.userMapper = userMapper;</span>
+<span class="fc" id="L30">        this.roleMapper = roleMapper;</span>
+<span class="fc" id="L31">        this.deptMapper = deptMapper;</span>
+<span class="fc" id="L32">        this.passwordEncoder = passwordEncoder;</span>
+<span class="fc" id="L33">        this.operationLogService = operationLogService;</span>
+<span class="fc" id="L34">    }</span>
+
+    public List&lt;SysUser&gt; listUsers() {
+<span class="nc" id="L37">        return userMapper.selectList(new LambdaQueryWrapper&lt;SysUser&gt;().orderByDesc(SysUser::getId));</span>
+    }
+
+    public SysUser saveUser(SysUser user) {
+<span class="fc" id="L41">        validateUser(user);</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        if (user.getId() == null) {</span>
+<span class="pc bpc" id="L43" title="2 of 4 branches missed.">            if (user.getPassword() == null || user.getPassword().isBlank()) {</span>
+<span class="nc" id="L44">                throw new BizException(400, &quot;密码不能为空&quot;);</span>
+            }
+<span class="fc" id="L46">            user.setPassword(passwordEncoder.encode(user.getPassword()));</span>
+<span class="fc" id="L47">            userMapper.insert(user);</span>
+<span class="fc" id="L48">            operationLogService.log(AuthUtil.currentUserId(), &quot;RBAC&quot;, &quot;CREATE_USER&quot;, user.getUsername());</span>
+        } else {
+<span class="nc" id="L50">            SysUser old = userMapper.selectById(user.getId());</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">            if (old == null) {</span>
+<span class="nc" id="L52">                throw new BizException(&quot;用户不存在&quot;);</span>
+            }
+<span class="nc bnc" id="L54" title="All 4 branches missed.">            if (user.getPassword() == null || user.getPassword().isBlank()) {</span>
+<span class="nc" id="L55">                user.setPassword(old.getPassword());</span>
+            } else {
+<span class="nc" id="L57">                user.setPassword(passwordEncoder.encode(user.getPassword()));</span>
+            }
+<span class="nc" id="L59">            userMapper.updateById(user);</span>
+<span class="nc" id="L60">            operationLogService.log(AuthUtil.currentUserId(), &quot;RBAC&quot;, &quot;UPDATE_USER&quot;, user.getUsername());</span>
+        }
+<span class="fc" id="L62">        return userMapper.selectById(user.getId());</span>
+    }
+
+    public void deleteUser(Long id) {
+<span class="nc" id="L66">        userMapper.deleteById(id);</span>
+<span class="nc" id="L67">        operationLogService.log(AuthUtil.currentUserId(), &quot;RBAC&quot;, &quot;DELETE_USER&quot;, String.valueOf(id));</span>
+<span class="nc" id="L68">    }</span>
+
+    public List&lt;SysRole&gt; listRoles() {
+<span class="nc" id="L71">        return roleMapper.selectList(new LambdaQueryWrapper&lt;SysRole&gt;().orderByAsc(SysRole::getId));</span>
+    }
+
+    public SysRole saveRole(SysRole role) {
+<span class="fc" id="L75">        validateRole(role);</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">        if (role.getId() == null) {</span>
+<span class="fc" id="L77">            roleMapper.insert(role);</span>
+<span class="fc" id="L78">            operationLogService.log(AuthUtil.currentUserId(), &quot;RBAC&quot;, &quot;CREATE_ROLE&quot;, role.getRoleCode());</span>
+        } else {
+<span class="nc" id="L80">            roleMapper.updateById(role);</span>
+<span class="nc" id="L81">            operationLogService.log(AuthUtil.currentUserId(), &quot;RBAC&quot;, &quot;UPDATE_ROLE&quot;, role.getRoleCode());</span>
+        }
+<span class="fc" id="L83">        return roleMapper.selectById(role.getId());</span>
+    }
+
+    public List&lt;SysDept&gt; listDepts() {
+<span class="nc" id="L87">        return deptMapper.selectList(new LambdaQueryWrapper&lt;SysDept&gt;().orderByAsc(SysDept::getId));</span>
+    }
+
+    public SysDept saveDept(SysDept dept) {
+<span class="nc bnc" id="L91" title="All 2 branches missed.">        if (dept.getId() == null) {</span>
+<span class="nc" id="L92">            deptMapper.insert(dept);</span>
+<span class="nc" id="L93">            operationLogService.log(AuthUtil.currentUserId(), &quot;RBAC&quot;, &quot;CREATE_DEPT&quot;, dept.getDeptName());</span>
+        } else {
+<span class="nc" id="L95">            deptMapper.updateById(dept);</span>
+<span class="nc" id="L96">            operationLogService.log(AuthUtil.currentUserId(), &quot;RBAC&quot;, &quot;UPDATE_DEPT&quot;, dept.getDeptName());</span>
+        }
+<span class="nc" id="L98">        return deptMapper.selectById(dept.getId());</span>
+    }
+
+    public void deleteDept(Long id) {
+<span class="nc" id="L102">        deptMapper.deleteById(id);</span>
+<span class="nc" id="L103">        operationLogService.log(AuthUtil.currentUserId(), &quot;RBAC&quot;, &quot;DELETE_DEPT&quot;, String.valueOf(id));</span>
+<span class="nc" id="L104">    }</span>
+
+    private void validateUser(SysUser user) {
+<span class="pc bpc" id="L107" title="2 of 4 branches missed.">        if (user.getUsername() == null || user.getUsername().isBlank()) {</span>
+<span class="nc" id="L108">            throw new BizException(400, &quot;用户名不能为空&quot;);</span>
+        }
+<span class="fc" id="L110">        String username = user.getUsername().trim();</span>
+<span class="fc" id="L111">        SysUser duplicated = userMapper.selectOne(new LambdaQueryWrapper&lt;SysUser&gt;()</span>
+<span class="fc" id="L112">                .eq(SysUser::getUsername, username)</span>
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">                .ne(user.getId() != null, SysUser::getId, user.getId())</span>
+<span class="fc" id="L114">                .last(&quot;limit 1&quot;));</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">        if (duplicated != null) {</span>
+<span class="fc" id="L116">            throw new BizException(409, &quot;用户账号已存在，请更换账号&quot;);</span>
+        }
+<span class="fc" id="L118">        user.setUsername(username);</span>
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">        if (user.getRealName() != null) {</span>
+<span class="fc" id="L120">            user.setRealName(user.getRealName().trim());</span>
+        }
+<span class="fc" id="L122">    }</span>
+
+    private void validateRole(SysRole role) {
+<span class="pc bpc" id="L125" title="2 of 4 branches missed.">        if (role.getRoleCode() == null || role.getRoleCode().isBlank()) {</span>
+<span class="nc" id="L126">            throw new BizException(400, &quot;角色编码不能为空&quot;);</span>
+        }
+<span class="fc" id="L128">        String roleCode = role.getRoleCode().trim();</span>
+<span class="fc" id="L129">        SysRole duplicated = roleMapper.selectOne(new LambdaQueryWrapper&lt;SysRole&gt;()</span>
+<span class="fc" id="L130">                .eq(SysRole::getRoleCode, roleCode)</span>
+<span class="pc bpc" id="L131" title="1 of 2 branches missed.">                .ne(role.getId() != null, SysRole::getId, role.getId())</span>
+<span class="fc" id="L132">                .last(&quot;limit 1&quot;));</span>
+<span class="fc bfc" id="L133" title="All 2 branches covered.">        if (duplicated != null) {</span>
+<span class="fc" id="L134">            throw new BizException(409, &quot;角色编码已存在，请勿重复添加&quot;);</span>
+        }
+<span class="fc" id="L136">        role.setRoleCode(roleCode);</span>
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">        if (role.getRoleName() != null) {</span>
+<span class="fc" id="L138">            role.setRoleName(role.getRoleName().trim());</span>
+        }
+<span class="fc" id="L140">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

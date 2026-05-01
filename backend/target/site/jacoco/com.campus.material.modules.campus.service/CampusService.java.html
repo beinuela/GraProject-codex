@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CampusService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.campus.service</a> &gt; <span class="el_source">CampusService.java</span></div><h1>CampusService.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.campus.service;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.campus.material.modules.campus.entity.Campus;
+import com.campus.material.modules.campus.mapper.CampusMapper;
+import com.campus.material.modules.log.service.OperationLogService;
+import com.campus.material.security.AuthUtil;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class CampusService {
+
+    private final CampusMapper campusMapper;
+    private final OperationLogService logService;
+
+<span class="fc" id="L18">    public CampusService(CampusMapper campusMapper, OperationLogService logService) {</span>
+<span class="fc" id="L19">        this.campusMapper = campusMapper;</span>
+<span class="fc" id="L20">        this.logService = logService;</span>
+<span class="fc" id="L21">    }</span>
+
+    public List&lt;Campus&gt; list() {
+<span class="nc" id="L24">        return campusMapper.selectList(new LambdaQueryWrapper&lt;Campus&gt;().orderByAsc(Campus::getId));</span>
+    }
+
+    public void save(Campus campus) {
+<span class="nc" id="L28">        Long uid = AuthUtil.currentUserId();</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        if (campus.getId() == null) {</span>
+<span class="nc" id="L30">            campusMapper.insert(campus);</span>
+<span class="nc" id="L31">            logService.log(uid, &quot;CAMPUS&quot;, &quot;CREATE&quot;, &quot;閺傛澘顤冮弽鈥冲隘:&quot; + campus.getCampusName());</span>
+        } else {
+<span class="nc" id="L33">            campusMapper.updateById(campus);</span>
+<span class="nc" id="L34">            logService.log(uid, &quot;CAMPUS&quot;, &quot;UPDATE&quot;, &quot;娣囶喗鏁奸弽鈥冲隘:&quot; + campus.getId());</span>
+        }
+<span class="nc" id="L36">    }</span>
+
+    public void delete(Long id) {
+<span class="nc" id="L39">        campusMapper.deleteById(id);</span>
+<span class="nc" id="L40">        logService.log(AuthUtil.currentUserId(), &quot;CAMPUS&quot;, &quot;DELETE&quot;, &quot;閸掔娀娅庨弽鈥冲隘:&quot; + id);</span>
+<span class="nc" id="L41">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

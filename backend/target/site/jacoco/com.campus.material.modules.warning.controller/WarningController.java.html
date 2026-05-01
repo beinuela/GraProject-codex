@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WarningController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.warning.controller</a> &gt; <span class="el_source">WarningController.java</span></div><h1>WarningController.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.warning.controller;
+
+import com.campus.material.common.ApiResponse;
+import com.campus.material.common.PageQuery;
+import com.campus.material.common.PageResult;
+import com.campus.material.common.RemarkRequest;
+import com.campus.material.modules.warning.entity.WarningRecord;
+import com.campus.material.modules.warning.service.WarningService;
+import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping(&quot;/api/warning&quot;)
+public class WarningController {
+
+    private final WarningService warningService;
+
+<span class="fc" id="L19">    public WarningController(WarningService warningService) {</span>
+<span class="fc" id="L20">        this.warningService = warningService;</span>
+<span class="fc" id="L21">    }</span>
+
+    @GetMapping(&quot;/list&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER')&quot;)
+    public ApiResponse&lt;PageResult&lt;WarningRecord&gt;&gt; list(@Valid PageQuery pageQuery,
+                                                       @RequestParam(required = false) String type,
+                                                       @RequestParam(required = false) String status) {
+<span class="nc" id="L28">        return ApiResponse.ok(warningService.list(pageQuery, type, status));</span>
+    }
+
+    @PostMapping(&quot;/scan&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','WAREHOUSE_ADMIN')&quot;)
+    public ApiResponse&lt;Void&gt; scan() {
+<span class="fc" id="L34">        warningService.scan();</span>
+<span class="fc" id="L35">        return ApiResponse.ok(null);</span>
+    }
+
+    @PostMapping(&quot;/{id}/handle&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER')&quot;)
+    public ApiResponse&lt;Void&gt; handle(@PathVariable Long id,
+                                    @RequestParam(required = false) String remark,
+                                    @RequestBody(required = false) RemarkRequest body) {
+<span class="fc" id="L43">        warningService.handle(id, resolveRemark(remark, body));</span>
+<span class="fc" id="L44">        return ApiResponse.ok(null);</span>
+    }
+
+    private String resolveRemark(String remark, RemarkRequest body) {
+<span class="pc bpc" id="L48" title="1 of 6 branches missed.">        if (body != null &amp;&amp; body.getRemark() != null &amp;&amp; !body.getRemark().isBlank()) {</span>
+<span class="fc" id="L49">            return body.getRemark();</span>
+        }
+<span class="fc" id="L51">        return remark;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransferService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">campus-backend</a> &gt; <a href="index.source.html" class="el_package">com.campus.material.modules.transfer.service</a> &gt; <span class="el_source">TransferService.java</span></div><h1>TransferService.java</h1><pre class="source lang-java linenums">package com.campus.material.modules.transfer.service;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.campus.material.common.BizException;
+import com.campus.material.common.OrderStatus;
+import com.campus.material.common.PageQuery;
+import com.campus.material.common.PageResult;
+import com.campus.material.monitoring.BusinessMetrics;
+import com.campus.material.modules.inventory.entity.Inventory;
+import com.campus.material.modules.inventory.entity.InventoryBatch;
+import com.campus.material.modules.inventory.mapper.InventoryBatchMapper;
+import com.campus.material.modules.inventory.mapper.InventoryMapper;
+import com.campus.material.modules.log.service.OperationLogService;
+import com.campus.material.modules.transfer.dto.TransferCreateRequest;
+import com.campus.material.modules.transfer.entity.TransferOrder;
+import com.campus.material.modules.transfer.entity.TransferOrderItem;
+import com.campus.material.modules.transfer.mapper.TransferOrderItemMapper;
+import com.campus.material.modules.transfer.mapper.TransferOrderMapper;
+import com.campus.material.security.AuthUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+@Service
+public class TransferService {
+
+    private final TransferOrderMapper transferOrderMapper;
+    private final TransferOrderItemMapper transferOrderItemMapper;
+    private final InventoryMapper inventoryMapper;
+    private final InventoryBatchMapper batchMapper;
+    private final OperationLogService operationLogService;
+    private final com.campus.material.modules.warehouse.mapper.WarehouseMapper warehouseMapper;
+    private final BusinessMetrics businessMetrics;
+
+    public TransferService(TransferOrderMapper transferOrderMapper, TransferOrderItemMapper transferOrderItemMapper,
+                           InventoryMapper inventoryMapper, InventoryBatchMapper batchMapper,
+                           OperationLogService operationLogService,
+                           com.campus.material.modules.warehouse.mapper.WarehouseMapper warehouseMapper,
+<span class="fc" id="L49">                           BusinessMetrics businessMetrics) {</span>
+<span class="fc" id="L50">        this.transferOrderMapper = transferOrderMapper;</span>
+<span class="fc" id="L51">        this.transferOrderItemMapper = transferOrderItemMapper;</span>
+<span class="fc" id="L52">        this.inventoryMapper = inventoryMapper;</span>
+<span class="fc" id="L53">        this.batchMapper = batchMapper;</span>
+<span class="fc" id="L54">        this.operationLogService = operationLogService;</span>
+<span class="fc" id="L55">        this.warehouseMapper = warehouseMapper;</span>
+<span class="fc" id="L56">        this.businessMetrics = businessMetrics;</span>
+<span class="fc" id="L57">    }</span>
+
+    public PageResult&lt;TransferOrder&gt; list(PageQuery pageQuery) {
+<span class="nc" id="L60">        Page&lt;TransferOrder&gt; page = transferOrderMapper.selectPage(</span>
+<span class="nc" id="L61">                new Page&lt;&gt;(pageQuery.getPage(), pageQuery.getSize()),</span>
+<span class="nc" id="L62">                new LambdaQueryWrapper&lt;TransferOrder&gt;().orderByDesc(TransferOrder::getId)</span>
+        );
+<span class="nc" id="L64">        return PageResult.from(page);</span>
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public Map&lt;String, Object&gt; create(TransferCreateRequest request) {
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (request.getFromWarehouseId().equals(request.getToWarehouseId())) {</span>
+<span class="fc" id="L70">            throw new BizException(&quot;调出仓库和调入仓库不能相同&quot;);</span>
+        }
+<span class="fc" id="L72">        TransferOrder order = new TransferOrder();</span>
+<span class="fc" id="L73">        order.setFromWarehouseId(request.getFromWarehouseId());</span>
+<span class="fc" id="L74">        order.setToWarehouseId(request.getToWarehouseId());</span>
+<span class="fc" id="L75">        order.setStatus(OrderStatus.DRAFT);</span>
+<span class="fc" id="L76">        order.setReason(request.getReason());</span>
+<span class="fc" id="L77">        order.setApplicantId(AuthUtil.currentUserId());</span>
+<span class="fc" id="L78">        transferOrderMapper.insert(order);</span>
+
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        for (TransferCreateRequest.Item item : request.getItems()) {</span>
+<span class="fc" id="L81">            TransferOrderItem orderItem = new TransferOrderItem();</span>
+<span class="fc" id="L82">            orderItem.setTransferOrderId(order.getId());</span>
+<span class="fc" id="L83">            orderItem.setMaterialId(item.getMaterialId());</span>
+<span class="fc" id="L84">            orderItem.setQuantity(item.getQuantity());</span>
+<span class="fc" id="L85">            transferOrderItemMapper.insert(orderItem);</span>
+<span class="fc" id="L86">        }</span>
+<span class="fc" id="L87">        operationLogService.log(AuthUtil.currentUserId(), &quot;TRANSFER&quot;, &quot;CREATE&quot;, &quot;创建调拨单:&quot; + order.getId());</span>
+<span class="fc" id="L88">        return detail(order.getId());</span>
+    }
+
+    public void submit(Long id) {
+<span class="fc" id="L92">        TransferOrder order = mustGet(id);</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        if (!OrderStatus.DRAFT.equals(order.getStatus())) {</span>
+<span class="fc" id="L94">            throw new BizException(&quot;当前状态不允许提交&quot;);</span>
+        }
+<span class="fc" id="L96">        order.setStatus(OrderStatus.SUBMITTED);</span>
+<span class="fc" id="L97">        transferOrderMapper.updateById(order);</span>
+<span class="fc" id="L98">        operationLogService.log(AuthUtil.currentUserId(), &quot;TRANSFER&quot;, &quot;SUBMIT&quot;, &quot;提交调拨单:&quot; + id);</span>
+<span class="fc" id="L99">    }</span>
+
+    public void approve(Long id, String remark) {
+<span class="fc" id="L102">        TransferOrder order = mustGet(id);</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">        if (!OrderStatus.SUBMITTED.equals(order.getStatus())) {</span>
+<span class="fc" id="L104">            throw new BizException(&quot;当前状态不允许审批&quot;);</span>
+        }
+<span class="fc" id="L106">        order.setStatus(OrderStatus.APPROVED);</span>
+<span class="fc" id="L107">        order.setApproverId(AuthUtil.currentUserId());</span>
+<span class="fc" id="L108">        order.setApproveRemark(remark);</span>
+<span class="fc" id="L109">        order.setApproveTime(LocalDateTime.now());</span>
+<span class="fc" id="L110">        transferOrderMapper.updateById(order);</span>
+<span class="fc" id="L111">        operationLogService.log(AuthUtil.currentUserId(), &quot;TRANSFER&quot;, &quot;APPROVE&quot;, &quot;审批通过调拨单:&quot; + id);</span>
+<span class="fc" id="L112">    }</span>
+
+    public void reject(Long id, String remark) {
+<span class="nc" id="L115">        TransferOrder order = mustGet(id);</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        if (!OrderStatus.SUBMITTED.equals(order.getStatus())) {</span>
+<span class="nc" id="L117">            throw new BizException(&quot;当前状态不允许驳回&quot;);</span>
+        }
+<span class="nc" id="L119">        order.setStatus(OrderStatus.REJECTED);</span>
+<span class="nc" id="L120">        order.setApproverId(AuthUtil.currentUserId());</span>
+<span class="nc" id="L121">        order.setApproveRemark(remark);</span>
+<span class="nc" id="L122">        order.setApproveTime(LocalDateTime.now());</span>
+<span class="nc" id="L123">        transferOrderMapper.updateById(order);</span>
+<span class="nc" id="L124">        operationLogService.log(AuthUtil.currentUserId(), &quot;TRANSFER&quot;, &quot;REJECT&quot;, &quot;驳回调拨单:&quot; + id);</span>
+<span class="nc" id="L125">    }</span>
+
+    @Transactional(rollbackFor = Exception.class)
+    public void execute(Long id) {
+<span class="fc" id="L129">        TransferOrder order = mustGet(id);</span>
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">        if (!OrderStatus.APPROVED.equals(order.getStatus())) {</span>
+<span class="nc" id="L131">            throw new BizException(&quot;当前状态不允许执行调拨&quot;);</span>
+        }
+        /*
+         * 调拨执行在同一事务中完成批次搬移和库存汇总扣减。
+         * 先按 FEFO 顺序扣减来源批次，再为目标仓生成镜像批次，最后同步更新库存汇总数量。
+         * 任何一步失败都需要整体回滚，避免出现批次和汇总库存不一致。
+         */
+<span class="fc" id="L138">        List&lt;TransferOrderItem&gt; items = transferOrderItemMapper.selectList(</span>
+<span class="fc" id="L139">                new LambdaQueryWrapper&lt;TransferOrderItem&gt;().eq(TransferOrderItem::getTransferOrderId, id));</span>
+
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        for (TransferOrderItem item : items) {</span>
+<span class="fc" id="L142">            Inventory sourceInventory = mustGetInventory(item.getMaterialId(), order.getFromWarehouseId());</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">            if (sourceInventory.getCurrentQty() &lt; item.getQuantity()) {</span>
+<span class="nc" id="L144">                throw new BizException(&quot;调拨物资库存不足，物资ID:&quot; + item.getMaterialId());</span>
+            }
+<span class="fc" id="L146">            List&lt;InventoryBatch&gt; sourceBatches = batchMapper.selectList(new LambdaQueryWrapper&lt;InventoryBatch&gt;()</span>
+<span class="fc" id="L147">                    .eq(InventoryBatch::getMaterialId, item.getMaterialId())</span>
+<span class="fc" id="L148">                    .eq(InventoryBatch::getWarehouseId, order.getFromWarehouseId())</span>
+<span class="fc" id="L149">                    .gt(InventoryBatch::getRemainQty, 0)</span>
+<span class="fc" id="L150">                    .ge(InventoryBatch::getExpireDate, LocalDate.now())</span>
+<span class="fc" id="L151">                    .orderByAsc(InventoryBatch::getExpireDate)</span>
+<span class="fc" id="L152">                    .orderByAsc(InventoryBatch::getId));</span>
+
+<span class="fc" id="L154">            int remain = item.getQuantity();</span>
+<span class="fc" id="L155">            int index = 1;</span>
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">            for (InventoryBatch sourceBatch : sourceBatches) {</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">                if (remain &lt;= 0) break;</span>
+<span class="fc" id="L158">                int transferQty = Math.min(remain, sourceBatch.getRemainQty());</span>
+<span class="fc" id="L159">                sourceBatch.setRemainQty(sourceBatch.getRemainQty() - transferQty);</span>
+<span class="fc" id="L160">                batchMapper.updateById(sourceBatch);</span>
+
+<span class="fc" id="L162">                InventoryBatch targetBatch = new InventoryBatch();</span>
+<span class="fc" id="L163">                targetBatch.setMaterialId(item.getMaterialId());</span>
+<span class="fc" id="L164">                targetBatch.setWarehouseId(order.getToWarehouseId());</span>
+<span class="fc" id="L165">                targetBatch.setBatchNo(sourceBatch.getBatchNo() + &quot;-T&quot; + id + &quot;-&quot; + index++);</span>
+<span class="fc" id="L166">                targetBatch.setInQty(transferQty);</span>
+<span class="fc" id="L167">                targetBatch.setRemainQty(transferQty);</span>
+<span class="fc" id="L168">                targetBatch.setProductionDate(sourceBatch.getProductionDate());</span>
+<span class="fc" id="L169">                targetBatch.setExpireDate(sourceBatch.getExpireDate());</span>
+<span class="fc" id="L170">                batchMapper.insert(targetBatch);</span>
+
+<span class="fc" id="L172">                remain -= transferQty;</span>
+<span class="fc" id="L173">            }</span>
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">            if (remain &gt; 0) {</span>
+<span class="nc" id="L175">                throw new BizException(&quot;调拨物资批次库存不足，无法完成调拨&quot;);</span>
+            }
+
+<span class="fc" id="L178">            sourceInventory.setCurrentQty(sourceInventory.getCurrentQty() - item.getQuantity());</span>
+<span class="fc" id="L179">            inventoryMapper.updateById(sourceInventory);</span>
+
+<span class="fc" id="L181">            Inventory targetInventory = getOrInitInventory(item.getMaterialId(), order.getToWarehouseId());</span>
+<span class="fc" id="L182">            targetInventory.setCurrentQty(targetInventory.getCurrentQty() + item.getQuantity());</span>
+<span class="fc" id="L183">            inventoryMapper.updateById(targetInventory);</span>
+<span class="fc" id="L184">        }</span>
+
+<span class="fc" id="L186">        order.setStatus(OrderStatus.OUTBOUND);</span>
+<span class="fc" id="L187">        transferOrderMapper.updateById(order);</span>
+<span class="fc" id="L188">        operationLogService.log(AuthUtil.currentUserId(), &quot;TRANSFER&quot;, &quot;EXECUTE&quot;, &quot;执行调拨单:&quot; + id);</span>
+<span class="fc" id="L189">        businessMetrics.recordTransferExecute();</span>
+<span class="fc" id="L190">    }</span>
+
+    public void receive(Long id) {
+<span class="nc" id="L193">        TransferOrder order = mustGet(id);</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        if (!OrderStatus.OUTBOUND.equals(order.getStatus())) {</span>
+<span class="nc" id="L195">            throw new BizException(&quot;当前状态不允许签收&quot;);</span>
+        }
+<span class="nc" id="L197">        order.setStatus(OrderStatus.RECEIVED);</span>
+<span class="nc" id="L198">        transferOrderMapper.updateById(order);</span>
+<span class="nc" id="L199">        operationLogService.log(AuthUtil.currentUserId(), &quot;TRANSFER&quot;, &quot;RECEIVE&quot;, &quot;签收调拨单:&quot; + id);</span>
+<span class="nc" id="L200">    }</span>
+
+    public Map&lt;String, Object&gt; detail(Long id) {
+<span class="fc" id="L203">        TransferOrder order = mustGet(id);</span>
+<span class="fc" id="L204">        List&lt;TransferOrderItem&gt; items = transferOrderItemMapper.selectList(</span>
+<span class="fc" id="L205">                new LambdaQueryWrapper&lt;TransferOrderItem&gt;().eq(TransferOrderItem::getTransferOrderId, id));</span>
+<span class="fc" id="L206">        Map&lt;String, Object&gt; map = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L207">        map.put(&quot;order&quot;, order);</span>
+<span class="fc" id="L208">        map.put(&quot;items&quot;, items);</span>
+<span class="fc" id="L209">        return map;</span>
+    }
+
+    public List&lt;Map&lt;String, Object&gt;&gt; recommendTransfer(String targetCampus, Long materialId, Integer qty) {
+        /*
+         * 调拨推荐以目标校区为起点，先计算校区间距离，再把满足库存条件的候选仓统一取出。
+         * 仓库信息采用批量预取，避免在候选列表遍历时出现按仓库逐条查询的 N+1 开销。
+         */
+<span class="nc" id="L217">        Map&lt;String, Double&gt; distances = com.campus.material.modules.algorithm.DijkstraUtil.calculateShortestPaths(targetCampus);</span>
+
+<span class="nc" id="L219">        List&lt;Inventory&gt; invs = inventoryMapper.selectList(new LambdaQueryWrapper&lt;Inventory&gt;()</span>
+<span class="nc" id="L220">                .eq(Inventory::getMaterialId, materialId)</span>
+<span class="nc" id="L221">                .ge(Inventory::getCurrentQty, qty));</span>
+<span class="nc" id="L222">        List&lt;Long&gt; warehouseIds = invs.stream().map(Inventory::getWarehouseId).distinct().toList();</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">        Map&lt;Long, com.campus.material.modules.warehouse.entity.Warehouse&gt; warehouseMap = warehouseIds.isEmpty()</span>
+<span class="nc" id="L224">                ? Map.of()</span>
+<span class="nc" id="L225">                : warehouseMapper.selectBatchIds(warehouseIds).stream()</span>
+<span class="nc" id="L226">                .collect(Collectors.toMap(com.campus.material.modules.warehouse.entity.Warehouse::getId, Function.identity()));</span>
+
+<span class="nc" id="L228">        List&lt;Map&lt;String, Object&gt;&gt; recommendations = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        for (Inventory inv : invs) {</span>
+<span class="nc" id="L230">            com.campus.material.modules.warehouse.entity.Warehouse wh = warehouseMap.get(inv.getWarehouseId());</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">            if (wh == null) continue;</span>
+
+<span class="nc" id="L233">            Double dist = distances.getOrDefault(wh.getCampus(), Double.MAX_VALUE);</span>
+<span class="nc" id="L234">            Map&lt;String, Object&gt; rec = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L235">            rec.put(&quot;warehouseId&quot;, wh.getId());</span>
+<span class="nc" id="L236">            rec.put(&quot;warehouseName&quot;, wh.getWarehouseName());</span>
+<span class="nc" id="L237">            rec.put(&quot;campus&quot;, wh.getCampus());</span>
+<span class="nc" id="L238">            rec.put(&quot;distance&quot;, dist);</span>
+<span class="nc" id="L239">            rec.put(&quot;availableQty&quot;, inv.getCurrentQty());</span>
+
+<span class="nc" id="L241">            recommendations.add(rec);</span>
+<span class="nc" id="L242">        }</span>
+
+<span class="nc" id="L244">        recommendations.sort(Comparator.comparingDouble(m -&gt; (Double) m.get(&quot;distance&quot;)));</span>
+<span class="nc" id="L245">        return recommendations;</span>
+    }
+
+    private TransferOrder mustGet(Long id) {
+<span class="fc" id="L249">        TransferOrder order = transferOrderMapper.selectById(id);</span>
+<span class="fc bfc" id="L250" title="All 2 branches covered.">        if (order == null) {</span>
+<span class="fc" id="L251">            throw new BizException(&quot;调拨单不存在&quot;);</span>
+        }
+<span class="fc" id="L253">        return order;</span>
+    }
+
+    private Inventory mustGetInventory(Long materialId, Long warehouseId) {
+<span class="fc" id="L257">        Inventory inv = inventoryMapper.selectOne(new LambdaQueryWrapper&lt;Inventory&gt;()</span>
+<span class="fc" id="L258">                .eq(Inventory::getMaterialId, materialId)</span>
+<span class="fc" id="L259">                .eq(Inventory::getWarehouseId, warehouseId)</span>
+<span class="fc" id="L260">                .last(&quot;limit 1&quot;));</span>
+<span class="pc bpc" id="L261" title="1 of 2 branches missed.">        if (inv == null) {</span>
+<span class="nc" id="L262">            throw new BizException(&quot;指定仓库无此物资库存记录，物资ID:&quot; + materialId);</span>
+        }
+<span class="fc" id="L264">        return inv;</span>
+    }
+
+    private Inventory getOrInitInventory(Long materialId, Long warehouseId) {
+<span class="fc" id="L268">        Inventory inv = inventoryMapper.selectOne(new LambdaQueryWrapper&lt;Inventory&gt;()</span>
+<span class="fc" id="L269">                .eq(Inventory::getMaterialId, materialId)</span>
+<span class="fc" id="L270">                .eq(Inventory::getWarehouseId, warehouseId)</span>
+<span class="fc" id="L271">                .last(&quot;limit 1&quot;));</span>
+<span class="pc bpc" id="L272" title="1 of 2 branches missed.">        if (inv != null) return inv;</span>
+<span class="nc" id="L273">        Inventory created = new Inventory();</span>
+<span class="nc" id="L274">        created.setMaterialId(materialId);</span>
+<span class="nc" id="L275">        created.setWarehouseId(warehouseId);</span>
+<span class="nc" id="L276">        created.setCurrentQty(0);</span>
+<span class="nc" id="L277">        created.setLockedQty(0);</span>
+<span class="nc" id="L278">        inventoryMapper.insert(created);</span>
+<span class="nc" id="L279">        return created;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
