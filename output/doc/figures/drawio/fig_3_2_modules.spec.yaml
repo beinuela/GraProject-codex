@@ -1,9 +1,9 @@
 meta:
   profile: academic-paper
   theme: academic
-  layout: star
-  routing: straight
-  canvas: 980x920
+  layout: vertical
+  routing: orthogonal
+  canvas: 1160x900
   title: 系统功能模块图
   description: 校园物资智能管理系统的功能模块划分
 nodes:
@@ -12,8 +12,8 @@ nodes:
     type: service
     size: xl
     position:
-      x: 470
-      'y': 390
+      x: 480
+      'y': 40
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
@@ -26,8 +26,8 @@ nodes:
     type: service
     size: xl
     position:
-      x: 110
-      'y': 110
+      x: 40
+      'y': 300
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
@@ -40,8 +40,8 @@ nodes:
     type: service
     size: xl
     position:
-      x: 470
-      'y': 90
+      x: 320
+      'y': 300
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
@@ -54,8 +54,8 @@ nodes:
     type: service
     size: xl
     position:
-      x: 830
-      'y': 110
+      x: 600
+      'y': 300
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
@@ -68,8 +68,8 @@ nodes:
     type: service
     size: xl
     position:
-      x: 110
-      'y': 390
+      x: 40
+      'y': 620
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
@@ -82,8 +82,8 @@ nodes:
     type: service
     size: xl
     position:
-      x: 830
-      'y': 390
+      x: 320
+      'y': 620
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
@@ -96,8 +96,8 @@ nodes:
     type: service
     size: xl
     position:
-      x: 110
-      'y': 690
+      x: 600
+      'y': 620
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
@@ -110,8 +110,8 @@ nodes:
     type: service
     size: xl
     position:
-      x: 470
-      'y': 730
+      x: 880
+      'y': 620
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
@@ -124,8 +124,8 @@ nodes:
     type: service
     size: xl
     position:
-      x: 830
-      'y': 690
+      x: 880
+      'y': 300
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'

@@ -16,7 +16,7 @@
       "id": "start",
       "label": "触发定时扫描",
       "type": "terminal",
-      "size": "xl"
+      "size": "large"
     },
     {
       "id": "scan",
@@ -58,7 +58,7 @@
       "id": "end",
       "label": "进入统计分析",
       "type": "terminal",
-      "size": "xl"
+      "size": "large"
     },
     {
       "id": "noop",

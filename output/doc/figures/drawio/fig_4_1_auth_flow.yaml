@@ -3,254 +3,139 @@ meta:
   theme: academic
   layout: vertical
   routing: orthogonal
-  canvas: 760x1180
+  canvas: 1150x1520
   title: 登录认证与令牌续签流程图
-  description: 登录、令牌刷新和失败回退链路
+  description: 登录、接口访问、401 刷新和请求重放的认证闭环
 nodes:
-- id: login
-  label: 提交账号密码
-  type: terminal
-  size: xl
-  position:
-    x: 330
-    y: 40
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 16
-- id: verify
-  label: 校验用户信息
-  type: process
-  size: xl
-  position:
-    x: 330
-    y: 145
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 16
-- id: issue
-  label: 签发令牌
-  type: process
-  size: xl
-  position:
-    x: 330
-    y: 255
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 16
-- id: init
-  label: 保存令牌并加载菜单
-  type: process
-  size: xl
-  position:
-    x: 330
-    y: 380
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 16
-- id: api
-  label: 携带 Token 访问接口
-  type: process
-  size: xl
-  position:
-    x: 330
-    y: 500
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 16
-- id: unauth
-  label: 收到 401？
-  type: decision
-  size: large
-  position:
-    x: 330
-    y: 625
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 16
-- id: refresh
-  label: 调用刷新接口
-  type: process
-  size: xl
-  position:
-    x: 330
-    y: 755
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 16
-- id: rotated
-  label: 刷新成功？
-  type: decision
-  size: large
-  position:
-    x: 330
-    y: 885
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 16
-- id: retry
-  label: 更新令牌并重放请求
-  type: process
-  size: xl
-  position:
-    x: 120
-    y: 1010
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 16
-- id: logout
-  label: 清理令牌并返回登录页
-  type: process
-  size: xl
-  position:
-    x: 540
-    y: 1010
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 16
-- id: done
-  label: 继续访问页面
-  type: terminal
-  size: xl
-  position:
-    x: 120
-    y: 1125
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 16
+  - id: login
+    label: 提交账号密码
+    type: terminal
+    size: large
+    position: { x: 430, y: 80 }
+    style: &flow_node
+      fillColor: "#FFFFFF"
+      strokeColor: "#000000"
+      fontColor: "#000000"
+      strokeWidth: 1.6
+      fontSize: 15
+  - id: verify
+    label: 校验用户信息
+    type: process
+    size: large
+    position: { x: 430, y: 220 }
+    style: *flow_node
+  - id: issue
+    label: 签发令牌
+    type: process
+    size: large
+    position: { x: 430, y: 360 }
+    style: *flow_node
+  - id: init
+    label: 保存令牌并加载菜单
+    type: process
+    size: xl
+    position: { x: 430, y: 520 }
+    style: *flow_node
+  - id: api
+    label: 携带 Token 访问接口
+    type: process
+    size: xl
+    position: { x: 430, y: 680 }
+    style: *flow_node
+  - id: unauth
+    label: 收到 401？
+    type: decision
+    size: large
+    position: { x: 430, y: 840 }
+    style: *flow_node
+  - id: refresh
+    label: 调用刷新接口
+    type: process
+    size: xl
+    position: { x: 790, y: 840 }
+    style: *flow_node
+  - id: rotated
+    label: 刷新成功？
+    type: decision
+    size: large
+    position: { x: 790, y: 1020 }
+    style: *flow_node
+  - id: retry
+    label: 更新令牌并重放请求
+    type: process
+    size: xl
+    position: { x: 790, y: 1200 }
+    style: *flow_node
+  - id: logout
+    label: 清理令牌并返回登录页
+    type: process
+    size: xl
+    position: { x: 1030, y: 1020 }
+    style: *flow_node
+  - id: done
+    label: 继续访问页面
+    type: terminal
+    size: large
+    position: { x: 430, y: 1380 }
+    style: *flow_node
 edges:
-- from: login
-  to: verify
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: block
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: verify
-  to: issue
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: block
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: issue
-  to: init
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: block
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: init
-  to: api
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: block
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: api
-  to: unauth
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: block
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: unauth
-  to: refresh
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: block
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-  label: 是
-- from: unauth
-  to: done
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: block
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-  label: 否
-- from: refresh
-  to: rotated
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: block
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: rotated
-  to: retry
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: block
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-  label: 是
-- from: rotated
-  to: logout
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: block
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-  label: 否
-- from: retry
-  to: done
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: block
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
+  - from: login
+    to: verify
+    type: primary
+    style: &flow_edge
+      strokeColor: "#000000"
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: "#000000"
+      fontSize: 12
+  - from: verify
+    to: issue
+    type: primary
+    style: *flow_edge
+  - from: issue
+    to: init
+    type: primary
+    style: *flow_edge
+  - from: init
+    to: api
+    type: primary
+    style: *flow_edge
+  - from: api
+    to: unauth
+    type: primary
+    style: *flow_edge
+  - from: unauth
+    to: done
+    type: primary
+    label: 否
+    labelPosition: start
+    style: *flow_edge
+  - from: unauth
+    to: refresh
+    type: primary
+    label: 是
+    labelPosition: end
+    style: *flow_edge
+  - from: refresh
+    to: rotated
+    type: primary
+    style: *flow_edge
+  - from: rotated
+    to: retry
+    type: primary
+    label: 是
+    labelPosition: start
+    style: *flow_edge
+  - from: rotated
+    to: logout
+    type: primary
+    label: 否
+    labelPosition: end
+    style: *flow_edge
+  - from: retry
+    to: done
+    type: primary
+    waypoints:
+      - { x: 790, y: 1290 }
+      - { x: 430, y: 1290 }
+    style: *flow_edge

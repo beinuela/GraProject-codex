@@ -87,7 +87,8 @@ CREATE TABLE material_category (
     deleted TINYINT NOT NULL DEFAULT 0,
     version INT NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_material_category_name (category_name)
 );
 
 CREATE TABLE material_info (
@@ -118,7 +119,8 @@ CREATE TABLE warehouse (
     deleted TINYINT NOT NULL DEFAULT 0,
     version INT NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_warehouse_name (warehouse_name)
 );
 
 CREATE TABLE inventory (
@@ -190,6 +192,7 @@ CREATE TABLE apply_order (
     reason VARCHAR(255),
     scenario VARCHAR(255),
     fast_track TINYINT NOT NULL DEFAULT 0,
+    reserved_warehouse_id BIGINT,
     approver_id BIGINT,
     approve_remark VARCHAR(255),
     approve_time DATETIME,
@@ -426,4 +429,7 @@ CREATE TABLE notification (
     INDEX idx_notification_read (is_read),
     INDEX idx_notification_user_created (target_user_id, created_at)
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS uk_material_category_name ON material_category(category_name);
+CREATE UNIQUE INDEX IF NOT EXISTS uk_warehouse_name ON warehouse(warehouse_name);
 

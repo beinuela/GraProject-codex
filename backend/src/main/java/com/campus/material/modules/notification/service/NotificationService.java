@@ -7,15 +7,27 @@ import com.campus.material.common.PageQuery;
 import com.campus.material.common.PageResult;
 import com.campus.material.modules.notification.entity.Notification;
 import com.campus.material.modules.notification.mapper.NotificationMapper;
+import com.campus.material.modules.rbac.entity.SysRole;
+import com.campus.material.modules.rbac.entity.SysUser;
+import com.campus.material.modules.rbac.mapper.SysRoleMapper;
+import com.campus.material.modules.rbac.mapper.SysUserMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
 
 @Service
 public class NotificationService {
 
     private final NotificationMapper notificationMapper;
+    private final SysUserMapper userMapper;
+    private final SysRoleMapper roleMapper;
 
-    public NotificationService(NotificationMapper notificationMapper) {
+    public NotificationService(NotificationMapper notificationMapper, SysUserMapper userMapper, SysRoleMapper roleMapper) {
         this.notificationMapper = notificationMapper;
+        this.userMapper = userMapper;
+        this.roleMapper = roleMapper;
     }
 
     /** 按用户查询通知列表（未读优先、最新优先） */
@@ -77,5 +89,29 @@ public class NotificationService {
         n.setBizId(bizId);
         n.setIsRead(0);
         notificationMapper.insert(n);
+    }
+
+    public void sendToRoleCodes(Collection<String> roleCodes, Long extraUserId,
+                                String title, String content, String bizType, Long bizId) {
+        LinkedHashSet<Long> targetUserIds = new LinkedHashSet<>();
+        if (extraUserId != null) {
+            targetUserIds.add(extraUserId);
+        }
+        if (roleCodes != null && !roleCodes.isEmpty()) {
+            List<Long> roleIds = roleMapper.selectList(new LambdaQueryWrapper<SysRole>()
+                            .in(SysRole::getRoleCode, roleCodes))
+                    .stream()
+                    .map(SysRole::getId)
+                    .toList();
+            if (!roleIds.isEmpty()) {
+                userMapper.selectList(new LambdaQueryWrapper<SysUser>()
+                                .in(SysUser::getRoleId, roleIds)
+                                .eq(SysUser::getStatus, 1))
+                        .stream()
+                        .map(SysUser::getId)
+                        .forEach(targetUserIds::add);
+            }
+        }
+        targetUserIds.forEach(userId -> send(userId, title, content, bizType, bizId));
     }
 }

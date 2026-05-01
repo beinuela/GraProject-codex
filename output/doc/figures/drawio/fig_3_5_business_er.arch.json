@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "title": "业务单据、预警与通知 E-R图",
+  "title": "业务单据、预警与通知 E-R 图",
   "type": "academic-diagram",
   "source": "generated",
   "profile": "academic-paper",
@@ -14,39 +14,183 @@
   "nodes": [
     {
       "id": "apply",
-      "label": "申领单\\napply_order",
+      "label": "申领单",
       "type": "service",
-      "size": "medium"
+      "size": "xl"
+    },
+    {
+      "id": "apply_attr_1",
+      "label": "编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "apply_attr_2",
+      "label": "部门编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "apply_attr_3",
+      "label": "申请人编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "apply_attr_4",
+      "label": "状态",
+      "type": "user",
+      "size": "small"
     },
     {
       "id": "item",
-      "label": "申领明细\\napply_order_item",
+      "label": "申领明细",
       "type": "service",
-      "size": "medium"
+      "size": "xl"
+    },
+    {
+      "id": "item_attr_1",
+      "label": "编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "item_attr_2",
+      "label": "申领单编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "item_attr_3",
+      "label": "物资编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "item_attr_4",
+      "label": "申请数量",
+      "type": "user",
+      "size": "small"
     },
     {
       "id": "stockout",
-      "label": "出库单\\nstock_out",
+      "label": "出库单",
       "type": "service",
-      "size": "medium"
+      "size": "xl"
+    },
+    {
+      "id": "stockout_attr_1",
+      "label": "编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "stockout_attr_2",
+      "label": "申领单编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "stockout_attr_3",
+      "label": "仓库编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "stockout_attr_4",
+      "label": "操作人编号",
+      "type": "user",
+      "size": "small"
     },
     {
       "id": "transfer",
-      "label": "调拨单\\ntransfer_order",
+      "label": "调拨单",
       "type": "service",
-      "size": "medium"
+      "size": "xl"
+    },
+    {
+      "id": "transfer_attr_1",
+      "label": "编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "transfer_attr_2",
+      "label": "调出仓库编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "transfer_attr_3",
+      "label": "调入仓库编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "transfer_attr_4",
+      "label": "状态",
+      "type": "user",
+      "size": "small"
     },
     {
       "id": "warning",
-      "label": "预警记录\\nwarning_record",
+      "label": "预警记录",
       "type": "service",
-      "size": "medium"
+      "size": "xl"
+    },
+    {
+      "id": "warning_attr_1",
+      "label": "编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "warning_attr_2",
+      "label": "预警类型",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "warning_attr_3",
+      "label": "处理状态",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "warning_attr_4",
+      "label": "处理人编号",
+      "type": "user",
+      "size": "small"
     },
     {
       "id": "notify",
-      "label": "通知消息\\nnotification",
+      "label": "通知消息",
       "type": "service",
-      "size": "medium"
+      "size": "xl"
+    },
+    {
+      "id": "notify_attr_1",
+      "label": "编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "notify_attr_2",
+      "label": "消息标题",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "notify_attr_3",
+      "label": "目标用户编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "notify_attr_4",
+      "label": "已读状态",
+      "type": "user",
+      "size": "small"
     },
     {
       "id": "rel_apply_item",
@@ -71,352 +215,208 @@
       "label": "发送",
       "type": "decision",
       "size": "medium"
-    },
-    {
-      "id": "apply_id",
-      "label": "id",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "apply_dept",
-      "label": "dept_id",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "apply_applicant",
-      "label": "applicant_id",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "apply_status",
-      "label": "status",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "item_id",
-      "label": "id",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "item_order",
-      "label": "apply_order_id",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "item_material",
-      "label": "material_id",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "item_qty",
-      "label": "apply_qty",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "out_id",
-      "label": "id",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "out_apply",
-      "label": "apply_order_id",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "out_wh",
-      "label": "warehouse_id",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "out_operator",
-      "label": "operator_id",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "transfer_id",
-      "label": "id",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "transfer_from",
-      "label": "from_warehouse_id",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "transfer_to",
-      "label": "to_warehouse_id",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "transfer_status",
-      "label": "status",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "warn_id",
-      "label": "id",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "warn_type",
-      "label": "warning_type",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "warn_status",
-      "label": "handle_status",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "warn_handler",
-      "label": "handler_id",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "notify_id",
-      "label": "id",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "notify_title",
-      "label": "title",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "notify_target",
-      "label": "target_user_id",
-      "type": "user",
-      "size": "small"
-    },
-    {
-      "id": "notify_read",
-      "label": "is_read",
-      "type": "user",
-      "size": "small"
     }
   ],
   "edges": [
     {
       "id": "edge-1",
       "from": "apply",
+      "to": "apply_attr_1",
+      "type": "primary"
+    },
+    {
+      "id": "edge-2",
+      "from": "apply",
+      "to": "apply_attr_2",
+      "type": "primary"
+    },
+    {
+      "id": "edge-3",
+      "from": "apply",
+      "to": "apply_attr_3",
+      "type": "primary"
+    },
+    {
+      "id": "edge-4",
+      "from": "apply",
+      "to": "apply_attr_4",
+      "type": "primary"
+    },
+    {
+      "id": "edge-5",
+      "from": "item",
+      "to": "item_attr_1",
+      "type": "primary"
+    },
+    {
+      "id": "edge-6",
+      "from": "item",
+      "to": "item_attr_2",
+      "type": "primary"
+    },
+    {
+      "id": "edge-7",
+      "from": "item",
+      "to": "item_attr_3",
+      "type": "primary"
+    },
+    {
+      "id": "edge-8",
+      "from": "item",
+      "to": "item_attr_4",
+      "type": "primary"
+    },
+    {
+      "id": "edge-9",
+      "from": "stockout",
+      "to": "stockout_attr_1",
+      "type": "primary"
+    },
+    {
+      "id": "edge-10",
+      "from": "stockout",
+      "to": "stockout_attr_2",
+      "type": "primary"
+    },
+    {
+      "id": "edge-11",
+      "from": "stockout",
+      "to": "stockout_attr_3",
+      "type": "primary"
+    },
+    {
+      "id": "edge-12",
+      "from": "stockout",
+      "to": "stockout_attr_4",
+      "type": "primary"
+    },
+    {
+      "id": "edge-13",
+      "from": "transfer",
+      "to": "transfer_attr_1",
+      "type": "primary"
+    },
+    {
+      "id": "edge-14",
+      "from": "transfer",
+      "to": "transfer_attr_2",
+      "type": "primary"
+    },
+    {
+      "id": "edge-15",
+      "from": "transfer",
+      "to": "transfer_attr_3",
+      "type": "primary"
+    },
+    {
+      "id": "edge-16",
+      "from": "transfer",
+      "to": "transfer_attr_4",
+      "type": "primary"
+    },
+    {
+      "id": "edge-17",
+      "from": "warning",
+      "to": "warning_attr_1",
+      "type": "primary"
+    },
+    {
+      "id": "edge-18",
+      "from": "warning",
+      "to": "warning_attr_2",
+      "type": "primary"
+    },
+    {
+      "id": "edge-19",
+      "from": "warning",
+      "to": "warning_attr_3",
+      "type": "primary"
+    },
+    {
+      "id": "edge-20",
+      "from": "warning",
+      "to": "warning_attr_4",
+      "type": "primary"
+    },
+    {
+      "id": "edge-21",
+      "from": "notify",
+      "to": "notify_attr_1",
+      "type": "primary"
+    },
+    {
+      "id": "edge-22",
+      "from": "notify",
+      "to": "notify_attr_2",
+      "type": "primary"
+    },
+    {
+      "id": "edge-23",
+      "from": "notify",
+      "to": "notify_attr_3",
+      "type": "primary"
+    },
+    {
+      "id": "edge-24",
+      "from": "notify",
+      "to": "notify_attr_4",
+      "type": "primary"
+    },
+    {
+      "id": "edge-25",
+      "from": "apply",
       "to": "rel_apply_item",
       "type": "primary",
       "label": "1"
     },
     {
-      "id": "edge-2",
+      "id": "edge-26",
       "from": "rel_apply_item",
       "to": "item",
       "type": "primary",
-      "label": "N"
+      "label": "n"
     },
     {
-      "id": "edge-3",
+      "id": "edge-27",
       "from": "apply",
       "to": "rel_apply_stock",
       "type": "primary",
       "label": "1"
     },
     {
-      "id": "edge-4",
+      "id": "edge-28",
       "from": "rel_apply_stock",
       "to": "stockout",
       "type": "primary",
       "label": "1"
     },
     {
-      "id": "edge-5",
+      "id": "edge-29",
       "from": "transfer",
       "to": "rel_transfer_warning",
       "type": "primary",
       "label": "1"
     },
     {
-      "id": "edge-6",
+      "id": "edge-30",
       "from": "rel_transfer_warning",
       "to": "warning",
       "type": "primary",
-      "label": "N"
+      "label": "n"
     },
     {
-      "id": "edge-7",
+      "id": "edge-31",
       "from": "warning",
       "to": "rel_warning_notify",
       "type": "primary",
       "label": "1"
     },
     {
-      "id": "edge-8",
+      "id": "edge-32",
       "from": "rel_warning_notify",
       "to": "notify",
       "type": "primary",
-      "label": "N"
-    },
-    {
-      "id": "edge-9",
-      "from": "apply",
-      "to": "apply_id",
-      "type": "primary"
-    },
-    {
-      "id": "edge-10",
-      "from": "apply",
-      "to": "apply_dept",
-      "type": "primary"
-    },
-    {
-      "id": "edge-11",
-      "from": "apply",
-      "to": "apply_applicant",
-      "type": "primary"
-    },
-    {
-      "id": "edge-12",
-      "from": "apply",
-      "to": "apply_status",
-      "type": "primary"
-    },
-    {
-      "id": "edge-13",
-      "from": "item",
-      "to": "item_id",
-      "type": "primary"
-    },
-    {
-      "id": "edge-14",
-      "from": "item",
-      "to": "item_order",
-      "type": "primary"
-    },
-    {
-      "id": "edge-15",
-      "from": "item",
-      "to": "item_material",
-      "type": "primary"
-    },
-    {
-      "id": "edge-16",
-      "from": "item",
-      "to": "item_qty",
-      "type": "primary"
-    },
-    {
-      "id": "edge-17",
-      "from": "stockout",
-      "to": "out_id",
-      "type": "primary"
-    },
-    {
-      "id": "edge-18",
-      "from": "stockout",
-      "to": "out_apply",
-      "type": "primary"
-    },
-    {
-      "id": "edge-19",
-      "from": "stockout",
-      "to": "out_wh",
-      "type": "primary"
-    },
-    {
-      "id": "edge-20",
-      "from": "stockout",
-      "to": "out_operator",
-      "type": "primary"
-    },
-    {
-      "id": "edge-21",
-      "from": "transfer",
-      "to": "transfer_id",
-      "type": "primary"
-    },
-    {
-      "id": "edge-22",
-      "from": "transfer",
-      "to": "transfer_from",
-      "type": "primary"
-    },
-    {
-      "id": "edge-23",
-      "from": "transfer",
-      "to": "transfer_to",
-      "type": "primary"
-    },
-    {
-      "id": "edge-24",
-      "from": "transfer",
-      "to": "transfer_status",
-      "type": "primary"
-    },
-    {
-      "id": "edge-25",
-      "from": "warning",
-      "to": "warn_id",
-      "type": "primary"
-    },
-    {
-      "id": "edge-26",
-      "from": "warning",
-      "to": "warn_type",
-      "type": "primary"
-    },
-    {
-      "id": "edge-27",
-      "from": "warning",
-      "to": "warn_status",
-      "type": "primary"
-    },
-    {
-      "id": "edge-28",
-      "from": "warning",
-      "to": "warn_handler",
-      "type": "primary"
-    },
-    {
-      "id": "edge-29",
-      "from": "notify",
-      "to": "notify_id",
-      "type": "primary"
-    },
-    {
-      "id": "edge-30",
-      "from": "notify",
-      "to": "notify_title",
-      "type": "primary"
-    },
-    {
-      "id": "edge-31",
-      "from": "notify",
-      "to": "notify_target",
-      "type": "primary"
-    },
-    {
-      "id": "edge-32",
-      "from": "notify",
-      "to": "notify_read",
-      "type": "primary"
+      "label": "n"
     }
   ],
   "modules": []

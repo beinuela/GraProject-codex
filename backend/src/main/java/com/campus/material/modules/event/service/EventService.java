@@ -48,8 +48,14 @@ public class EventService {
         }
         eventMapper.insert(event);
         logService.log(uid, "EVENT", "CREATE", "创建物资事件:" + event.getEventTitle());
-        // 发送通知
-        notificationService.send(null, "物资事件通知", event.getEventTitle() + " - 请及时处理", "EVENT", event.getId());
+        notificationService.sendToRoleCodes(
+                List.of("ADMIN", "WAREHOUSE_ADMIN"),
+                uid,
+                "物资事件通知",
+                event.getEventTitle() + " - 请及时处理",
+                "EVENT",
+                event.getId()
+        );
     }
 
     public void handle(Long id, String handleResult) {

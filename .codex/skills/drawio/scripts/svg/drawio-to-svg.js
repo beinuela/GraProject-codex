@@ -328,8 +328,13 @@ function renderVertex(cell, style) {
 // Edge Rendering
 // ============================================================================
 
+function isEdgeLabelCell(cell) {
+  const style = parseStyle(cell.style)
+  return cell.vertex && (style.has('edgeLabel') || style.get('edgeLabel') === '1')
+}
+
 /**
- * Compute center point of a cell's geometry
+ * Compute center point of a cell's geometry.
  * @param {object} cell
  * @returns {{ x: number, y: number }}
  */
@@ -341,18 +346,87 @@ function cellCenter(cell) {
   }
 }
 
+function resolveConnectionPoint(cell, ratioX = 0.5, ratioY = 0.5) {
+  const geo = cell.geometry || { x: 0, y: 0, width: 120, height: 60 }
+  return {
+    x: geo.x + geo.width * ratioX,
+    y: geo.y + geo.height * ratioY
+  }
+}
+
+function edgeAnchor(cell, style, sourceCell, targetCell) {
+  const fallbackSource = sourceCell ? cellCenter(sourceCell) : { x: 0, y: 0 }
+  const fallbackTarget = targetCell ? cellCenter(targetCell) : { x: 100, y: 100 }
+
+  const exitX = Number(style.get('exitX'))
+  const exitY = Number(style.get('exitY'))
+  const entryX = Number(style.get('entryX'))
+  const entryY = Number(style.get('entryY'))
+
+  return {
+    source: Number.isFinite(exitX) && Number.isFinite(exitY) && sourceCell
+      ? resolveConnectionPoint(sourceCell, exitX, exitY)
+      : fallbackSource,
+    target: Number.isFinite(entryX) && Number.isFinite(entryY) && targetCell
+      ? resolveConnectionPoint(targetCell, entryX, entryY)
+      : fallbackTarget
+  }
+}
+
+function buildEdgePoints(cell, style, cellMap) {
+  const sourceCell = cell.source ? cellMap.get(cell.source) : null
+  const targetCell = cell.target ? cellMap.get(cell.target) : null
+  const { source, target } = edgeAnchor(cell, style, sourceCell, targetCell)
+  const waypoints = (cell.geometry?.points || [])
+    .filter(point => Number.isFinite(point.x) && Number.isFinite(point.y))
+    .map(point => ({ x: point.x, y: point.y }))
+
+  return [source, ...waypoints, target]
+}
+
+function pointOnPolyline(points, ratio = 0.5) {
+  if (!points.length) return { x: 0, y: 0 }
+  if (points.length === 1) return points[0]
+
+  const segments = []
+  let totalLength = 0
+  for (let i = 1; i < points.length; i += 1) {
+    const start = points[i - 1]
+    const end = points[i]
+    const length = Math.hypot(end.x - start.x, end.y - start.y)
+    segments.push({ start, end, length })
+    totalLength += length
+  }
+
+  if (totalLength === 0) return points[0]
+
+  const clampedRatio = Math.min(Math.max(ratio, 0), 1)
+  let remaining = totalLength * clampedRatio
+  for (const segment of segments) {
+    if (remaining <= segment.length || segment === segments[segments.length - 1]) {
+      const position = segment.length === 0 ? 0 : remaining / segment.length
+      return {
+        x: segment.start.x + (segment.end.x - segment.start.x) * position,
+        y: segment.start.y + (segment.end.y - segment.start.y) * position
+      }
+    }
+    remaining -= segment.length
+  }
+
+  return points[points.length - 1]
+}
+
 /**
  * Render an edge cell to SVG elements
  * @param {object} cell - parsed edge cell
  * @param {Map<string, string>} style - parsed style
  * @param {Map<string, object>} cellMap - id → cell lookup
+ * @param {object|null} labelCell - child edgeLabel cell, if present
  * @returns {string} SVG markup
  */
-function renderEdge(cell, style, cellMap) {
+function renderEdge(cell, style, cellMap, labelCell = null) {
   const strokeColor = style.get('strokeColor') || '#000000'
   const strokeWidth = Number(style.get('strokeWidth')) || 1
-  const fontColor = style.get('fontColor') || '#000000'
-  const fontSize = Number(style.get('fontSize')) || 11
 
   let dashAttr = ''
   if (style.get('dashed') === '1') {
@@ -360,21 +434,7 @@ function renderEdge(cell, style, cellMap) {
     dashAttr = ` stroke-dasharray="${pattern}"`
   }
 
-  const sourceCell = cell.source ? cellMap.get(cell.source) : null
-  const targetCell = cell.target ? cellMap.get(cell.target) : null
-
-  let x1 = 0, y1 = 0, x2 = 100, y2 = 100
-  if (sourceCell) {
-    const c = cellCenter(sourceCell)
-    x1 = c.x
-    y1 = c.y
-  }
-  if (targetCell) {
-    const c = cellCenter(targetCell)
-    x2 = c.x
-    y2 = c.y
-  }
-
+  const points = buildEdgePoints(cell, style, cellMap)
   const parts = []
 
   // Arrow markers
@@ -384,19 +444,34 @@ function renderEdge(cell, style, cellMap) {
   const startRef = markerRef(startArrow, 'start')
   const colorStyle = ` style="color: ${strokeColor}"`
 
-  parts.push(
-    `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" ` +
-    `stroke="${strokeColor}" stroke-width="${strokeWidth}"${dashAttr}` +
-    `${endRef}${startRef}${colorStyle} fill="none"/>`
-  )
-
-  // Edge label
-  const label = decodeEntities(cell.value)
-  if (label) {
-    const midX = (x1 + x2) / 2
-    const midY = (y1 + y2) / 2
+  if (points.length > 2) {
+    const pointList = points.map(point => `${point.x},${point.y}`).join(' ')
     parts.push(
-      `<text x="${midX}" y="${midY - 6}" text-anchor="middle" dominant-baseline="auto" ` +
+      `<polyline points="${pointList}" stroke="${strokeColor}" stroke-width="${strokeWidth}"${dashAttr}` +
+      `${endRef}${startRef}${colorStyle} fill="none"/>`
+    )
+  } else {
+    const [source, target] = points
+    parts.push(
+      `<line x1="${source.x}" y1="${source.y}" x2="${target.x}" y2="${target.y}" ` +
+      `stroke="${strokeColor}" stroke-width="${strokeWidth}"${dashAttr}` +
+      `${endRef}${startRef}${colorStyle} fill="none"/>`
+    )
+  }
+
+  const label = decodeEntities(labelCell?.value || cell.value)
+  if (label) {
+    const labelStyle = labelCell ? parseStyle(labelCell.style) : style
+    const fontColor = labelStyle.get('fontColor') || style.get('fontColor') || '#000000'
+    const fontSize = Number(labelStyle.get('fontSize')) || Number(style.get('fontSize')) || 11
+    const labelRatio = labelCell?.geometry?.labelX != null && Number.isFinite(Number(labelCell.geometry.labelX))
+      ? Number(labelCell.geometry.labelX)
+      : 0.5
+    const anchor = pointOnPolyline(points, labelRatio)
+    const offsetX = labelCell?.geometry?.offsetX ?? 0
+    const offsetY = labelCell ? (labelCell.geometry?.offsetY ?? 0) : -6
+    parts.push(
+      `<text x="${anchor.x + offsetX}" y="${anchor.y + offsetY}" text-anchor="middle" dominant-baseline="middle" ` +
       `font-size="${fontSize}" fill="${fontColor}">${escapeXml(label)}</text>`
     )
   }
@@ -428,7 +503,13 @@ export function drawioToSvg(xmlString) {
   }
 
   // Separate vertices and edges
-  const vertices = cells.filter(c => c.vertex && c.parent !== '0')
+  const edgeLabelCells = cells.filter(isEdgeLabelCell)
+  const edgeLabelMap = new Map()
+  for (const labelCell of edgeLabelCells) {
+    if (labelCell.parent) edgeLabelMap.set(labelCell.parent, labelCell)
+  }
+
+  const vertices = cells.filter(c => c.vertex && c.parent !== '0' && !isEdgeLabelCell(c))
   const edges = cells.filter(c => c.edge)
 
   // Calculate viewBox dimensions from content if default
@@ -469,7 +550,7 @@ export function drawioToSvg(xmlString) {
 
   for (const e of edges) {
     const style = parseStyle(e.style)
-    svgParts.push(renderEdge(e, style, cellMap))
+    svgParts.push(renderEdge(e, style, cellMap, edgeLabelMap.get(e.id) || null))
   }
 
   svgParts.push('</svg>')

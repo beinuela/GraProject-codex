@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "title": "统计数据流转流程图",
+  "type": "academic-diagram",
+  "source": "generated",
+  "profile": "academic-paper",
+  "theme": "academic",
+  "layout": "vertical",
+  "counts": {
+    "nodes": 6,
+    "edges": 5,
+    "modules": 0
+  },
+  "nodes": [
+    {
+      "id": "n1",
+      "label": "前端选择统计主题",
+      "type": "terminal",
+      "size": "xl"
+    },
+    {
+      "id": "n2",
+      "label": "请求 AnalyticsController",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "n3",
+      "label": "Service 聚合业务表",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "n4",
+      "label": "返回统一 JSON",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "n5",
+      "label": "ECharts 渲染图表",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "n6",
+      "label": "页面展示库存与预警结果",
+      "type": "terminal",
+      "size": "xl"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "from": "n1",
+      "to": "n2",
+      "type": "primary"
+    },
+    {
+      "id": "edge-2",
+      "from": "n2",
+      "to": "n3",
+      "type": "primary"
+    },
+    {
+      "id": "edge-3",
+      "from": "n3",
+      "to": "n4",
+      "type": "primary"
+    },
+    {
+      "id": "edge-4",
+      "from": "n4",
+      "to": "n5",
+      "type": "primary"
+    },
+    {
+      "id": "edge-5",
+      "from": "n5",
+      "to": "n6",
+      "type": "primary"
+    }
+  ],
+  "modules": []
+}

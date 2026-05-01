@@ -916,7 +916,7 @@ export function buildXml(spec, theme, layout) {
     const rawEdgeLabel = formatNetworkEdgeLabel(edge)
     const edgeLabel = rawEdgeLabel ? prepareMathLabel(rawEdgeLabel) : ''
 
-    let edgeXml = `<mxCell id="${cellId}" value="${edgeLabel}" style="${style}" edge="1" parent="1" source="${sourceId}" target="${targetId}">`
+    let edgeXml = `<mxCell id="${cellId}" value="" style="${style}" edge="1" parent="1" source="${sourceId}" target="${targetId}">`
     edgeXml += `<mxGeometry relative="1" as="geometry">`
     if (edge.waypoints?.length) {
       edgeXml += '<Array as="points">'

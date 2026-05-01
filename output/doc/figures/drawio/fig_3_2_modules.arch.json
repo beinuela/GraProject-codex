@@ -5,7 +5,7 @@
   "source": "generated",
   "profile": "academic-paper",
   "theme": "academic",
-  "layout": "star",
+  "layout": "vertical",
   "counts": {
     "nodes": 9,
     "edges": 8,

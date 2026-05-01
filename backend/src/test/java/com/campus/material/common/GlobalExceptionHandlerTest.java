@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.lang.NonNull;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -28,11 +30,12 @@ class GlobalExceptionHandlerTest {
     void handleBizShouldReturnSameCodeAndMessage() {
         BizException e = new BizException(401, "unauthorized");
 
-        ApiResponse<Void> response = handler.handleBiz(e);
+        ResponseEntity<ApiResponse<Void>> response = handler.handleBiz(e);
 
-        assertEquals(401, response.getCode());
-        assertEquals("unauthorized", response.getMessage());
-        assertEquals(null, response.getData());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals(401, response.getBody().getCode());
+        assertEquals("unauthorized", response.getBody().getMessage());
+        assertEquals(null, response.getBody().getData());
     }
 
     @Test
@@ -45,30 +48,33 @@ class GlobalExceptionHandlerTest {
         MethodParameter methodParameter = new MethodParameter(Objects.requireNonNull(method), 0);
         MethodArgumentNotValidException e = new MethodArgumentNotValidException(methodParameter, bindingResult);
 
-        ApiResponse<Void> response = handler.handleMethodArgumentNotValid(e);
+        ResponseEntity<ApiResponse<Void>> response = handler.handleMethodArgumentNotValid(e);
 
-        assertEquals(ErrorCode.BAD_REQUEST.getCode(), response.getCode());
-        assertNotNull(response.getMessage());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(ErrorCode.BAD_REQUEST.getCode(), response.getBody().getCode());
+        assertNotNull(response.getBody().getMessage());
     }
 
     @Test
     void handleBadRequestShouldReturnBadRequestContract() {
         BindException e = new BindException(new Object(), "obj");
 
-        ApiResponse<Void> response = handler.handleBadRequest(e);
+        ResponseEntity<ApiResponse<Void>> response = handler.handleBadRequest(e);
 
-        assertEquals(ErrorCode.BAD_REQUEST.getCode(), response.getCode());
-        assertNotNull(response.getMessage());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(ErrorCode.BAD_REQUEST.getCode(), response.getBody().getCode());
+        assertNotNull(response.getBody().getMessage());
     }
 
     @Test
     void handleConstraintViolationShouldReturnBadRequestContract() {
         ConstraintViolationException e = new ConstraintViolationException("bad request", Collections.emptySet());
 
-        ApiResponse<Void> response = handler.handleBadRequest(e);
+        ResponseEntity<ApiResponse<Void>> response = handler.handleBadRequest(e);
 
-        assertEquals(ErrorCode.BAD_REQUEST.getCode(), response.getCode());
-        assertNotNull(response.getMessage());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(ErrorCode.BAD_REQUEST.getCode(), response.getBody().getCode());
+        assertNotNull(response.getBody().getMessage());
     }
 
     @Test
@@ -88,20 +94,22 @@ class GlobalExceptionHandlerTest {
         };
         HttpMessageNotReadableException e = new HttpMessageNotReadableException("invalid body", inputMessage);
 
-        ApiResponse<Void> response = handler.handleBadRequest(e);
+        ResponseEntity<ApiResponse<Void>> response = handler.handleBadRequest(e);
 
-        assertEquals(ErrorCode.BAD_REQUEST.getCode(), response.getCode());
-        assertNotNull(response.getMessage());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(ErrorCode.BAD_REQUEST.getCode(), response.getBody().getCode());
+        assertNotNull(response.getBody().getMessage());
     }
 
     @Test
     void handleUnknownShouldReturnInternalServerErrorContract() {
         RuntimeException e = new RuntimeException("boom");
 
-        ApiResponse<Void> response = handler.handleUnknown(e);
+        ResponseEntity<ApiResponse<Void>> response = handler.handleUnknown(e);
 
-        assertEquals(ErrorCode.INTERNAL_SERVER_ERROR.getCode(), response.getCode());
-        assertEquals(ErrorCode.INTERNAL_SERVER_ERROR.getDefaultMessage(), response.getMessage());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(ErrorCode.INTERNAL_SERVER_ERROR.getCode(), response.getBody().getCode());
+        assertEquals(ErrorCode.INTERNAL_SERVER_ERROR.getDefaultMessage(), response.getBody().getMessage());
     }
 
     private static class DummyController {

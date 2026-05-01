@@ -1,6 +1,7 @@
 package com.campus.material.modules.apply.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.campus.material.common.BizException;
 import com.campus.material.common.OrderStatus;
@@ -12,6 +13,7 @@ import com.campus.material.modules.apply.entity.ApplyOrder;
 import com.campus.material.modules.apply.entity.ApplyOrderItem;
 import com.campus.material.modules.apply.mapper.ApplyOrderItemMapper;
 import com.campus.material.modules.apply.mapper.ApplyOrderMapper;
+import com.campus.material.modules.inventory.service.InventoryService;
 import com.campus.material.modules.log.service.OperationLogService;
 import com.campus.material.security.AuthUtil;
 import org.springframework.stereotype.Service;
@@ -27,13 +29,15 @@ public class ApplyService {
 
     private final ApplyOrderMapper applyOrderMapper;
     private final ApplyOrderItemMapper applyOrderItemMapper;
+    private final InventoryService inventoryService;
     private final OperationLogService operationLogService;
     private final BusinessMetrics businessMetrics;
 
     public ApplyService(ApplyOrderMapper applyOrderMapper, ApplyOrderItemMapper applyOrderItemMapper,
-                        OperationLogService operationLogService, BusinessMetrics businessMetrics) {
+                        InventoryService inventoryService, OperationLogService operationLogService, BusinessMetrics businessMetrics) {
         this.applyOrderMapper = applyOrderMapper;
         this.applyOrderItemMapper = applyOrderItemMapper;
+        this.inventoryService = inventoryService;
         this.operationLogService = operationLogService;
         this.businessMetrics = businessMetrics;
     }
@@ -80,11 +84,15 @@ public class ApplyService {
         if (!OrderStatus.DRAFT.equals(order.getStatus())) {
             throw new BizException("当前状态不允许提交");
         }
+        List<ApplyOrderItem> applyItems = items(orderId);
+        Long reservedWarehouseId = inventoryService.reserveForApplyOrder(applyItems);
         /*
          * 申领单在提交阶段完成第一次状态跃迁。
+         * 同时在事务内锁定库存，避免多个申请并发提交时出现超卖。
          * 紧急等级达到阈值时直接走快速通道，服务端在同一事务内补齐审批人、审批意见与审批时间，
          * 避免前端或后续异步任务再拼装半完成状态。
          */
+        order.setReservedWarehouseId(reservedWarehouseId);
         if (order.getUrgencyLevel() != null && order.getUrgencyLevel() >= 2) {
             order.setFastTrack(1);
             order.setStatus(OrderStatus.APPROVED);
@@ -94,11 +102,12 @@ public class ApplyService {
         } else {
             order.setStatus(OrderStatus.SUBMITTED);
         }
-        applyOrderMapper.updateById(order);
+        ensureUpdated(applyOrderMapper.updateById(order), "申领单状态已被其他操作修改，请刷新后重试");
         operationLogService.log(AuthUtil.currentUserId(), "APPLY", "SUBMIT", "提交申领单:" + orderId);
         businessMetrics.recordApplySubmit();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void approve(Long orderId, String remark) {
         ApplyOrder order = mustGet(orderId);
         if (!OrderStatus.SUBMITTED.equals(order.getStatus())) {
@@ -109,32 +118,49 @@ public class ApplyService {
         order.setApproverId(AuthUtil.currentUserId());
         order.setApproveRemark(remark);
         order.setApproveTime(LocalDateTime.now());
-        applyOrderMapper.updateById(order);
+        ensureUpdated(applyOrderMapper.updateById(order), "申领单状态已被其他操作修改，请刷新后重试");
         operationLogService.log(AuthUtil.currentUserId(), "APPLY", "APPROVE", "审批通过申领单:" + orderId);
         businessMetrics.recordApplyApprove();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void reject(Long orderId, String remark) {
         ApplyOrder order = mustGet(orderId);
         if (!OrderStatus.SUBMITTED.equals(order.getStatus())) {
             throw new BizException("当前状态不允许驳回");
         }
+        inventoryService.releaseApplyReservation(order.getReservedWarehouseId(), items(orderId));
+        LocalDateTime approveTime = LocalDateTime.now();
         // 驳回和审批共享同一前置状态，确保单据不会在已审批或已出库后被反向改写。
-        order.setStatus(OrderStatus.REJECTED);
-        order.setApproverId(AuthUtil.currentUserId());
-        order.setApproveRemark(remark);
-        order.setApproveTime(LocalDateTime.now());
-        applyOrderMapper.updateById(order);
+        ensureUpdated(applyOrderMapper.update(null, new LambdaUpdateWrapper<ApplyOrder>()
+                        .eq(ApplyOrder::getId, orderId)
+                        .eq(ApplyOrder::getVersion, order.getVersion())
+                        .eq(ApplyOrder::getStatus, OrderStatus.SUBMITTED)
+                        .set(ApplyOrder::getStatus, OrderStatus.REJECTED)
+                        .set(ApplyOrder::getReservedWarehouseId, null)
+                        .set(ApplyOrder::getApproverId, AuthUtil.currentUserId())
+                        .set(ApplyOrder::getApproveRemark, remark)
+                        .set(ApplyOrder::getApproveTime, approveTime)
+                        .set(ApplyOrder::getVersion, order.getVersion() + 1)),
+                "申领单状态已被其他操作修改，请刷新后重试");
         operationLogService.log(AuthUtil.currentUserId(), "APPLY", "REJECT", "驳回申领单:" + orderId);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void receive(Long orderId) {
         ApplyOrder order = mustGet(orderId);
         if (!OrderStatus.OUTBOUND.equals(order.getStatus())) {
             throw new BizException("当前状态不允许签收");
         }
-        order.setStatus(OrderStatus.RECEIVED);
-        applyOrderMapper.updateById(order);
+        inventoryService.releaseApplyReservation(order.getReservedWarehouseId(), items(orderId));
+        ensureUpdated(applyOrderMapper.update(null, new LambdaUpdateWrapper<ApplyOrder>()
+                        .eq(ApplyOrder::getId, orderId)
+                        .eq(ApplyOrder::getVersion, order.getVersion())
+                        .eq(ApplyOrder::getStatus, OrderStatus.OUTBOUND)
+                        .set(ApplyOrder::getStatus, OrderStatus.RECEIVED)
+                        .set(ApplyOrder::getReservedWarehouseId, null)
+                        .set(ApplyOrder::getVersion, order.getVersion() + 1)),
+                "申领单状态已被其他操作修改，请刷新后重试");
         operationLogService.log(AuthUtil.currentUserId(), "APPLY", "RECEIVE", "签收申领单:" + orderId);
     }
 
@@ -153,5 +179,11 @@ public class ApplyService {
             throw new BizException("申领单不存在");
         }
         return order;
+    }
+
+    private void ensureUpdated(int updatedRows, String message) {
+        if (updatedRows != 1) {
+            throw new BizException(message);
+        }
     }
 }

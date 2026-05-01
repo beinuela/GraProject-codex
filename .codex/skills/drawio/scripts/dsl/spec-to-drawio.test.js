@@ -1373,6 +1373,30 @@ describe('edge label in XML', () => {
     assert.ok(xml.includes('MyEdgeLabel'), 'XML should contain edge label text "MyEdgeLabel"')
   })
 
+  it('edge label is stored only in the child edgeLabel cell', () => {
+    const spec = {
+      meta: { theme: 'tech-blue' },
+      nodes: [
+        { id: 'n1', label: 'A' },
+        { id: 'n2', label: 'B' }
+      ],
+      edges: [{ from: 'n1', to: 'n2', label: 'MyEdgeLabel', labelPosition: 'end' }]
+    }
+    const xml = specToDrawioXml(spec)
+    const labelMatches = xml.match(/MyEdgeLabel/g) || []
+    assert.strictEqual(labelMatches.length, 1, 'edge label text should appear exactly once in XML')
+    assert.match(
+      xml,
+      /<mxCell id="\d+" value="" style="[^"]*" edge="1" parent="1" source="\d+" target="\d+">/,
+      'parent edge cell should keep an empty value attribute'
+    )
+    assert.match(
+      xml,
+      /<mxCell id="\d+" value="MyEdgeLabel" style="edgeLabel;[^"]*" vertex="1" connectable="0" parent="\d+"><mxGeometry x="0\.8" relative="1" as="geometry">/,
+      'edgeLabel child should retain the end-position geometry'
+    )
+  })
+
   it('edge without label does NOT produce edgeLabel cell in XML', () => {
     const spec = {
       meta: { theme: 'tech-blue' },

@@ -156,6 +156,8 @@ export function buildCell(cellAttrs, cellBody) {
   const geometrySelfMatch = /<mxGeometry\b([^>]*?)\/>/i.exec(cellBody)
   const geometryAttrs = geometryMatch ? geometryMatch[1] : geometrySelfMatch ? geometrySelfMatch[1] : null
   const geometryBody = geometryMatch ? geometryMatch[2] : ''
+  const offsetMatch = /<mxPoint\b([^>]*?)\bas="offset"[^>]*\/>/i.exec(geometryBody)
+  const offsetAttrs = offsetMatch ? offsetMatch[1] : null
 
   const geometry = geometryAttrs ? {
     x: Number(attr(geometryAttrs, 'x')) || 0,
@@ -164,6 +166,9 @@ export function buildCell(cellAttrs, cellBody) {
     height: Number(attr(geometryAttrs, 'height')) || 0,
     relative: attr(geometryAttrs, 'relative') === '1',
     labelX: attr(geometryAttrs, 'x'),
+    labelY: attr(geometryAttrs, 'y'),
+    offsetX: offsetAttrs ? Number(attr(offsetAttrs, 'x')) || 0 : 0,
+    offsetY: offsetAttrs ? Number(attr(offsetAttrs, 'y')) || 0 : 0,
     points: parsePoints(geometryBody)
   } : null
 

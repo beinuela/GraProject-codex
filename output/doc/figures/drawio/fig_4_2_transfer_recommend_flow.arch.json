@@ -16,7 +16,7 @@
       "id": "start",
       "label": "发起调拨需求",
       "type": "terminal",
-      "size": "xl"
+      "size": "large"
     },
     {
       "id": "input",
@@ -76,7 +76,7 @@
       "id": "end",
       "label": "状态为 RECEIVED",
       "type": "terminal",
-      "size": "xl"
+      "size": "large"
     }
   ],
   "edges": [

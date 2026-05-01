@@ -44,9 +44,9 @@
     },
     {
       "id": "unauth",
-      "label": "收到 401？",
+      "label": "收到 401?",
       "type": "decision",
-      "size": "large"
+      "size": "xl"
     },
     {
       "id": "refresh",
@@ -56,9 +56,9 @@
     },
     {
       "id": "rotated",
-      "label": "刷新成功？",
+      "label": "刷新成功?",
       "type": "decision",
-      "size": "large"
+      "size": "xl"
     },
     {
       "id": "retry",
@@ -113,16 +113,14 @@
     {
       "id": "edge-6",
       "from": "unauth",
-      "to": "refresh",
-      "type": "primary",
-      "label": "是"
+      "to": "done",
+      "type": "primary"
     },
     {
       "id": "edge-7",
       "from": "unauth",
-      "to": "done",
-      "type": "primary",
-      "label": "否"
+      "to": "refresh",
+      "type": "primary"
     },
     {
       "id": "edge-8",
@@ -134,15 +132,13 @@
       "id": "edge-9",
       "from": "rotated",
       "to": "retry",
-      "type": "primary",
-      "label": "是"
+      "type": "primary"
     },
     {
       "id": "edge-10",
       "from": "rotated",
       "to": "logout",
-      "type": "primary",
-      "label": "否"
+      "type": "primary"
     },
     {
       "id": "edge-11",

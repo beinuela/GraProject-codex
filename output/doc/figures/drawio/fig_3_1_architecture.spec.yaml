@@ -110,7 +110,7 @@ nodes:
     type: service
     size: xl
     position:
-      x: 470
+      x: 820
       'y': 890
     style:
       fillColor: '#FFFFFF'

@@ -1,0 +1,343 @@
+meta:
+  profile: academic-paper
+  theme: academic
+  layout: horizontal
+  routing: orthogonal
+  canvas: 2200x1350
+  title: 前后端交互流程图
+  description: 论文流程图箭头规范修复版：连接点固定在节点边缘
+modules:
+  - id: frontend
+    label: 前端请求
+  - id: security
+    label: 安全边界
+  - id: backend
+    label: 后端服务
+  - id: data
+    label: 数据访问与响应
+nodes:
+  - id: vue
+    label: Vue页面
+    type: process
+    module: frontend
+    size: xl
+    position:
+      x: 200
+      'y': 156
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: pinia
+    label: Pinia状态
+    type: process
+    module: frontend
+    size: xl
+    position:
+      x: 200
+      'y': 306
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: axios
+    label: Axios请求
+    type: process
+    module: frontend
+    size: xl
+    position:
+      x: 200
+      'y': 456
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: jwt
+    label: JWT过滤器
+    type: process
+    module: security
+    size: xl
+    position:
+      x: 700
+      'y': 456
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: perm
+    label: 权限校验
+    type: process
+    module: security
+    size: xl
+    position:
+      x: 700
+      'y': 606
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: controller
+    label: Controller
+    type: process
+    module: backend
+    size: xl
+    position:
+      x: 1170
+      'y': 606
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: service
+    label: Service
+    type: process
+    module: backend
+    size: xl
+    position:
+      x: 1170
+      'y': 756
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: mapper
+    label: Mapper
+    type: process
+    module: backend
+    size: xl
+    position:
+      x: 1170
+      'y': 906
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: mysql
+    label: MySQL
+    type: process
+    module: data
+    size: xl
+    position:
+      x: 1690
+      'y': 906
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: response
+    label: 统一响应
+    type: process
+    module: data
+    size: xl
+    position:
+      x: 1690
+      'y': 1056
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: refresh
+    label: 页面刷新
+    type: process
+    module: data
+    size: xl
+    position:
+      x: 1690
+      'y': 1206
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+edges:
+  - from: vue
+    to: pinia
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: pinia
+    to: axios
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: axios
+    to: jwt
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 1
+      exitY: 0.5
+      entryX: 0
+      entryY: 0.5
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: jwt
+    to: perm
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: perm
+    to: controller
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 1
+      exitY: 0.5
+      entryX: 0
+      entryY: 0.5
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: controller
+    to: service
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: service
+    to: mapper
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: mapper
+    to: mysql
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 1
+      exitY: 0.5
+      entryX: 0
+      entryY: 0.5
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: mysql
+    to: response
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: response
+    to: refresh
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0

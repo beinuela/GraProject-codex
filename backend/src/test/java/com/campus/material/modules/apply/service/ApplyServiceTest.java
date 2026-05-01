@@ -7,6 +7,7 @@ import com.campus.material.modules.apply.entity.ApplyOrderItem;
 import com.campus.material.modules.apply.entity.ApplyOrder;
 import com.campus.material.modules.apply.mapper.ApplyOrderItemMapper;
 import com.campus.material.modules.apply.mapper.ApplyOrderMapper;
+import com.campus.material.modules.inventory.service.InventoryService;
 import com.campus.material.modules.log.service.OperationLogService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,9 @@ class ApplyServiceTest {
 
     @Mock
     private ApplyOrderItemMapper applyOrderItemMapper;
+
+    @Mock
+    private InventoryService inventoryService;
 
     @Mock
     private OperationLogService operationLogService;
@@ -83,6 +87,7 @@ class ApplyServiceTest {
         mockOrder.setStatus("SUBMITTED");
 
         when(applyOrderMapper.selectById(10L)).thenReturn(mockOrder);
+        when(applyOrderMapper.updateById(mockOrder)).thenReturn(1);
 
         applyService.approve(10L, "同意申请");
 

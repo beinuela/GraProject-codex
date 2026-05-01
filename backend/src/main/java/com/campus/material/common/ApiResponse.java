@@ -10,8 +10,8 @@ public class ApiResponse<T> {
 
     public static <T> ApiResponse<T> ok(T data) {
         ApiResponse<T> r = new ApiResponse<>();
-        r.setCode(0);
-        r.setMessage("success");
+        r.setCode(ErrorCode.SUCCESS.getCode());
+        r.setMessage(ErrorCode.SUCCESS.getDefaultMessage());
         r.setData(data);
         return r;
     }

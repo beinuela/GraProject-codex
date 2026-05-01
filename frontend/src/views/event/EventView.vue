@@ -56,14 +56,14 @@
         </el-form-item>
         <el-form-item label="事件等级">
           <el-select v-model="form.eventLevel">
-            <el-option :value="1" label="一级（特别重大）" />
-            <el-option :value="2" label="二级（重大）" />
-            <el-option :value="3" label="三级（较大）" />
-            <el-option :value="4" label="四级（一般）" />
+            <el-option value="1" label="一级（特别重大）" />
+            <el-option value="2" label="二级（重大）" />
+            <el-option value="3" label="三级（较大）" />
+            <el-option value="4" label="四级（一般）" />
           </el-select>
         </el-form-item>
         <el-form-item label="事件描述" style="grid-column: 1 / -1;">
-          <el-input v-model="form.eventDescription" type="textarea" :rows="4" />
+          <el-input v-model="form.description" type="textarea" :rows="4" />
         </el-form-item>
         <el-form-item label="发生地点" style="grid-column: 1 / -1;">
           <el-input v-model="form.location" />
@@ -92,7 +92,9 @@ import TableShell from '../../components/ui/TableShell.vue'
 const list = ref([])
 const filterStatus = ref('')
 const createVisible = ref(false)
-const form = reactive({ eventTitle: '', eventType: '', eventLevel: 4, eventDescription: '', location: '' })
+const form = reactive({ eventTitle: '', eventType: 'OTHER', eventLevel: '4', description: '', location: '' })
+
+const currentLocalDateTime = () => new Date().toISOString().slice(0, 19)
 
 const statusLabel = status => ({ OPEN: '待处理', IN_PROGRESS: '处理中', CLOSED: '已关闭' }[status] || status)
 const statusTone = status => ({ OPEN: 'danger', IN_PROGRESS: 'warning', CLOSED: 'success' }[status] || 'neutral')
@@ -112,12 +114,12 @@ const load = async () => {
 }
 
 const openCreate = () => {
-  Object.assign(form, { eventTitle: '', eventType: '', eventLevel: 4, eventDescription: '', location: '' })
+  Object.assign(form, { eventTitle: '', eventType: 'OTHER', eventLevel: '4', description: '', location: '' })
   createVisible.value = true
 }
 
 const saveEvent = async () => {
-  await apiPost('/api/event', form)
+  await apiPost('/api/event', { ...form, eventTime: currentLocalDateTime() })
   ElMessage.success('事件上报成功')
   createVisible.value = false
   await load()

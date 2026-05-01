@@ -3,16 +3,16 @@ meta:
   theme: academic
   layout: horizontal
   routing: straight
-  canvas: 1600x980
-  title: 业务单据、预警与通知 E-R图
-  description: 申领单、出库单、调拨单、预警记录与通知消息之间的 E-R 图
+  canvas: 1960x1200
+  title: 业务单据、预警与通知 E-R 图
+  description: 申领、出库、调拨、预警和通知的实体关系图
 nodes:
 - id: apply
-  label: 申领单\napply_order
+  label: 申领单
   type: service
-  size: medium
+  size: xl
   position:
-    x: 110
+    x: 260
     y: 250
   style:
     fillColor: '#FFFFFF'
@@ -20,27 +20,131 @@ nodes:
     fontColor: '#000000'
     strokeWidth: 1.6
     fontSize: 13
-    shape: shape=rectangle;rounded=0
+    shape: shape=rectangle;rounded=0;whiteSpace=wrap;html=1;spacing=8
+- id: apply_attr_1
+  label: 编号
+  type: user
+  size: small
+  position:
+    x: 150
+    y: 130
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: apply_attr_2
+  label: 部门编号
+  type: user
+  size: small
+  position:
+    x: 290
+    y: 45
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: apply_attr_3
+  label: 申请人编号
+  type: user
+  size: small
+  position:
+    x: 470
+    y: 110
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: apply_attr_4
+  label: 状态
+  type: user
+  size: small
+  position:
+    x: 90
+    y: 255
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
 - id: item
-  label: 申领明细\napply_order_item
+  label: 申领明细
   type: service
-  size: medium
+  size: xl
   position:
-    x: 590
-    y: 250
+    x: 950
+    y: 500
   style:
     fillColor: '#FFFFFF'
     strokeColor: '#000000'
     fontColor: '#000000'
     strokeWidth: 1.6
     fontSize: 13
-    shape: shape=rectangle;rounded=0
+    shape: shape=rectangle;rounded=0;whiteSpace=wrap;html=1;spacing=8
+- id: item_attr_1
+  label: 编号
+  type: user
+  size: small
+  position:
+    x: 780
+    y: 390
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: item_attr_2
+  label: 申领单编号
+  type: user
+  size: small
+  position:
+    x: 950
+    y: 300
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: item_attr_3
+  label: 物资编号
+  type: user
+  size: small
+  position:
+    x: 1130
+    y: 390
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: item_attr_4
+  label: 申请数量
+  type: user
+  size: small
+  position:
+    x: 1160
+    y: 540
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
 - id: stockout
-  label: 出库单\nstock_out
+  label: 出库单
   type: service
-  size: medium
+  size: xl
   position:
-    x: 1110
+    x: 1640
     y: 250
   style:
     fillColor: '#FFFFFF'
@@ -48,56 +152,264 @@ nodes:
     fontColor: '#000000'
     strokeWidth: 1.6
     fontSize: 13
-    shape: shape=rectangle;rounded=0
+    shape: shape=rectangle;rounded=0;whiteSpace=wrap;html=1;spacing=8
+- id: stockout_attr_1
+  label: 编号
+  type: user
+  size: small
+  position:
+    x: 1510
+    y: 130
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: stockout_attr_2
+  label: 申领单编号
+  type: user
+  size: small
+  position:
+    x: 1670
+    y: 40
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: stockout_attr_3
+  label: 仓库编号
+  type: user
+  size: small
+  position:
+    x: 1835
+    y: 110
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: stockout_attr_4
+  label: 操作人编号
+  type: user
+  size: small
+  position:
+    x: 1905
+    y: 220
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
 - id: transfer
-  label: 调拨单\ntransfer_order
+  label: 调拨单
   type: service
-  size: medium
+  size: xl
   position:
-    x: 360
-    y: 660
+    x: 260
+    y: 900
   style:
     fillColor: '#FFFFFF'
     strokeColor: '#000000'
     fontColor: '#000000'
     strokeWidth: 1.6
     fontSize: 13
-    shape: shape=rectangle;rounded=0
+    shape: shape=rectangle;rounded=0;whiteSpace=wrap;html=1;spacing=8
+- id: transfer_attr_1
+  label: 编号
+  type: user
+  size: small
+  position:
+    x: 150
+    y: 780
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: transfer_attr_2
+  label: 调出仓库编号
+  type: user
+  size: small
+  position:
+    x: 260
+    y: 1070
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: transfer_attr_3
+  label: 调入仓库编号
+  type: user
+  size: small
+  position:
+    x: 500
+    y: 1070
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: transfer_attr_4
+  label: 状态
+  type: user
+  size: small
+  position:
+    x: 90
+    y: 900
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
 - id: warning
-  label: 预警记录\nwarning_record
+  label: 预警记录
   type: service
-  size: medium
+  size: xl
   position:
-    x: 840
-    y: 660
+    x: 980
+    y: 900
   style:
     fillColor: '#FFFFFF'
     strokeColor: '#000000'
     fontColor: '#000000'
     strokeWidth: 1.6
     fontSize: 13
-    shape: shape=rectangle;rounded=0
+    shape: shape=rectangle;rounded=0;whiteSpace=wrap;html=1;spacing=8
+- id: warning_attr_1
+  label: 编号
+  type: user
+  size: small
+  position:
+    x: 850
+    y: 780
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: warning_attr_2
+  label: 预警类型
+  type: user
+  size: small
+  position:
+    x: 980
+    y: 700
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: warning_attr_3
+  label: 处理状态
+  type: user
+  size: small
+  position:
+    x: 1170
+    y: 780
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: warning_attr_4
+  label: 处理人编号
+  type: user
+  size: small
+  position:
+    x: 1060
+    y: 1070
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
 - id: notify
-  label: 通知消息\nnotification
+  label: 通知消息
   type: service
-  size: medium
+  size: xl
   position:
-    x: 1290
-    y: 660
+    x: 1660
+    y: 900
   style:
     fillColor: '#FFFFFF'
     strokeColor: '#000000'
     fontColor: '#000000'
     strokeWidth: 1.6
     fontSize: 13
-    shape: shape=rectangle;rounded=0
+    shape: shape=rectangle;rounded=0;whiteSpace=wrap;html=1;spacing=8
+- id: notify_attr_1
+  label: 编号
+  type: user
+  size: small
+  position:
+    x: 1530
+    y: 780
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: notify_attr_2
+  label: 消息标题
+  type: user
+  size: small
+  position:
+    x: 1670
+    y: 700
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: notify_attr_3
+  label: 目标用户编号
+  type: user
+  size: small
+  position:
+    x: 1860
+    y: 800
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: notify_attr_4
+  label: 已读状态
+  type: user
+  size: small
+  position:
+    x: 1895
+    y: 930
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
 - id: rel_apply_item
   label: 包含
   type: decision
   size: medium
   position:
-    x: 350
-    y: 255
+    x: 590
+    y: 420
   style:
     fillColor: '#FFFFFF'
     strokeColor: '#000000'
@@ -109,8 +421,8 @@ nodes:
   type: decision
   size: medium
   position:
-    x: 850
-    y: 255
+    x: 950
+    y: 110
   style:
     fillColor: '#FFFFFF'
     strokeColor: '#000000'
@@ -122,8 +434,8 @@ nodes:
   type: decision
   size: medium
   position:
-    x: 610
-    y: 540
+    x: 620
+    y: 900
   style:
     fillColor: '#FFFFFF'
     strokeColor: '#000000'
@@ -135,327 +447,231 @@ nodes:
   type: decision
   size: medium
   position:
-    x: 1065
-    y: 660
+    x: 1320
+    y: 900
   style:
     fillColor: '#FFFFFF'
     strokeColor: '#000000'
     fontColor: '#000000'
     strokeWidth: 1.6
     fontSize: 12
-- id: apply_id
-  label: id
-  type: user
-  size: small
-  position:
-    x: 25
-    y: 85
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: apply_dept
-  label: dept_id
-  type: user
-  size: small
-  position:
-    x: 110
-    y: 35
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: apply_applicant
-  label: applicant_id
-  type: user
-  size: small
-  position:
-    x: 235
-    y: 70
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: apply_status
-  label: status
-  type: user
-  size: small
-  position:
-    x: 270
-    y: 155
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: item_id
-  label: id
-  type: user
-  size: small
-  position:
-    x: 505
-    y: 95
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: item_order
-  label: apply_order_id
-  type: user
-  size: small
-  position:
-    x: 590
-    y: 40
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: item_material
-  label: material_id
-  type: user
-  size: small
-  position:
-    x: 725
-    y: 95
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: item_qty
-  label: apply_qty
-  type: user
-  size: small
-  position:
-    x: 760
-    y: 175
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: out_id
-  label: id
-  type: user
-  size: small
-  position:
-    x: 1025
-    y: 95
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: out_apply
-  label: apply_order_id
-  type: user
-  size: small
-  position:
-    x: 1115
-    y: 40
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: out_wh
-  label: warehouse_id
-  type: user
-  size: small
-  position:
-    x: 1255
-    y: 95
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: out_operator
-  label: operator_id
-  type: user
-  size: small
-  position:
-    x: 1295
-    y: 175
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: transfer_id
-  label: id
-  type: user
-  size: small
-  position:
-    x: 265
-    y: 500
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: transfer_from
-  label: from_warehouse_id
-  type: user
-  size: small
-  position:
-    x: 320
-    y: 810
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: transfer_to
-  label: to_warehouse_id
-  type: user
-  size: small
-  position:
-    x: 475
-    y: 810
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: transfer_status
-  label: status
-  type: user
-  size: small
-  position:
-    x: 505
-    y: 585
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: warn_id
-  label: id
-  type: user
-  size: small
-  position:
-    x: 750
-    y: 500
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: warn_type
-  label: warning_type
-  type: user
-  size: small
-  position:
-    x: 845
-    y: 470
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: warn_status
-  label: handle_status
-  type: user
-  size: small
-  position:
-    x: 980
-    y: 515
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: warn_handler
-  label: handler_id
-  type: user
-  size: small
-  position:
-    x: 1025
-    y: 610
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: notify_id
-  label: id
-  type: user
-  size: small
-  position:
-    x: 1205
-    y: 515
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: notify_title
-  label: title
-  type: user
-  size: small
-  position:
-    x: 1290
-    y: 470
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: notify_target
-  label: target_user_id
-  type: user
-  size: small
-  position:
-    x: 1435
-    y: 525
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
-- id: notify_read
-  label: is_read
-  type: user
-  size: small
-  position:
-    x: 1450
-    y: 625
-  style:
-    fillColor: '#FFFFFF'
-    strokeColor: '#000000'
-    fontColor: '#000000'
-    strokeWidth: 1.6
-    fontSize: 11
 edges:
+- from: apply
+  to: apply_attr_1
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: apply
+  to: apply_attr_2
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: apply
+  to: apply_attr_3
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: apply
+  to: apply_attr_4
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: item
+  to: item_attr_1
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: item
+  to: item_attr_2
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: item
+  to: item_attr_3
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: item
+  to: item_attr_4
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: stockout
+  to: stockout_attr_1
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: stockout
+  to: stockout_attr_2
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: stockout
+  to: stockout_attr_3
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: stockout
+  to: stockout_attr_4
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: transfer
+  to: transfer_attr_1
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: transfer
+  to: transfer_attr_2
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: transfer
+  to: transfer_attr_3
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: transfer
+  to: transfer_attr_4
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: warning
+  to: warning_attr_1
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: warning
+  to: warning_attr_2
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: warning
+  to: warning_attr_3
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: warning
+  to: warning_attr_4
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: notify
+  to: notify_attr_1
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: notify
+  to: notify_attr_2
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: notify
+  to: notify_attr_3
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: notify
+  to: notify_attr_4
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
 - from: apply
   to: rel_apply_item
   type: primary
@@ -465,6 +681,10 @@ edges:
     strokeWidth: 1.4
     fontColor: '#000000'
     fontSize: 12
+    exitX: 1
+    exitY: 0.72
+    entryX: 0.0
+    entryY: 0.5
   label: '1'
   labelPosition: end
 - from: rel_apply_item
@@ -476,7 +696,11 @@ edges:
     strokeWidth: 1.4
     fontColor: '#000000'
     fontSize: 12
-  label: N
+    exitX: 1
+    exitY: 0.5
+    entryX: 0.0
+    entryY: 0.58
+  label: n
   labelPosition: end
 - from: apply
   to: rel_apply_stock
@@ -487,6 +711,10 @@ edges:
     strokeWidth: 1.4
     fontColor: '#000000'
     fontSize: 12
+    exitX: 1
+    exitY: 0.38
+    entryX: 0.0
+    entryY: 0.5
   label: '1'
   labelPosition: end
 - from: rel_apply_stock
@@ -498,6 +726,10 @@ edges:
     strokeWidth: 1.4
     fontColor: '#000000'
     fontSize: 12
+    exitX: 1
+    exitY: 0.5
+    entryX: 0.0
+    entryY: 0.38
   label: '1'
   labelPosition: end
 - from: transfer
@@ -509,6 +741,10 @@ edges:
     strokeWidth: 1.4
     fontColor: '#000000'
     fontSize: 12
+    exitX: 1
+    exitY: 0.52
+    entryX: 0.0
+    entryY: 0.5
   label: '1'
   labelPosition: end
 - from: rel_transfer_warning
@@ -520,7 +756,11 @@ edges:
     strokeWidth: 1.4
     fontColor: '#000000'
     fontSize: 12
-  label: N
+    exitX: 1
+    exitY: 0.5
+    entryX: 0.0
+    entryY: 0.52
+  label: n
   labelPosition: end
 - from: warning
   to: rel_warning_notify
@@ -531,6 +771,10 @@ edges:
     strokeWidth: 1.4
     fontColor: '#000000'
     fontSize: 12
+    exitX: 1
+    exitY: 0.5
+    entryX: 0.0
+    entryY: 0.5
   label: '1'
   labelPosition: end
 - from: rel_warning_notify
@@ -542,221 +786,10 @@ edges:
     strokeWidth: 1.4
     fontColor: '#000000'
     fontSize: 12
-  label: N
+    exitX: 1
+    exitY: 0.5
+    entryX: 0.0
+    entryY: 0.5
+  label: n
   labelPosition: end
-- from: apply
-  to: apply_id
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: apply
-  to: apply_dept
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: apply
-  to: apply_applicant
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: apply
-  to: apply_status
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: item
-  to: item_id
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: item
-  to: item_order
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: item
-  to: item_material
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: item
-  to: item_qty
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: stockout
-  to: out_id
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: stockout
-  to: out_apply
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: stockout
-  to: out_wh
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: stockout
-  to: out_operator
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: transfer
-  to: transfer_id
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: transfer
-  to: transfer_from
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: transfer
-  to: transfer_to
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: transfer
-  to: transfer_status
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: warning
-  to: warn_id
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: warning
-  to: warn_type
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: warning
-  to: warn_status
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: warning
-  to: warn_handler
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: notify
-  to: notify_id
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: notify
-  to: notify_title
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: notify
-  to: notify_target
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
-- from: notify
-  to: notify_read
-  type: primary
-  style:
-    strokeColor: '#000000'
-    endArrow: none
-    strokeWidth: 1.4
-    fontColor: '#000000'
-    fontSize: 12
+modules: []

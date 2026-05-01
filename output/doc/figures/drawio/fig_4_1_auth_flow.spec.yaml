@@ -3,153 +3,153 @@ meta:
   theme: academic
   layout: vertical
   routing: orthogonal
-  canvas: 760x1180
+  canvas: 1600x2672
   title: 登录认证与令牌续签流程图
-  description: 登录、令牌刷新和失败回退链路
+  description: 论文流程图箭头规范修复版：连接点固定在节点边缘
 nodes:
   - id: login
     label: 提交账号密码
     type: terminal
     size: xl
     position:
-      x: 330
-      'y': 40
+      x: 440
+      'y': 130
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 16
+      strokeWidth: 1.4
+      fontSize: 10
   - id: verify
     label: 校验用户信息
     type: process
     size: xl
     position:
-      x: 330
-      'y': 145
+      x: 440
+      'y': 330
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 16
+      strokeWidth: 1.4
+      fontSize: 10
   - id: issue
     label: 签发令牌
     type: process
     size: xl
     position:
-      x: 330
-      'y': 255
+      x: 440
+      'y': 530
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 16
+      strokeWidth: 1.4
+      fontSize: 10
   - id: init
     label: 保存令牌并加载菜单
     type: process
     size: xl
     position:
-      x: 330
-      'y': 380
+      x: 420
+      'y': 740
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 16
+      strokeWidth: 1.4
+      fontSize: 10
   - id: api
     label: 携带 Token 访问接口
     type: process
     size: xl
     position:
-      x: 330
-      'y': 500
+      x: 420
+      'y': 970
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 16
+      strokeWidth: 1.4
+      fontSize: 10
   - id: unauth
-    label: 收到 401？
+    label: 收到 401?
     type: decision
-    size: large
+    size: xl
     position:
-      x: 330
-      'y': 625
+      x: 440
+      'y': 1200
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 16
+      strokeWidth: 1.4
+      fontSize: 10
   - id: refresh
     label: 调用刷新接口
     type: process
     size: xl
     position:
-      x: 330
-      'y': 755
+      x: 1080
+      'y': 1210
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 16
+      strokeWidth: 1.4
+      fontSize: 10
   - id: rotated
-    label: 刷新成功？
+    label: 刷新成功?
     type: decision
-    size: large
+    size: xl
     position:
-      x: 330
-      'y': 885
+      x: 1080
+      'y': 1430
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 16
+      strokeWidth: 1.4
+      fontSize: 10
   - id: retry
     label: 更新令牌并重放请求
     type: process
     size: xl
     position:
-      x: 120
-      'y': 1010
+      x: 1060
+      'y': 1680
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 16
+      strokeWidth: 1.4
+      fontSize: 10
   - id: logout
     label: 清理令牌并返回登录页
     type: process
     size: xl
     position:
-      x: 540
-      'y': 1010
+      x: 1060
+      'y': 2080
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 16
+      strokeWidth: 1.4
+      fontSize: 10
   - id: done
     label: 继续访问页面
     type: terminal
     size: xl
     position:
-      x: 120
-      'y': 1125
+      x: 440
+      'y': 2410
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 16
+      strokeWidth: 1.4
+      fontSize: 10
 edges:
   - from: login
     to: verify
@@ -159,7 +159,15 @@ edges:
       endArrow: block
       strokeWidth: 1.4
       fontColor: '#000000'
-      fontSize: 12
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
   - from: verify
     to: issue
     type: primary
@@ -168,7 +176,15 @@ edges:
       endArrow: block
       strokeWidth: 1.4
       fontColor: '#000000'
-      fontSize: 12
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
   - from: issue
     to: init
     type: primary
@@ -177,7 +193,15 @@ edges:
       endArrow: block
       strokeWidth: 1.4
       fontColor: '#000000'
-      fontSize: 12
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
   - from: init
     to: api
     type: primary
@@ -186,7 +210,15 @@ edges:
       endArrow: block
       strokeWidth: 1.4
       fontColor: '#000000'
-      fontSize: 12
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
   - from: api
     to: unauth
     type: primary
@@ -195,7 +227,32 @@ edges:
       endArrow: block
       strokeWidth: 1.4
       fontColor: '#000000'
-      fontSize: 12
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: unauth
+    to: done
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
   - from: unauth
     to: refresh
     type: primary
@@ -204,18 +261,15 @@ edges:
       endArrow: block
       strokeWidth: 1.4
       fontColor: '#000000'
-      fontSize: 12
-    label: 是
-  - from: unauth
-    to: done
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: block
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-    label: 否
+      fontSize: 9
+      exitX: 1
+      exitY: 0.5
+      entryX: 0
+      entryY: 0.5
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
   - from: refresh
     to: rotated
     type: primary
@@ -224,7 +278,15 @@ edges:
       endArrow: block
       strokeWidth: 1.4
       fontColor: '#000000'
-      fontSize: 12
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
   - from: rotated
     to: retry
     type: primary
@@ -233,8 +295,15 @@ edges:
       endArrow: block
       strokeWidth: 1.4
       fontColor: '#000000'
-      fontSize: 12
-    label: 是
+      fontSize: 9
+      exitX: 0.35
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
   - from: rotated
     to: logout
     type: primary
@@ -243,8 +312,15 @@ edges:
       endArrow: block
       strokeWidth: 1.4
       fontColor: '#000000'
-      fontSize: 12
-    label: 否
+      fontSize: 9
+      exitX: 0.65
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
   - from: retry
     to: done
     type: primary
@@ -253,5 +329,13 @@ edges:
       endArrow: block
       strokeWidth: 1.4
       fontColor: '#000000'
-      fontSize: 12
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
 modules: []

@@ -143,7 +143,7 @@ public class InventoryService {
 
             Inventory inventory = getOrInitInventory(item.getMaterialId(), request.getWarehouseId());
             inventory.setCurrentQty(inventory.getCurrentQty() + item.getQuantity());
-            inventoryMapper.updateById(inventory);
+            ensureUpdated(inventoryMapper.updateById(inventory), "库存汇总更新失败，请重试");
 
             InventoryBatch batch = new InventoryBatch();
             batch.setMaterialId(item.getMaterialId());
@@ -169,6 +169,7 @@ public class InventoryService {
         stockOut.setRemark(request.getRemark());
         stockOutMapper.insert(stockOut);
         Map<Long, ApplyOrderItem> applyItemMap = loadApplyItemsByMaterial(request.getApplyOrderId());
+        ApplyOrder applyOrder = loadApplyOrderForOutbound(request.getApplyOrderId(), request.getWarehouseId());
 
         /*
          * 出库链路需要同时维护批次余量、库存汇总以及申领实发数量的一致性。
@@ -180,9 +181,20 @@ public class InventoryService {
                     .eq(Inventory::getMaterialId, item.getMaterialId())
                     .eq(Inventory::getWarehouseId, request.getWarehouseId())
                     .last("limit 1"));
-            if (inventory == null || inventory.getCurrentQty() < item.getQuantity()) {
+            int availableQty = inventory == null ? 0 : inventory.getCurrentQty() - inventory.getLockedQty();
+            if (inventory == null || (!isApplyOutbound(request) && availableQty < item.getQuantity()) || (isApplyOutbound(request) && inventory.getCurrentQty() < item.getQuantity())) {
                 createLowStockWarning(item.getMaterialId(), request.getWarehouseId(), "出库时库存不足");
                 throw new BizException("物资ID " + item.getMaterialId() + " 库存不足");
+            }
+            if (isApplyOutbound(request)) {
+                ApplyOrderItem applyItem = requireApplyItem(applyItemMap, item.getMaterialId());
+                int remainingReserved = applyItem.getApplyQty() - safeQty(applyItem.getActualQty());
+                if (remainingReserved < item.getQuantity()) {
+                    throw new BizException("物资ID " + item.getMaterialId() + " 超出申领单已锁定数量");
+                }
+                if (inventory.getLockedQty() < item.getQuantity()) {
+                    throw new BizException("物资ID " + item.getMaterialId() + " 锁定库存不足，请刷新后重试");
+                }
             }
 
             List<InventoryBatch> candidates = batchMapper.selectList(new LambdaQueryWrapper<InventoryBatch>()
@@ -200,7 +212,7 @@ public class InventoryService {
                 }
                 int use = Math.min(remain, batch.getRemainQty());
                 batch.setRemainQty(batch.getRemainQty() - use);
-                batchMapper.updateById(batch);
+                ensureUpdated(batchMapper.updateById(batch), "批次库存已被其他操作修改，请重试");
                 remain -= use;
             }
             if (remain > 0) {
@@ -208,7 +220,10 @@ public class InventoryService {
             }
 
             inventory.setCurrentQty(inventory.getCurrentQty() - item.getQuantity());
-            inventoryMapper.updateById(inventory);
+            if (isApplyOutbound(request)) {
+                inventory.setLockedQty(inventory.getLockedQty() - item.getQuantity());
+            }
+            ensureUpdated(inventoryMapper.updateById(inventory), "库存已被其他操作修改，请重试");
 
             StockOutItem outItem = new StockOutItem();
             outItem.setStockOutId(stockOut.getId());
@@ -217,23 +232,18 @@ public class InventoryService {
             stockOutItemMapper.insert(outItem);
 
             if (request.getApplyOrderId() != null) {
-                ApplyOrderItem applyItem = applyItemMap.get(item.getMaterialId());
-                if (applyItem != null) {
-                    int old = applyItem.getActualQty() == null ? 0 : applyItem.getActualQty();
-                    applyItem.setActualQty(old + item.getQuantity());
-                    applyOrderItemMapper.updateById(applyItem);
-                }
+                ApplyOrderItem applyItem = requireApplyItem(applyItemMap, item.getMaterialId());
+                int old = safeQty(applyItem.getActualQty());
+                applyItem.setActualQty(old + item.getQuantity());
+                ensureUpdated(applyOrderItemMapper.updateById(applyItem), "申领实发数量更新失败，请重试");
             }
 
             checkSafetyWarning(item.getMaterialId(), request.getWarehouseId());
         }
 
-        if (request.getApplyOrderId() != null) {
-            ApplyOrder applyOrder = applyOrderMapper.selectById(request.getApplyOrderId());
-            if (applyOrder != null) {
-                applyOrder.setStatus(OrderStatus.OUTBOUND);
-                applyOrderMapper.updateById(applyOrder);
-            }
+        if (applyOrder != null) {
+            applyOrder.setStatus(OrderStatus.OUTBOUND);
+            ensureUpdated(applyOrderMapper.updateById(applyOrder), "申领单状态更新失败，请重试");
         }
         operationLogService.log(AuthUtil.currentUserId(), "INVENTORY", "STOCK_OUT", "出库单:" + stockOut.getId());
         businessMetrics.recordInventoryStockOut();
@@ -246,7 +256,7 @@ public class InventoryService {
             throw new BizException("库存记录不存在");
         }
         inventory.setCurrentQty(request.getActualQty());
-        inventoryMapper.updateById(inventory);
+        ensureUpdated(inventoryMapper.updateById(inventory), "库存盘点更新失败，请重试");
         operationLogService.log(AuthUtil.currentUserId(), "INVENTORY", "CHECK", "库存盘点ID:" + request.getInventoryId());
     }
 
@@ -275,6 +285,63 @@ public class InventoryService {
         created.setLockedQty(0);
         inventoryMapper.insert(created);
         return created;
+    }
+
+    public Long reserveForApplyOrder(List<ApplyOrderItem> applyItems) {
+        Map<Long, Integer> requestByMaterial = aggregateApplyQuantities(applyItems);
+        if (requestByMaterial.isEmpty()) {
+            throw new BizException("申领单缺少物资明细");
+        }
+
+        List<Inventory> inventoryRows = inventoryMapper.selectList(new LambdaQueryWrapper<Inventory>()
+                .in(Inventory::getMaterialId, requestByMaterial.keySet()));
+        Long warehouseId = selectReservationWarehouse(inventoryRows, requestByMaterial);
+        if (warehouseId == null) {
+            throw new BizException("库存不足或未找到可满足申领的仓库");
+        }
+
+        Map<Long, Inventory> inventoryByMaterial = inventoryRows.stream()
+                .filter(row -> warehouseId.equals(row.getWarehouseId()))
+                .collect(Collectors.toMap(Inventory::getMaterialId, Function.identity()));
+
+        for (Map.Entry<Long, Integer> entry : requestByMaterial.entrySet()) {
+            Inventory inventory = inventoryByMaterial.get(entry.getKey());
+            if (inventory == null) {
+                throw new BizException("物资ID " + entry.getKey() + " 库存记录不存在");
+            }
+            ensureUpdated(
+                    inventoryMapper.reserveLockedQty(inventory.getId(), entry.getValue(), safeQty(inventory.getVersion())),
+                    "库存已被其他申请占用，请刷新后重试"
+            );
+        }
+        return warehouseId;
+    }
+
+    public void releaseApplyReservation(Long warehouseId, List<ApplyOrderItem> applyItems) {
+        if (warehouseId == null) {
+            return;
+        }
+        Map<Long, Integer> releaseByMaterial = aggregateRemainingReservation(applyItems);
+        if (releaseByMaterial.isEmpty()) {
+            return;
+        }
+
+        List<Inventory> inventoryRows = inventoryMapper.selectList(new LambdaQueryWrapper<Inventory>()
+                .eq(Inventory::getWarehouseId, warehouseId)
+                .in(Inventory::getMaterialId, releaseByMaterial.keySet()));
+        Map<Long, Inventory> inventoryByMaterial = inventoryRows.stream()
+                .collect(Collectors.toMap(Inventory::getMaterialId, Function.identity()));
+
+        for (Map.Entry<Long, Integer> entry : releaseByMaterial.entrySet()) {
+            Inventory inventory = inventoryByMaterial.get(entry.getKey());
+            if (inventory == null) {
+                throw new BizException("物资ID " + entry.getKey() + " 库存记录不存在，无法释放锁定库存");
+            }
+            ensureUpdated(
+                    inventoryMapper.releaseLockedQty(inventory.getId(), entry.getValue(), safeQty(inventory.getVersion())),
+                    "锁定库存释放失败，请刷新后重试"
+            );
+        }
     }
 
     private void checkSafetyWarning(Long materialId, Long warehouseId) {
@@ -313,5 +380,99 @@ public class InventoryService {
                         Function.identity(),
                         (left, right) -> left
                 ));
+    }
+
+    private Map<Long, Integer> aggregateApplyQuantities(List<ApplyOrderItem> applyItems) {
+        return applyItems.stream().collect(Collectors.toMap(
+                ApplyOrderItem::getMaterialId,
+                item -> safeQty(item.getApplyQty()),
+                Integer::sum,
+                LinkedHashMap::new
+        ));
+    }
+
+    private Map<Long, Integer> aggregateRemainingReservation(List<ApplyOrderItem> applyItems) {
+        Map<Long, Integer> remaining = new LinkedHashMap<>();
+        for (ApplyOrderItem item : applyItems) {
+            int reservedQty = safeQty(item.getApplyQty()) - safeQty(item.getActualQty());
+            if (reservedQty > 0) {
+                remaining.merge(item.getMaterialId(), reservedQty, Integer::sum);
+            }
+        }
+        return remaining;
+    }
+
+    private Long selectReservationWarehouse(List<Inventory> inventoryRows, Map<Long, Integer> requestByMaterial) {
+        Map<Long, Map<Long, Inventory>> inventoryByWarehouse = inventoryRows.stream()
+                .collect(Collectors.groupingBy(Inventory::getWarehouseId, Collectors.toMap(Inventory::getMaterialId, Function.identity(), (left, right) -> left)));
+
+        return inventoryByWarehouse.entrySet().stream()
+                .filter(entry -> canSatisfyWarehouse(entry.getValue(), requestByMaterial))
+                .map(entry -> Map.entry(entry.getKey(), warehouseSlack(entry.getValue(), requestByMaterial)))
+                .sorted((left, right) -> {
+                    int bySlack = Integer.compare(right.getValue(), left.getValue());
+                    return bySlack != 0 ? bySlack : Long.compare(left.getKey(), right.getKey());
+                })
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private boolean canSatisfyWarehouse(Map<Long, Inventory> inventoryByMaterial, Map<Long, Integer> requestByMaterial) {
+        for (Map.Entry<Long, Integer> entry : requestByMaterial.entrySet()) {
+            Inventory inventory = inventoryByMaterial.get(entry.getKey());
+            if (inventory == null || inventory.getCurrentQty() - inventory.getLockedQty() < entry.getValue()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int warehouseSlack(Map<Long, Inventory> inventoryByMaterial, Map<Long, Integer> requestByMaterial) {
+        int slack = 0;
+        for (Map.Entry<Long, Integer> entry : requestByMaterial.entrySet()) {
+            Inventory inventory = inventoryByMaterial.get(entry.getKey());
+            slack += inventory.getCurrentQty() - inventory.getLockedQty() - entry.getValue();
+        }
+        return slack;
+    }
+
+    private ApplyOrder loadApplyOrderForOutbound(Long applyOrderId, Long warehouseId) {
+        if (applyOrderId == null) {
+            return null;
+        }
+        ApplyOrder applyOrder = applyOrderMapper.selectById(applyOrderId);
+        if (applyOrder == null) {
+            throw new BizException("申领单不存在");
+        }
+        if (!Set.of(OrderStatus.APPROVED, OrderStatus.OUTBOUND).contains(applyOrder.getStatus())) {
+            throw new BizException("当前申领单状态不允许出库");
+        }
+        if (applyOrder.getReservedWarehouseId() != null && !applyOrder.getReservedWarehouseId().equals(warehouseId)) {
+            throw new BizException("申领单已锁定至其他仓库，请按锁定仓库执行出库");
+        }
+        return applyOrder;
+    }
+
+    private ApplyOrderItem requireApplyItem(Map<Long, ApplyOrderItem> applyItemMap, Long materialId) {
+        ApplyOrderItem item = applyItemMap.get(materialId);
+        if (item == null) {
+            throw new BizException("申领单中不存在物资ID " + materialId);
+        }
+        return item;
+    }
+
+    private boolean isApplyOutbound(StockOutRequest request) {
+        return request.getApplyOrderId() != null;
+    }
+
+    private int safeQty(Integer quantity) {
+        return quantity == null ? 0 : quantity;
+    }
+
+    private void ensureUpdated(int updatedRows, String message) {
+        if (updatedRows != 1) {
+            throw new BizException(message);
+        }
     }
 }

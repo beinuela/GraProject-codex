@@ -242,6 +242,28 @@ const EDGE_WITH_LABEL = `
   </root>
 </mxGraphModel>`
 
+const EDGE_WITH_CHILD_LABEL = `
+<mxGraphModel>
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="2" value="Decision" style="rhombus;" vertex="1" parent="1">
+      <mxGeometry x="368" y="360" width="160" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="3" value="End" style="rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="608" y="352" width="200" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="4" value="否" style="endArrow=block;exitX=1;exitY=0.25;entryX=0;entryY=0.25;" edge="1" source="2" target="3" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="5" value="否" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=11;fontColor=#6B6B6B;" vertex="1" connectable="0" parent="4">
+      <mxGeometry x="0.8" relative="1" as="geometry">
+        <mxPoint x="0" y="-12" as="offset"/>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>`
+
 // ============================================================================
 // Tests
 // ============================================================================
@@ -342,6 +364,13 @@ describe('drawioToSvg', () => {
   it('should render edge label text', () => {
     const svg = drawioToSvg(EDGE_WITH_LABEL)
     assert.ok(svg.includes('>connects<'), 'Output should contain the edge label text')
+  })
+
+  it('should render child edge labels once and skip duplicate vertex rendering', () => {
+    const svg = drawioToSvg(EDGE_WITH_CHILD_LABEL)
+    const labelMatches = svg.match(/>否</g) || []
+    assert.strictEqual(labelMatches.length, 1, 'edge label text should be rendered only once')
+    assert.ok(!svg.includes('x="0.8" y="0"'), 'edgeLabel helper cell should not be rendered as a standalone vertex')
   })
 
   // --- Shape type rendering tests ---

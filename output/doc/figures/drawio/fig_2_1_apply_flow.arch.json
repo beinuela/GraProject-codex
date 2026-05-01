@@ -16,19 +16,19 @@
       "id": "start",
       "label": "创建申领单",
       "type": "terminal",
-      "size": "xl"
+      "size": "large"
     },
     {
       "id": "draft",
       "label": "保存草稿",
       "type": "process",
-      "size": "xl"
+      "size": "large"
     },
     {
       "id": "submit",
       "label": "提交申领单",
       "type": "process",
-      "size": "xl"
+      "size": "large"
     },
     {
       "id": "urgent",
@@ -76,7 +76,7 @@
       "id": "end",
       "label": "状态为 RECEIVED",
       "type": "terminal",
-      "size": "xl"
+      "size": "large"
     }
   ],
   "edges": [

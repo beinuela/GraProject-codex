@@ -18,6 +18,7 @@ public class ApplyOrder extends BaseEntity {
     private String reason;
     private String scenario;
     private Integer fastTrack;
+    private Long reservedWarehouseId;
     private Long approverId;
     private String approveRemark;
     private LocalDateTime approveTime;

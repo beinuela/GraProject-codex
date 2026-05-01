@@ -3,87 +3,373 @@ meta:
   theme: academic
   layout: horizontal
   routing: straight
-  canvas: 1500x980
-  title: 库存与批次 E-R图
-  description: 分类、物资档案、仓库、库存总表与库存批次之间的 E-R 图
+  canvas: 1900x1280
+  title: 库存与批次 E-R 图
+  description: 分类、物资档案、仓库、库存和库存批次的实体关系图
 nodes:
   - id: category
-    label: 分类\nmaterial_category
+    label: 物资分类
     type: service
-    size: medium
+    size: xl
     position:
-      x: 90
-      'y': 250
+      x: 280
+      'y': 210
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
       strokeWidth: 1.6
       fontSize: 13
-      shape: shape=rectangle;rounded=0
+      shape: shape=rectangle;rounded=0;whiteSpace=wrap;html=1;spacing=8
+  - id: category_attr_1
+    label: 编号
+    type: user
+    size: small
+    position:
+      x: 150
+      'y': 100
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
+  - id: category_attr_2
+    label: 分类名称
+    type: user
+    size: small
+    position:
+      x: 300
+      'y': 35
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
+  - id: category_attr_3
+    label: 备注
+    type: user
+    size: small
+    position:
+      x: 470
+      'y': 105
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
   - id: material
-    label: 物资档案\nmaterial_info
+    label: 物资档案
     type: service
-    size: medium
+    size: xl
     position:
-      x: 550
-      'y': 250
+      x: 930
+      'y': 230
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
       strokeWidth: 1.6
       fontSize: 13
-      shape: shape=rectangle;rounded=0
+      shape: shape=rectangle;rounded=0;whiteSpace=wrap;html=1;spacing=8
+  - id: material_attr_1
+    label: 编号
+    type: user
+    size: small
+    position:
+      x: 760
+      'y': 115
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
+  - id: material_attr_2
+    label: 物资编码
+    type: user
+    size: small
+    position:
+      x: 930
+      'y': 55
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
+  - id: material_attr_3
+    label: 物资名称
+    type: user
+    size: small
+    position:
+      x: 1110
+      'y': 120
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
+  - id: material_attr_4
+    label: 安全库存
+    type: user
+    size: small
+    position:
+      x: 690
+      'y': 350
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
+  - id: material_attr_5
+    label: 规格单位
+    type: user
+    size: small
+    position:
+      x: 1170
+      'y': 350
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
   - id: warehouse
-    label: 仓库\nwarehouse
+    label: 仓库
     type: service
-    size: medium
+    size: xl
     position:
-      x: 1060
-      'y': 250
+      x: 1600
+      'y': 230
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
       strokeWidth: 1.6
       fontSize: 13
-      shape: shape=rectangle;rounded=0
+      shape: shape=rectangle;rounded=0;whiteSpace=wrap;html=1;spacing=8
+  - id: warehouse_attr_1
+    label: 编号
+    type: user
+    size: small
+    position:
+      x: 1460
+      'y': 110
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
+  - id: warehouse_attr_2
+    label: 仓库名称
+    type: user
+    size: small
+    position:
+      x: 1610
+      'y': 40
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
+  - id: warehouse_attr_3
+    label: 所属校区
+    type: user
+    size: small
+    position:
+      x: 1790
+      'y': 120
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
+  - id: warehouse_attr_4
+    label: 负责人
+    type: user
+    size: small
+    position:
+      x: 1810
+      'y': 265
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
   - id: inventory
-    label: 库存\ninventory
+    label: 库存
     type: service
-    size: medium
+    size: xl
     position:
-      x: 450
-      'y': 650
+      x: 930
+      'y': 610
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
       strokeWidth: 1.6
       fontSize: 13
-      shape: shape=rectangle;rounded=0
+      shape: shape=rectangle;rounded=0;whiteSpace=wrap;html=1;spacing=8
+  - id: inventory_attr_1
+    label: 编号
+    type: user
+    size: small
+    position:
+      x: 760
+      'y': 520
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
+  - id: inventory_attr_2
+    label: 物资编号
+    type: user
+    size: small
+    position:
+      x: 620
+      'y': 780
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
+  - id: inventory_attr_3
+    label: 仓库编号
+    type: user
+    size: small
+    position:
+      x: 770
+      'y': 840
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
+  - id: inventory_attr_4
+    label: 当前库存
+    type: user
+    size: small
+    position:
+      x: 1240
+      'y': 790
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
+  - id: inventory_attr_5
+    label: 锁定库存
+    type: user
+    size: small
+    position:
+      x: 1260
+      'y': 650
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
   - id: batch
-    label: 库存批次\ninventory_batch
+    label: 库存批次
     type: service
-    size: medium
+    size: xl
     position:
-      x: 990
-      'y': 650
+      x: 930
+      'y': 1000
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
       strokeWidth: 1.6
       fontSize: 13
-      shape: shape=rectangle;rounded=0
+      shape: shape=rectangle;rounded=0;whiteSpace=wrap;html=1;spacing=8
+  - id: batch_attr_1
+    label: 编号
+    type: user
+    size: small
+    position:
+      x: 760
+      'y': 930
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
+  - id: batch_attr_2
+    label: 批次号
+    type: user
+    size: small
+    position:
+      x: 1140
+      'y': 930
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
+  - id: batch_attr_3
+    label: 入库数量
+    type: user
+    size: small
+    position:
+      x: 720
+      'y': 1120
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
+  - id: batch_attr_4
+    label: 剩余数量
+    type: user
+    size: small
+    position:
+      x: 1150
+      'y': 1120
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
+  - id: batch_attr_5
+    label: 过期日期
+    type: user
+    size: small
+    position:
+      x: 940
+      'y': 1230
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 11
   - id: rel_cat_material
     label: 归类
     type: decision
     size: medium
     position:
-      x: 305
-      'y': 255
+      x: 610
+      'y': 250
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
@@ -95,8 +381,8 @@ nodes:
     type: decision
     size: medium
     position:
-      x: 500
-      'y': 485
+      x: 930
+      'y': 420
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
@@ -108,8 +394,8 @@ nodes:
     type: decision
     size: medium
     position:
-      x: 815
-      'y': 485
+      x: 1320
+      'y': 430
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
@@ -121,301 +407,213 @@ nodes:
     type: decision
     size: medium
     position:
-      x: 720
-      'y': 650
+      x: 930
+      'y': 820
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
       strokeWidth: 1.6
       fontSize: 12
-  - id: cat_id
-    label: id
-    type: user
-    size: small
-    position:
-      x: 10
-      'y': 90
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: cat_name
-    label: category_name
-    type: user
-    size: small
-    position:
-      x: 110
-      'y': 40
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: cat_remark
-    label: remark
-    type: user
-    size: small
-    position:
-      x: 220
-      'y': 90
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: mat_id
-    label: id
-    type: user
-    size: small
-    position:
-      x: 405
-      'y': 70
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: mat_code
-    label: material_code
-    type: user
-    size: small
-    position:
-      x: 550
-      'y': 20
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: mat_name
-    label: material_name
-    type: user
-    size: small
-    position:
-      x: 700
-      'y': 70
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: mat_safety
-    label: safety_stock
-    type: user
-    size: small
-    position:
-      x: 735
-      'y': 165
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: mat_spec
-    label: spec/unit
-    type: user
-    size: small
-    position:
-      x: 360
-      'y': 160
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: wh_id
-    label: id
-    type: user
-    size: small
-    position:
-      x: 940
-      'y': 70
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: wh_name
-    label: warehouse_name
-    type: user
-    size: small
-    position:
-      x: 1075
-      'y': 20
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: wh_campus
-    label: campus
-    type: user
-    size: small
-    position:
-      x: 1220
-      'y': 70
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: wh_manager
-    label: manager
-    type: user
-    size: small
-    position:
-      x: 1245
-      'y': 160
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: inv_id
-    label: id
-    type: user
-    size: small
-    position:
-      x: 320
-      'y': 500
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: inv_material
-    label: material_id
-    type: user
-    size: small
-    position:
-      x: 355
-      'y': 785
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: inv_wh
-    label: warehouse_id
-    type: user
-    size: small
-    position:
-      x: 520
-      'y': 785
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: inv_qty
-    label: current_qty
-    type: user
-    size: small
-    position:
-      x: 610
-      'y': 535
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: inv_locked
-    label: locked_qty
-    type: user
-    size: small
-    position:
-      x: 635
-      'y': 710
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: batch_id
-    label: id
-    type: user
-    size: small
-    position:
-      x: 905
-      'y': 500
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: batch_no
-    label: batch_no
-    type: user
-    size: small
-    position:
-      x: 1035
-      'y': 475
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: batch_in
-    label: in_qty
-    type: user
-    size: small
-    position:
-      x: 1175
-      'y': 520
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: batch_remain
-    label: remain_qty
-    type: user
-    size: small
-    position:
-      x: 1200
-      'y': 635
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
-  - id: batch_expire
-    label: expire_date
-    type: user
-    size: small
-    position:
-      x: 1125
-      'y': 760
-    style:
-      fillColor: '#FFFFFF'
-      strokeColor: '#000000'
-      fontColor: '#000000'
-      strokeWidth: 1.6
-      fontSize: 11
 edges:
+  - from: category
+    to: category_attr_1
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: category
+    to: category_attr_2
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: category
+    to: category_attr_3
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: material
+    to: material_attr_1
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: material
+    to: material_attr_2
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: material
+    to: material_attr_3
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: material
+    to: material_attr_4
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: material
+    to: material_attr_5
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: warehouse
+    to: warehouse_attr_1
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: warehouse
+    to: warehouse_attr_2
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: warehouse
+    to: warehouse_attr_3
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: warehouse
+    to: warehouse_attr_4
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: inventory
+    to: inventory_attr_1
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: inventory
+    to: inventory_attr_2
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: inventory
+    to: inventory_attr_3
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: inventory
+    to: inventory_attr_4
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: inventory
+    to: inventory_attr_5
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: batch
+    to: batch_attr_1
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: batch
+    to: batch_attr_2
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: batch
+    to: batch_attr_3
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: batch
+    to: batch_attr_4
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: batch
+    to: batch_attr_5
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: none
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
   - from: category
     to: rel_cat_material
     type: primary
@@ -425,6 +623,10 @@ edges:
       strokeWidth: 1.4
       fontColor: '#000000'
       fontSize: 12
+      exitX: 1
+      exitY: 0.56
+      entryX: 0
+      entryY: 0.5
     label: '1'
     labelPosition: end
   - from: rel_cat_material
@@ -436,7 +638,11 @@ edges:
       strokeWidth: 1.4
       fontColor: '#000000'
       fontSize: 12
-    label: 'N'
+      exitX: 1
+      exitY: 0.5
+      entryX: 0
+      entryY: 0.5
+    label: 'n'
     labelPosition: end
   - from: material
     to: rel_material_inventory
@@ -447,6 +653,10 @@ edges:
       strokeWidth: 1.4
       fontColor: '#000000'
       fontSize: 12
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
     label: '1'
     labelPosition: end
   - from: rel_material_inventory
@@ -458,7 +668,11 @@ edges:
       strokeWidth: 1.4
       fontColor: '#000000'
       fontSize: 12
-    label: 'N'
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+    label: 'n'
     labelPosition: end
   - from: warehouse
     to: rel_wh_inventory
@@ -469,8 +683,15 @@ edges:
       strokeWidth: 1.4
       fontColor: '#000000'
       fontSize: 12
+      exitX: 0
+      exitY: 0.62
+      entryX: 1
+      entryY: 0.5
     label: '1'
     labelPosition: end
+    waypoints:
+      - x: 1450
+        'y': 430
   - from: rel_wh_inventory
     to: inventory
     type: primary
@@ -480,8 +701,17 @@ edges:
       strokeWidth: 1.4
       fontColor: '#000000'
       fontSize: 12
-    label: 'N'
+      exitX: 0
+      exitY: 0.6
+      entryX: 1
+      entryY: 0.36
+    label: 'n'
     labelPosition: end
+    waypoints:
+      - x: 1120
+        'y': 430
+      - x: 1120
+        'y': 620
   - from: inventory
     to: rel_inventory_batch
     type: primary
@@ -491,6 +721,10 @@ edges:
       strokeWidth: 1.4
       fontColor: '#000000'
       fontSize: 12
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
     label: '1'
     labelPosition: end
   - from: rel_inventory_batch
@@ -502,204 +736,10 @@ edges:
       strokeWidth: 1.4
       fontColor: '#000000'
       fontSize: 12
-    label: 'N'
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+    label: 'n'
     labelPosition: end
-  - from: category
-    to: cat_id
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: category
-    to: cat_name
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: category
-    to: cat_remark
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: material
-    to: mat_id
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: material
-    to: mat_code
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: material
-    to: mat_name
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: material
-    to: mat_safety
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: material
-    to: mat_spec
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: warehouse
-    to: wh_id
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: warehouse
-    to: wh_name
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: warehouse
-    to: wh_campus
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: warehouse
-    to: wh_manager
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: inventory
-    to: inv_id
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: inventory
-    to: inv_material
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: inventory
-    to: inv_wh
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: inventory
-    to: inv_qty
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: inventory
-    to: inv_locked
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: batch
-    to: batch_id
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: batch
-    to: batch_no
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: batch
-    to: batch_in
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: batch
-    to: batch_remain
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
-  - from: batch
-    to: batch_expire
-    type: primary
-    style:
-      strokeColor: '#000000'
-      endArrow: none
-      strokeWidth: 1.4
-      fontColor: '#000000'
-      fontSize: 12
 modules: []

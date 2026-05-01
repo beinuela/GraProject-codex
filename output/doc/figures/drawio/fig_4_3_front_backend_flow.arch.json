@@ -1,0 +1,173 @@
+{
+  "version": 1,
+  "title": "前后端交互流程图",
+  "type": "academic-diagram",
+  "source": "generated",
+  "profile": "academic-paper",
+  "theme": "academic",
+  "layout": "horizontal",
+  "counts": {
+    "nodes": 11,
+    "edges": 10,
+    "modules": 4
+  },
+  "nodes": [
+    {
+      "id": "vue",
+      "label": "Vue页面",
+      "type": "process",
+      "module": "frontend",
+      "size": "xl"
+    },
+    {
+      "id": "pinia",
+      "label": "Pinia状态",
+      "type": "process",
+      "module": "frontend",
+      "size": "xl"
+    },
+    {
+      "id": "axios",
+      "label": "Axios请求",
+      "type": "process",
+      "module": "frontend",
+      "size": "xl"
+    },
+    {
+      "id": "jwt",
+      "label": "JWT过滤器",
+      "type": "process",
+      "module": "security",
+      "size": "xl"
+    },
+    {
+      "id": "perm",
+      "label": "权限校验",
+      "type": "process",
+      "module": "security",
+      "size": "xl"
+    },
+    {
+      "id": "controller",
+      "label": "Controller",
+      "type": "process",
+      "module": "backend",
+      "size": "xl"
+    },
+    {
+      "id": "service",
+      "label": "Service",
+      "type": "process",
+      "module": "backend",
+      "size": "xl"
+    },
+    {
+      "id": "mapper",
+      "label": "Mapper",
+      "type": "process",
+      "module": "backend",
+      "size": "xl"
+    },
+    {
+      "id": "mysql",
+      "label": "MySQL",
+      "type": "process",
+      "module": "data",
+      "size": "xl"
+    },
+    {
+      "id": "response",
+      "label": "统一响应",
+      "type": "process",
+      "module": "data",
+      "size": "xl"
+    },
+    {
+      "id": "refresh",
+      "label": "页面刷新",
+      "type": "process",
+      "module": "data",
+      "size": "xl"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "from": "vue",
+      "to": "pinia",
+      "type": "primary"
+    },
+    {
+      "id": "edge-2",
+      "from": "pinia",
+      "to": "axios",
+      "type": "primary"
+    },
+    {
+      "id": "edge-3",
+      "from": "axios",
+      "to": "jwt",
+      "type": "primary"
+    },
+    {
+      "id": "edge-4",
+      "from": "jwt",
+      "to": "perm",
+      "type": "primary"
+    },
+    {
+      "id": "edge-5",
+      "from": "perm",
+      "to": "controller",
+      "type": "primary"
+    },
+    {
+      "id": "edge-6",
+      "from": "controller",
+      "to": "service",
+      "type": "primary"
+    },
+    {
+      "id": "edge-7",
+      "from": "service",
+      "to": "mapper",
+      "type": "primary"
+    },
+    {
+      "id": "edge-8",
+      "from": "mapper",
+      "to": "mysql",
+      "type": "primary"
+    },
+    {
+      "id": "edge-9",
+      "from": "mysql",
+      "to": "response",
+      "type": "primary"
+    },
+    {
+      "id": "edge-10",
+      "from": "response",
+      "to": "refresh",
+      "type": "primary"
+    }
+  ],
+  "modules": [
+    {
+      "id": "frontend",
+      "label": "前端请求"
+    },
+    {
+      "id": "security",
+      "label": "安全边界"
+    },
+    {
+      "id": "backend",
+      "label": "后端服务"
+    },
+    {
+      "id": "data",
+      "label": "数据访问与响应"
+    }
+  ]
+}

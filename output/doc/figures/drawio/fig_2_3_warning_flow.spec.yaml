@@ -3,75 +3,75 @@ meta:
   theme: academic
   layout: vertical
   routing: orthogonal
-  canvas: 760x980
+  canvas: 900x1380
   title: 预警处置流程图
-  description: 定时扫描、预警生成、人工处置与通知联动流程图
+  description: 定时扫描、预警生成、人工处理和通知推送的闭环流程
 nodes:
   - id: start
     label: 触发定时扫描
     type: terminal
-    size: xl
+    size: large
     position:
-      x: 330
-      'y': 40
+      x: 450
+      'y': 80
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
       strokeWidth: 1.6
-      fontSize: 16
+      fontSize: 15
   - id: scan
     label: 检查库存与批次
     type: process
     size: xl
     position:
-      x: 330
-      'y': 150
+      x: 450
+      'y': 240
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
       strokeWidth: 1.6
-      fontSize: 16
+      fontSize: 15
   - id: risk
     label: 发现异常？
     type: decision
     size: large
     position:
-      x: 330
-      'y': 280
+      x: 450
+      'y': 400
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
       strokeWidth: 1.6
-      fontSize: 16
+      fontSize: 15
   - id: record
     label: 生成预警记录
     type: process
     size: xl
     position:
-      x: 330
-      'y': 410
+      x: 450
+      'y': 560
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
       strokeWidth: 1.6
-      fontSize: 16
+      fontSize: 15
   - id: view
     label: 查看待处理预警
     type: process
     size: xl
     position:
-      x: 330
-      'y': 535
+      x: 450
+      'y': 720
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
       strokeWidth: 1.6
-      fontSize: 16
+      fontSize: 15
   - id: handle
     label: |-
       填写说明
@@ -79,40 +79,40 @@ nodes:
     type: process
     size: xl
     position:
-      x: 330
-      'y': 660
+      x: 450
+      'y': 880
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
       strokeWidth: 1.6
-      fontSize: 16
+      fontSize: 15
   - id: notify
     label: 按需发送通知
     type: process
     size: xl
     position:
-      x: 330
-      'y': 785
+      x: 450
+      'y': 1040
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
       strokeWidth: 1.6
-      fontSize: 16
+      fontSize: 15
   - id: end
     label: 进入统计分析
     type: terminal
-    size: xl
+    size: large
     position:
-      x: 330
-      'y': 910
+      x: 450
+      'y': 1220
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
       strokeWidth: 1.6
-      fontSize: 16
+      fontSize: 15
   - id: noop
     label: |-
       无预警
@@ -120,14 +120,14 @@ nodes:
     type: process
     size: xl
     position:
-      x: 580
-      'y': 280
+      x: 710
+      'y': 400
     style:
       fillColor: '#FFFFFF'
       strokeColor: '#000000'
       fontColor: '#000000'
       strokeWidth: 1.6
-      fontSize: 16
+      fontSize: 15
 edges:
   - from: start
     to: scan
@@ -150,23 +150,25 @@ edges:
   - from: risk
     to: record
     type: primary
+    label: 是
+    labelPosition: start
     style:
       strokeColor: '#000000'
       endArrow: block
       strokeWidth: 1.4
       fontColor: '#000000'
       fontSize: 12
-    label: 是
   - from: risk
     to: noop
     type: primary
+    label: 否
+    labelPosition: end
     style:
       strokeColor: '#000000'
       endArrow: block
       strokeWidth: 1.4
       fontColor: '#000000'
       fontSize: 12
-    label: 否
   - from: record
     to: view
     type: primary

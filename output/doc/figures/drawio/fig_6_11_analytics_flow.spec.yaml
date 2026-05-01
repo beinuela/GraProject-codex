@@ -1,0 +1,174 @@
+meta:
+  profile: academic-paper
+  theme: academic
+  layout: vertical
+  routing: orthogonal
+  canvas: 1700x1850
+  title: 统计数据流转流程图
+  description: 论文流程图箭头规范修复版：连接点固定在节点边缘
+nodes:
+  - id: n1
+    label: 前端选择统计主题
+    type: terminal
+    size: xl
+    position:
+      x: 750
+      'y': 160
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: n2
+    label: 请求 AnalyticsController
+    type: process
+    size: xl
+    position:
+      x: 750
+      'y': 380
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: n3
+    label: Service 聚合业务表
+    type: process
+    size: xl
+    position:
+      x: 750
+      'y': 600
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: n4
+    label: 返回统一 JSON
+    type: process
+    size: xl
+    position:
+      x: 750
+      'y': 820
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: n5
+    label: ECharts 渲染图表
+    type: process
+    size: xl
+    position:
+      x: 750
+      'y': 1040
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: n6
+    label: 页面展示库存与预警结果
+    type: terminal
+    size: xl
+    position:
+      x: 750
+      'y': 1260
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+edges:
+  - from: n1
+    to: n2
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: n2
+    to: n3
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: n3
+    to: n4
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: n4
+    to: n5
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: n5
+    to: n6
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+modules: []

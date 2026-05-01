@@ -91,7 +91,8 @@ CREATE TABLE material_category (
     deleted TINYINT NOT NULL DEFAULT 0,
     version INT NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_material_category_name (category_name)
 );
 
 CREATE TABLE material_info (
@@ -122,7 +123,8 @@ CREATE TABLE warehouse (
     deleted TINYINT NOT NULL DEFAULT 0,
     version INT NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_warehouse_name (warehouse_name)
 );
 
 CREATE TABLE inventory (
@@ -194,6 +196,7 @@ CREATE TABLE apply_order (
     reason VARCHAR(255),
     scenario VARCHAR(255),
     fast_track TINYINT NOT NULL DEFAULT 0,
+    reserved_warehouse_id BIGINT,
     approver_id BIGINT,
     approve_remark VARCHAR(255),
     approve_time DATETIME,

@@ -16,7 +16,7 @@
       "id": "start",
       "label": "创建调拨单",
       "type": "terminal",
-      "size": "xl"
+      "size": "large"
     },
     {
       "id": "recommend",
@@ -28,13 +28,13 @@
       "id": "submit",
       "label": "提交调拨单",
       "type": "process",
-      "size": "xl"
+      "size": "large"
     },
     {
       "id": "approve",
       "label": "审批人审核",
       "type": "process",
-      "size": "xl"
+      "size": "large"
     },
     {
       "id": "pass",
@@ -58,13 +58,13 @@
       "id": "receive",
       "label": "调入仓签收",
       "type": "process",
-      "size": "xl"
+      "size": "large"
     },
     {
       "id": "end",
       "label": "状态为 RECEIVED",
       "type": "terminal",
-      "size": "xl"
+      "size": "large"
     }
   ],
   "edges": [
