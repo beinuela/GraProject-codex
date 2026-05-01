@@ -86,8 +86,9 @@ public class TransferController {
     public ApiResponse<List<Map<String, Object>>> recommend(
             @RequestParam String targetCampus,
             @RequestParam Long materialId,
-            @RequestParam Integer qty) {
-        return ApiResponse.ok(transferService.recommendTransfer(targetCampus, materialId, qty));
+            @RequestParam Integer qty,
+            @RequestParam(required = false) Long excludeWarehouseId) {
+        return ApiResponse.ok(transferService.recommendTransfer(targetCampus, materialId, qty, excludeWarehouseId));
     }
 
     private String resolveRemark(String remark, RemarkRequest body) {

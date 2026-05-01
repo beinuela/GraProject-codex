@@ -86,7 +86,7 @@
             <el-option v-for="material in materials" :key="material.id" :label="material.materialName" :value="material.id" />
           </el-select>
           <el-input-number v-model="item.quantity" :min="1" />
-          <div class="table-note">推荐逻辑仅参考第一项物资与数量。</div>
+          <div class="table-note">推荐逻辑仅参考第一项物资与数量，并自动排除当前调入仓。</div>
           <div class="table-note">最终库存校验仍由后端处理。</div>
           <el-button type="danger" @click="createForm.items.splice(index, 1)">删除</el-button>
         </div>
@@ -209,7 +209,7 @@ const fetchRecommendation = async () => {
     return ElMessage.error('调入仓库缺乏校区地理信息')
   }
 
-  const url = `/api/transfer/recommend?targetCampus=${encodeURIComponent(targetWarehouse.campus)}&materialId=${firstItem.materialId}&qty=${firstItem.quantity}`
+  const url = `/api/transfer/recommend?targetCampus=${encodeURIComponent(targetWarehouse.campus)}&materialId=${firstItem.materialId}&qty=${firstItem.quantity}&excludeWarehouseId=${createForm.toWarehouseId}`
   const result = await apiGet(url)
   recommendations.value = (result || []).slice(0, 3)
   if (!recommendations.value.length) {

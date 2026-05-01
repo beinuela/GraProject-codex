@@ -64,7 +64,7 @@ http.interceptors.response.use(
         if (location.pathname !== '/login') {
           location.href = '/login'
         }
-        return Promise.reject(error)
+        return Promise.reject(new Error('登录已失效，请重新登录'))
       }
 
       if (isRefreshing) {
@@ -106,12 +106,15 @@ http.interceptors.response.use(
           if (location.pathname !== '/login') {
             location.href = '/login'
           }
-          return Promise.reject(refreshErr)
+          return Promise.reject(new Error('登录已失效，请重新登录'))
         })
         .finally(() => {
           isRefreshing = false
         })
     }
+
+    const backendMessage = extractBackendMessage(error?.response?.data)
+    const message = inferTransportMessage(code, backendMessage, originalRequest, error) || resolveMessage(code, backendMessage)
 
     if (!code || code >= 500) {
       captureFrontendError(error, {
@@ -121,12 +124,15 @@ http.interceptors.response.use(
       })
     }
 
-    ElMessage.error(resolveMessage(code, error?.response?.data?.message || error.message))
-    return Promise.reject(error)
+    ElMessage.error(message)
+    return Promise.reject(new Error(message))
   }
 )
 
 function resolveMessage(status, message) {
+  if (!status) {
+    return '网络连接异常，请检查服务是否启动'
+  }
   if (message) {
     return message
   }
@@ -142,8 +148,29 @@ function resolveMessage(status, message) {
     case 500:
       return '服务器异常，请稍后重试'
     default:
-      return status ? '请求失败' : '网络连接异常，请检查服务是否启动'
+      return '请求失败'
   }
+}
+
+function extractBackendMessage(data) {
+  if (!data) return ''
+  if (typeof data === 'string') return ''
+  if (typeof data?.message === 'string') {
+    return data.message
+  }
+  return ''
+}
+
+function inferTransportMessage(status, backendMessage, request, error) {
+  if (!status) {
+    return '网络连接异常，请检查服务是否启动'
+  }
+  const isProxyApiRequest = String(request?.url || '').startsWith('/api/')
+  const isAxiosStatusFallback = /^Request failed with status code \d+$/.test(error?.message || '')
+  if (status >= 500 && !backendMessage && isProxyApiRequest && isAxiosStatusFallback) {
+    return '网络连接异常，请检查服务是否启动'
+  }
+  return ''
 }
 
 export default http

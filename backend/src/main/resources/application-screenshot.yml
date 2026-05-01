@@ -6,7 +6,7 @@ spring:
     password:
   sql:
     init:
-      mode: always
+      mode: never
       encoding: UTF-8
       schema-locations: optional:classpath:schema-screenshot.sql
       data-locations: optional:classpath:data-screenshot.sql

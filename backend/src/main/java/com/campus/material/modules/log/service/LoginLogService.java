@@ -7,6 +7,8 @@ import com.campus.material.common.PageResult;
 import com.campus.material.modules.log.entity.LoginLog;
 import com.campus.material.modules.log.mapper.LoginLogMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -27,6 +29,7 @@ public class LoginLogService {
         return PageResult.from(page);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void record(Long userId, String username, String ip, String status, String userAgent) {
         LoginLog log = new LoginLog();
         log.setUserId(userId);

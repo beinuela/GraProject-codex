@@ -25,6 +25,62 @@
         <div ref="emergencyLineRef" class="chart-box"></div>
       </DataPanel>
     </div>
+
+    <div class="surface-grid surface-grid--2">
+      <DataPanel title="补货参考" description="基于安全库存与近 30 天出库量生成补货建议。">
+        <template #actions>
+          <span v-if="!canUseSmart" class="table-note">当前角色仅查看基础统计</span>
+        </template>
+        <el-table v-if="canUseSmart && replenishmentRows.length" :data="replenishmentRows.slice(0, 5)" size="small" class="list-table">
+          <el-table-column prop="materialName" label="物资" min-width="160" />
+          <el-table-column prop="currentStock" label="当前库存" width="110" />
+          <el-table-column prop="safetyStock" label="安全库存" width="110" />
+          <el-table-column prop="suggestQty" label="建议补货" width="110" />
+        </el-table>
+        <div v-else class="chart-empty">
+          {{ canUseSmart ? '暂无补货建议数据。' : '当前角色未开放补货建议接口。' }}
+        </div>
+      </DataPanel>
+
+      <DataPanel title="出库趋势参考" description="基于历史出库记录计算移动平均并给出未来月份参考值。">
+        <template #actions>
+          <el-select
+            v-if="canUseSmart && forecastOptions.length"
+            v-model="forecastMaterialId"
+            placeholder="选择物资"
+            style="width: 220px;"
+            @change="loadForecast"
+          >
+            <el-option v-for="item in forecastOptions" :key="item.id" :label="item.materialName" :value="item.id" />
+          </el-select>
+        </template>
+
+        <div v-if="canUseSmart && hasForecastData" class="smart-forecast">
+          <div class="smart-forecast__summary">
+            近六个月移动平均出库量：<strong>{{ forecastAverageText }}</strong>
+          </div>
+          <div class="smart-forecast__grid">
+            <div>
+              <div class="table-note">历史出库</div>
+              <el-table :data="forecastData.history || []" size="small" class="list-table">
+                <el-table-column prop="monthKey" label="月份" width="120" />
+                <el-table-column prop="qty" label="出库量" width="100" />
+              </el-table>
+            </div>
+            <div>
+              <div class="table-note">未来参考</div>
+              <el-table :data="forecastData.forecast || []" size="small" class="list-table">
+                <el-table-column prop="monthKey" label="月份" width="120" />
+                <el-table-column prop="predictQty" label="参考值" width="100" />
+              </el-table>
+            </div>
+          </div>
+        </div>
+        <div v-else class="chart-empty">
+          {{ canUseSmart ? '暂无可展示的出库趋势参考。' : '当前角色未开放预测接口。' }}
+        </div>
+      </DataPanel>
+    </div>
   </PageScaffold>
 </template>
 
@@ -36,8 +92,10 @@ import { apiGet } from '../../api'
 import DataPanel from '../../components/ui/DataPanel.vue'
 import PageScaffold from '../../components/ui/PageScaffold.vue'
 import { useChart } from '../../composables/useChart'
+import { useAuthStore } from '../../store/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 const chartColors = ['#2670e9', '#35d4c6', '#7856ff', '#ff9f43', '#fa5252', '#12b886']
 
@@ -56,6 +114,14 @@ const trendData = ref([])
 const deptData = ref([])
 const expiryData = ref([])
 const emergencyData = ref([])
+const replenishmentRows = ref([])
+const forecastOptions = ref([])
+const forecastMaterialId = ref(null)
+const forecastData = ref({ history: [], movingAverage: 0, forecast: [] })
+
+const canUseSmart = computed(() => ['ADMIN', 'WAREHOUSE_ADMIN', 'APPROVER'].includes(authStore.user?.roleCode || localStorage.getItem('roleCode') || ''))
+const hasForecastData = computed(() => (forecastData.value.history || []).length || (forecastData.value.forecast || []).length)
+const forecastAverageText = computed(() => Number(forecastData.value.movingAverage || 0).toFixed(2))
 
 const overviewMetrics = computed(() => [
   { label: '系统用户', value: overview.value.userCount, helper: '当前可登录账号', icon: User, tone: 'accent' },
@@ -304,6 +370,49 @@ const load = async () => {
   try { deptData.value = await apiGet('/api/analytics/department-ranking') } catch { deptData.value = [] }
   try { expiryData.value = await apiGet('/api/analytics/expiry-stats') } catch { expiryData.value = [] }
   try { emergencyData.value = await apiGet('/api/analytics/emergency-consumption') } catch { emergencyData.value = [] }
+  await loadSmart()
+}
+
+const loadForecast = async () => {
+  if (!canUseSmart.value || !forecastMaterialId.value) {
+    forecastData.value = { history: [], movingAverage: 0, forecast: [] }
+    return
+  }
+  try {
+    forecastData.value = await apiGet('/api/smart/forecast', {
+      materialId: forecastMaterialId.value,
+      months: 3
+    })
+  } catch {
+    forecastData.value = { history: [], movingAverage: 0, forecast: [] }
+  }
+}
+
+const loadSmart = async () => {
+  if (!canUseSmart.value) {
+    replenishmentRows.value = []
+    forecastOptions.value = []
+    forecastMaterialId.value = null
+    forecastData.value = { history: [], movingAverage: 0, forecast: [] }
+    return
+  }
+
+  try {
+    replenishmentRows.value = await apiGet('/api/smart/replenishment-suggestions', { guaranteeDays: 7 })
+  } catch {
+    replenishmentRows.value = []
+  }
+
+  try {
+    forecastOptions.value = await apiGet('/api/material/info')
+  } catch {
+    forecastOptions.value = []
+  }
+
+  if (!forecastMaterialId.value) {
+    forecastMaterialId.value = replenishmentRows.value[0]?.materialId || forecastOptions.value[0]?.id || null
+  }
+  await loadForecast()
 }
 
 onMounted(load)
@@ -313,5 +422,34 @@ onMounted(load)
 .chart-box {
   width: 100%;
   height: 300px;
+}
+
+.chart-empty {
+  display: grid;
+  place-items: center;
+  min-height: 220px;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+.smart-forecast {
+  display: grid;
+  gap: 14px;
+}
+
+.smart-forecast__summary {
+  color: var(--text-secondary);
+}
+
+.smart-forecast__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .smart-forecast__grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

@@ -11,6 +11,7 @@ import com.campus.material.modules.inventory.mapper.InventoryBatchMapper;
 import com.campus.material.modules.inventory.mapper.InventoryMapper;
 import com.campus.material.modules.notification.entity.Notification;
 import com.campus.material.modules.notification.mapper.NotificationMapper;
+import com.campus.material.modules.log.mapper.LoginLogMapper;
 import com.campus.material.modules.transfer.entity.TransferOrder;
 import com.campus.material.modules.transfer.mapper.TransferOrderMapper;
 import com.campus.material.modules.warning.entity.WarningRecord;
@@ -87,6 +88,9 @@ class CoreFlowIntegrationTest {
 
     @Autowired
     private NotificationMapper notificationMapper;
+
+    @Autowired
+    private LoginLogMapper loginLogMapper;
 
     @Test
     void loginRefreshAndSecurityHeadersShouldWork() throws Exception {
@@ -372,6 +376,43 @@ class CoreFlowIntegrationTest {
     }
 
     @Test
+    void failedAndDisabledLoginShouldCreateLoginAuditRows() throws Exception {
+        Tokens adminTokens = login("admin", "Abc@123456", "198.18.0.74");
+        long before = loginLogMapper.selectCount(null);
+
+        mockMvc.perform(post("/api/auth/login")
+                        .with(request -> {
+                            request.setRemoteAddr("198.18.0.73");
+                            return request;
+                        })
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of("username", "admin", "password", "wrong-password"))))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value(401));
+
+        authorizedPost("/api/rbac/users", adminTokens.accessToken(), Map.of(
+                "username", "disabledUser",
+                "password", "Abc@123456",
+                "realName", "禁用账号",
+                "deptId", 4,
+                "roleId", 4,
+                "status", 0
+        )).andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/auth/login")
+                        .with(request -> {
+                            request.setRemoteAddr("198.18.0.75");
+                            return request;
+                        })
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of("username", "disabledUser", "password", "Abc@123456"))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value(403));
+
+        assertEquals(before + 2, loginLogMapper.selectCount(null));
+    }
+
+    @Test
     void eventNotificationShouldBeVisibleAndMarkReadable() throws Exception {
         Tokens adminTokens = login("admin", "Abc@123456", "198.18.0.63");
         long unreadBefore = unreadCount(adminTokens.accessToken());
@@ -476,6 +517,46 @@ class CoreFlowIntegrationTest {
     }
 
     @Test
+    void systemConfigShouldValidateRequiredFieldsAndPreventDuplicateKey() throws Exception {
+        Tokens adminTokens = login("admin", "Abc@123456", "198.18.0.641");
+        String suffix = String.valueOf(System.nanoTime());
+        String configKey = "TEST_CONFIG_" + suffix;
+
+        authorizedPost("/api/config", adminTokens.accessToken(), Map.of(
+                "configKey", configKey,
+                "configValue", "VALUE_" + suffix,
+                "configName", "配置项" + suffix,
+                "configGroup", "TEST",
+                "remark", "系统配置测试"
+        ))
+                .andExpect(status().isOk());
+
+        authorizedGet("/api/config?group=TEST", adminTokens.accessToken())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[?(@.configKey=='" + configKey + "')]").isNotEmpty());
+
+        authorizedPost("/api/config", adminTokens.accessToken(), Map.of(
+                "configKey", configKey,
+                "configValue", "VALUE_DUP",
+                "configName", "重复配置",
+                "configGroup", "TEST",
+                "remark", "重复配置测试"
+        ))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value(409))
+                .andExpect(jsonPath("$.message").value("配置键已存在，请勿重复添加"));
+
+        authorizedPost("/api/config", adminTokens.accessToken(), Map.of(
+                "configValue", "VALUE_MISSING_KEY",
+                "configName", "缺少键的配置",
+                "configGroup", "TEST"
+        ))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.message").value("配置键不能为空"));
+    }
+
+    @Test
     void validationAndBusinessErrorsShouldUseExpectedHttpStatus() throws Exception {
         Tokens deptTokens = login("dept", "Abc@123456", "198.18.0.65");
         authorizedPost("/api/apply", deptTokens.accessToken(), Map.of(
@@ -496,6 +577,29 @@ class CoreFlowIntegrationTest {
         ))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value(409));
+    }
+
+    @Test
+    void smartForecastMissingMaterialShouldReturnBadRequest() throws Exception {
+        Tokens adminTokens = login("admin", "Abc@123456", "198.18.0.67");
+
+        authorizedGet("/api/smart/forecast?months=3", adminTokens.accessToken())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.message").value("缺少必填参数: materialId"));
+    }
+
+    @Test
+    void transferRecommendationShouldExcludeTargetWarehouse() throws Exception {
+        Tokens warehouseTokens = login("warehouse", "Abc@123456", "198.18.0.68");
+
+        MvcResult result = authorizedGet("/api/transfer/recommend?targetCampus=%E4%B8%9C%E9%A3%8E%E6%A0%A1%E5%8C%BA&materialId=1&qty=1&excludeWarehouseId=2", warehouseTokens.accessToken())
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode records = readJson(result).path("data");
+        assertTrue(records.isArray());
+        records.forEach(node -> assertTrue(node.path("warehouseId").asLong() != 2L));
     }
 
     private Tokens login(String username, String password, String remoteAddr) throws Exception {

@@ -23,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class AuthServiceTest {
@@ -112,6 +113,7 @@ class AuthServiceTest {
 
         BizException thrown = assertThrows(BizException.class, () -> authService.login(request));
         assertTrue(thrown.getMessage().contains("用户名或密码错误"));
+        verify(loginLogService).record(eq(null), eq("admin"), anyString(), eq("FAILURE"), anyString());
     }
 
     @Test
@@ -124,6 +126,7 @@ class AuthServiceTest {
 
         BizException thrown = assertThrows(BizException.class, () -> authService.login(request));
         assertTrue(thrown.getMessage().contains("用户名或密码错误"));
+        verify(loginLogService).record(eq(null), eq("nonexistent"), anyString(), eq("FAILURE"), anyString());
     }
 
     @Test
@@ -142,6 +145,7 @@ class AuthServiceTest {
 
         BizException thrown = assertThrows(BizException.class, () -> authService.login(request));
         assertTrue(thrown.getMessage().contains("禁用"));
+        verify(loginLogService).record(eq(null), eq("admin"), anyString(), eq("FAILURE"), anyString());
     }
 
     @Test
