@@ -209,7 +209,7 @@ public class TransferService {
         return map;
     }
 
-    public List<Map<String, Object>> recommendTransfer(String targetCampus, Long materialId, Integer qty) {
+    public List<Map<String, Object>> recommendTransfer(String targetCampus, Long materialId, Integer qty, Long excludeWarehouseId) {
         /*
          * 调拨推荐以目标校区为起点，先计算校区间距离，再把满足库存条件的候选仓统一取出。
          * 仓库信息采用批量预取，避免在候选列表遍历时出现按仓库逐条查询的 N+1 开销。
@@ -227,6 +227,9 @@ public class TransferService {
 
         List<Map<String, Object>> recommendations = new ArrayList<>();
         for (Inventory inv : invs) {
+            if (excludeWarehouseId != null && excludeWarehouseId.equals(inv.getWarehouseId())) {
+                continue;
+            }
             com.campus.material.modules.warehouse.entity.Warehouse wh = warehouseMap.get(inv.getWarehouseId());
             if (wh == null) continue;
 

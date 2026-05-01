@@ -5,6 +5,7 @@
         <span class="table-note">统一查看系统通知、广播和未读状态。</span>
       </template>
       <template #actions>
+        <el-button :disabled="!list.some(item => !item.isRead)" @click="markAllRead">全部已读</el-button>
         <el-button @click="load">刷新</el-button>
       </template>
     </FilterActionBar>
@@ -21,9 +22,16 @@
           </template>
         </el-table-column>
         <el-table-column prop="createdAt" label="时间" width="180" />
-        <el-table-column label="操作" width="120" fixed="right">
+        <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button v-if="!row.isRead" size="small" @click="markRead(row.id)">标记已读</el-button>
+            <div class="inline-actions">
+              <el-button v-if="!row.isRead" size="small" @click="markRead(row.id)">标记已读</el-button>
+              <el-popconfirm title="确认删除该通知？" @confirm="remove(row.id)">
+                <template #reference>
+                  <el-button size="small" type="danger">删除</el-button>
+                </template>
+              </el-popconfirm>
+            </div>
           </template>
         </el-table-column>
         <template #empty>
@@ -44,7 +52,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { Bell, CircleCheck, MessageBox, Warning } from '@element-plus/icons-vue'
-import { apiGet, apiPost } from '../../api'
+import { apiDelete, apiGet, apiPost } from '../../api'
 import EmptyState from '../../components/ui/EmptyState.vue'
 import FilterActionBar from '../../components/ui/FilterActionBar.vue'
 import PaginationBar from '../../components/ui/PaginationBar.vue'
@@ -75,6 +83,22 @@ const load = async () => {
 
 const markRead = async (id) => {
   await apiPost(`/api/notification/${id}/read`)
+  notifyShell()
+  await load()
+}
+
+const markAllRead = async () => {
+  await apiPost('/api/notification/read-all')
+  notifyShell()
+  await load()
+}
+
+const remove = async (id) => {
+  await apiDelete(`/api/notification/${id}`)
+  notifyShell()
+  if (list.value.length === 1 && pagination.page > 1) {
+    pagination.page -= 1
+  }
   await load()
 }
 
@@ -87,6 +111,10 @@ const handleSizeChange = async (size) => {
   pagination.size = size
   pagination.page = 1
   await load()
+}
+
+const notifyShell = () => {
+  window.dispatchEvent(new Event('notification-updated'))
 }
 
 onMounted(load)

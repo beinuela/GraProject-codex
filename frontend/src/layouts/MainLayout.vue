@@ -247,13 +247,19 @@ const handleCommand = (command) => {
   }
 }
 
-watch(() => route.path, handleNavClick)
+watch(() => route.path, async () => {
+  handleNavClick()
+  if (authStore.token) {
+    await loadUnread()
+  }
+})
 
 onMounted(async () => {
   syncViewport()
   syncClock()
   clockTimer = window.setInterval(syncClock, 1000)
   window.addEventListener('resize', syncViewport)
+  window.addEventListener('notification-updated', loadUnread)
   await loadMenus()
   await loadUnread()
 })
@@ -263,6 +269,7 @@ onBeforeUnmount(() => {
     window.clearInterval(clockTimer)
   }
   window.removeEventListener('resize', syncViewport)
+  window.removeEventListener('notification-updated', loadUnread)
 })
 </script>
 

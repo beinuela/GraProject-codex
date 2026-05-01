@@ -13,6 +13,7 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 
 import java.lang.reflect.Method;
 import java.io.ByteArrayInputStream;
@@ -99,6 +100,17 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(ErrorCode.BAD_REQUEST.getCode(), response.getBody().getCode());
         assertNotNull(response.getBody().getMessage());
+    }
+
+    @Test
+    void handleMissingServletRequestParameterShouldReturnBadRequestContract() {
+        MissingServletRequestParameterException e = new MissingServletRequestParameterException("materialId", "Long");
+
+        ResponseEntity<ApiResponse<Void>> response = handler.handleBadRequest(e);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(ErrorCode.BAD_REQUEST.getCode(), response.getBody().getCode());
+        assertEquals("缺少必填参数: materialId", response.getBody().getMessage());
     }
 
     @Test

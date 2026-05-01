@@ -2,6 +2,7 @@ package com.campus.material.modules.transfer.service;
 
 import com.campus.material.common.BizException;
 import com.campus.material.common.OrderStatus;
+import com.campus.material.monitoring.BusinessMetrics;
 import com.campus.material.modules.inventory.mapper.InventoryBatchMapper;
 import com.campus.material.modules.inventory.mapper.InventoryMapper;
 import com.campus.material.modules.log.service.OperationLogService;
@@ -44,6 +45,9 @@ class TransferServiceTest {
     @Mock
     private WarehouseMapper warehouseMapper;
 
+    @Mock
+    private BusinessMetrics businessMetrics;
+
     @InjectMocks
     private TransferService transferService;
 
@@ -60,7 +64,7 @@ class TransferServiceTest {
         request.setItems(Collections.emptyList());
 
         BizException ex = assertThrows(BizException.class, () -> transferService.create(request));
-        assertEquals(410, ex.getCode());
+        assertEquals(409, ex.getCode());
     }
 
     @Test
@@ -71,7 +75,7 @@ class TransferServiceTest {
         when(transferOrderMapper.selectById(10L)).thenReturn(order);
 
         BizException ex = assertThrows(BizException.class, () -> transferService.submit(10L));
-        assertEquals(410, ex.getCode());
+        assertEquals(409, ex.getCode());
 
         verify(transferOrderMapper, never()).updateById(order);
     }
@@ -84,7 +88,7 @@ class TransferServiceTest {
         when(transferOrderMapper.selectById(11L)).thenReturn(order);
 
         BizException ex = assertThrows(BizException.class, () -> transferService.approve(11L, "ok"));
-        assertEquals(410, ex.getCode());
+        assertEquals(409, ex.getCode());
 
         verify(transferOrderMapper, never()).updateById(order);
     }
@@ -94,6 +98,6 @@ class TransferServiceTest {
         when(transferOrderMapper.selectById(404L)).thenReturn(null);
 
         BizException ex = assertThrows(BizException.class, () -> transferService.detail(404L));
-        assertEquals(410, ex.getCode());
+        assertEquals(409, ex.getCode());
     }
 }

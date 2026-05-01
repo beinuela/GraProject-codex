@@ -13,6 +13,7 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -45,7 +46,8 @@ public class GlobalExceptionHandler {
             BindException.class,
             ConstraintViolationException.class,
             HttpMessageNotReadableException.class,
-            MethodArgumentTypeMismatchException.class
+            MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class
     })
     public ResponseEntity<ApiResponse<Void>> handleBadRequest(Exception e) {
         String message = extractBadRequestMessage(e);
@@ -118,6 +120,9 @@ public class GlobalExceptionHandler {
         }
         if (e instanceof HttpMessageNotReadableException) {
             return "请求参数格式错误";
+        }
+        if (e instanceof MissingServletRequestParameterException missingServletRequestParameterException) {
+            return "缺少必填参数: " + missingServletRequestParameterException.getParameterName();
         }
         return "请求参数错误";
     }

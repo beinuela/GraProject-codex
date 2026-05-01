@@ -83,6 +83,20 @@ public class RbacService {
         return roleMapper.selectById(role.getId());
     }
 
+    public void deleteRole(Long id) {
+        SysRole role = roleMapper.selectById(id);
+        if (role == null) {
+            throw new BizException(404, "角色不存在");
+        }
+        Long assignedUserCount = userMapper.selectCount(new LambdaQueryWrapper<SysUser>()
+                .eq(SysUser::getRoleId, id));
+        if (assignedUserCount != null && assignedUserCount > 0) {
+            throw new BizException(409, "当前角色已分配给用户，不能删除");
+        }
+        roleMapper.deleteById(id);
+        operationLogService.log(AuthUtil.currentUserId(), "RBAC", "DELETE_ROLE", role.getRoleCode());
+    }
+
     public List<SysDept> listDepts() {
         return deptMapper.selectList(new LambdaQueryWrapper<SysDept>().orderByAsc(SysDept::getId));
     }

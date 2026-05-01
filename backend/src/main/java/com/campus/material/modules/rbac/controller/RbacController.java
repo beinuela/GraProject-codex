@@ -51,6 +51,13 @@ public class RbacController {
         return ApiResponse.ok(rbacService.saveRole(role));
     }
 
+    @DeleteMapping("/roles/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Void> deleteRole(@PathVariable Long id) {
+        rbacService.deleteRole(id);
+        return ApiResponse.ok(null);
+    }
+
     @GetMapping("/depts")
     @PreAuthorize("hasAnyRole('ADMIN','APPROVER','DEPT_USER')")
     public ApiResponse<List<SysDept>> depts() {

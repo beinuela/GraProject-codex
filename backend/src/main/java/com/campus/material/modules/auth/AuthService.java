@@ -275,6 +275,7 @@ public class AuthService {
         if ("ADMIN".equals(role)) {
             // 系统管理
             addMenu(all, "users", "用户管理", "/rbac/users", "系统管理");
+            addMenu(all, "roles", "角色管理", "/rbac/roles", "系统管理");
             addMenu(all, "depts", "部门管理", "/rbac/depts", "系统管理");
             // 基础数据
             addMenu(all, "campus", "校区管理", "/campus/list", "基础数据");

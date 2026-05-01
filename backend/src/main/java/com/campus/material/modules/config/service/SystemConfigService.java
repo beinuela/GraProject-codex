@@ -1,6 +1,7 @@
 package com.campus.material.modules.config.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.campus.material.common.BizException;
 import com.campus.material.modules.config.entity.SystemConfig;
 import com.campus.material.modules.config.mapper.SystemConfigMapper;
 import com.campus.material.modules.log.service.OperationLogService;
@@ -36,6 +37,7 @@ public class SystemConfigService {
     }
 
     public void save(SystemConfig config) {
+        validateConfig(config);
         Long uid = AuthUtil.currentUserId();
         if (config.getId() == null) {
             configMapper.insert(config);
@@ -49,5 +51,40 @@ public class SystemConfigService {
     public void delete(Long id) {
         configMapper.deleteById(id);
         logService.log(AuthUtil.currentUserId(), "CONFIG", "DELETE", "閸掔娀娅庨柊宥囩枂:" + id);
+    }
+
+    private void validateConfig(SystemConfig config) {
+        if (config == null) {
+            throw new BizException(400, "系统配置不能为空");
+        }
+        if (config.getConfigKey() == null || config.getConfigKey().isBlank()) {
+            throw new BizException(400, "配置键不能为空");
+        }
+        if (config.getConfigName() == null || config.getConfigName().isBlank()) {
+            throw new BizException(400, "配置名称不能为空");
+        }
+        if (config.getConfigValue() == null || config.getConfigValue().isBlank()) {
+            throw new BizException(400, "配置值不能为空");
+        }
+        if (config.getConfigGroup() == null || config.getConfigGroup().isBlank()) {
+            throw new BizException(400, "配置分组不能为空");
+        }
+
+        String configKey = config.getConfigKey().trim();
+        SystemConfig duplicated = configMapper.selectOne(new LambdaQueryWrapper<SystemConfig>()
+                .eq(SystemConfig::getConfigKey, configKey)
+                .ne(config.getId() != null, SystemConfig::getId, config.getId())
+                .last("limit 1"));
+        if (duplicated != null) {
+            throw new BizException(409, "配置键已存在，请勿重复添加");
+        }
+
+        config.setConfigKey(configKey);
+        config.setConfigName(config.getConfigName().trim());
+        config.setConfigValue(config.getConfigValue().trim());
+        config.setConfigGroup(config.getConfigGroup().trim());
+        if (config.getRemark() != null) {
+            config.setRemark(config.getRemark().trim());
+        }
     }
 }
