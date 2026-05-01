@@ -1,0 +1,110 @@
+meta:
+  profile: academic-paper
+  theme: academic
+  layout: vertical
+  routing: orthogonal
+  canvas: 900x1380
+  title: 预警处置流程图
+  description: 定时扫描、预警生成、人工处理和通知推送的闭环流程
+nodes:
+  - id: start
+    label: 触发定时扫描
+    type: terminal
+    size: large
+    position: { x: 450, y: 80 }
+    style: &flow_node
+      fillColor: "#FFFFFF"
+      strokeColor: "#000000"
+      fontColor: "#000000"
+      strokeWidth: 1.6
+      fontSize: 15
+  - id: scan
+    label: 检查库存与批次
+    type: process
+    size: xl
+    position: { x: 450, y: 240 }
+    style: *flow_node
+  - id: risk
+    label: 发现异常？
+    type: decision
+    size: large
+    position: { x: 450, y: 400 }
+    style: *flow_node
+  - id: record
+    label: 生成预警记录
+    type: process
+    size: xl
+    position: { x: 450, y: 560 }
+    style: *flow_node
+  - id: view
+    label: 查看待处理预警
+    type: process
+    size: xl
+    position: { x: 450, y: 720 }
+    style: *flow_node
+  - id: handle
+    label: "填写说明\n更新状态"
+    type: process
+    size: xl
+    position: { x: 450, y: 880 }
+    style: *flow_node
+  - id: notify
+    label: 按需发送通知
+    type: process
+    size: xl
+    position: { x: 450, y: 1040 }
+    style: *flow_node
+  - id: end
+    label: 进入统计分析
+    type: terminal
+    size: large
+    position: { x: 450, y: 1220 }
+    style: *flow_node
+  - id: noop
+    label: "无预警\n结束扫描"
+    type: process
+    size: xl
+    position: { x: 710, y: 400 }
+    style: *flow_node
+edges:
+  - from: start
+    to: scan
+    type: primary
+    style: &flow_edge
+      strokeColor: "#000000"
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: "#000000"
+      fontSize: 12
+  - from: scan
+    to: risk
+    type: primary
+    style: *flow_edge
+  - from: risk
+    to: record
+    type: primary
+    label: 是
+    labelPosition: start
+    style: *flow_edge
+  - from: risk
+    to: noop
+    type: primary
+    label: 否
+    labelPosition: end
+    style: *flow_edge
+  - from: record
+    to: view
+    type: primary
+    style: *flow_edge
+  - from: view
+    to: handle
+    type: primary
+    style: *flow_edge
+  - from: handle
+    to: notify
+    type: primary
+    style: *flow_edge
+  - from: notify
+    to: end
+    type: primary
+    style: *flow_edge

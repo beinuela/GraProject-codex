@@ -1,0 +1,204 @@
+meta:
+  profile: academic-paper
+  theme: academic
+  layout: vertical
+  routing: orthogonal
+  canvas: 1700x1850
+  title: 出库业务流程图
+  description: 论文流程图箭头规范修复版：连接点固定在节点边缘
+nodes:
+  - id: n1
+    label: 创建出库请求
+    type: terminal
+    size: xl
+    position:
+      x: 750
+      'y': 160
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: n2
+    label: 校验申领单与仓库
+    type: process
+    size: xl
+    position:
+      x: 750
+      'y': 380
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: n3
+    label: 检查库存与锁定量
+    type: process
+    size: xl
+    position:
+      x: 750
+      'y': 600
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: n4
+    label: 按 expire_date 批次扣减
+    type: process
+    size: xl
+    position:
+      x: 750
+      'y': 820
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: n5
+    label: 写入 stock_out_item
+    type: process
+    size: xl
+    position:
+      x: 750
+      'y': 1040
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: n6
+    label: 回写库存与实发数量
+    type: process
+    size: xl
+    position:
+      x: 750
+      'y': 1260
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+  - id: n7
+    label: 触发低库存检查
+    type: terminal
+    size: xl
+    position:
+      x: 750
+      'y': 1480
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.4
+      fontSize: 10
+edges:
+  - from: n1
+    to: n2
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: n2
+    to: n3
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: n3
+    to: n4
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: n4
+    to: n5
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: n5
+    to: n6
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+  - from: n6
+    to: n7
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 9
+      exitX: 0.5
+      exitY: 1
+      entryX: 0.5
+      entryY: 0
+      exitDx: 0
+      exitDy: 0
+      entryDx: 0
+      entryDy: 0
+modules: []

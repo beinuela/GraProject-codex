@@ -1,10 +1,18 @@
 # Backend
 /target
+/backend/target
+**/target/
+/backend/logs/
+/backend/tmp/
+/backend/tmp.txt
 
 # Frontend
 /node_modules
 /frontend/node_modules
 /frontend/dist
+/frontend/playwright-report/
+/frontend/test-results/
+/frontend/tmp-*.log
 
 # IDE
 /.idea
@@ -12,6 +20,10 @@
 
 # Logs
 *.log
+/tmp/
+
+# Env
+.env
 
 # OS
 .DS_Store

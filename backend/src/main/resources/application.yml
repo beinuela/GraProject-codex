@@ -1,9 +1,12 @@
 server:
   port: 8080
+  forward-headers-strategy: framework
 
 spring:
   application:
-    name: emergency-backend
+    name: campus-backend
+  config:
+    import: optional:file:.env[.properties],optional:file:../.env[.properties]
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   jackson:
@@ -18,13 +21,55 @@ mybatis-plus:
 
 security:
   jwt:
-    secret: ${JWT_SECRET:dev-local-jwt-secret-key-must-be-at-least-32-bytes}
+    secret: ${JWT_SECRET:}
     access-expire-minutes: ${JWT_ACCESS_EXPIRE_MINUTES:30}
     refresh-expire-days: ${JWT_REFRESH_EXPIRE_DAYS:7}
     multi-device-login: ${JWT_MULTI_DEVICE_LOGIN:true}
     cleanup-cron: '${JWT_CLEANUP_CRON:0 0/30 * * * ?}'
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173}
     allowed-methods: ${CORS_ALLOWED_METHODS:GET,POST,PUT,DELETE,OPTIONS}
     allowed-headers: ${CORS_ALLOWED_HEADERS:Authorization,Content-Type,X-Requested-With}
     allow-credentials: ${CORS_ALLOW_CREDENTIALS:false}
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    trust-forward-headers: ${RATE_LIMIT_TRUST_FORWARD_HEADERS:false}
+    login-capacity: ${RATE_LIMIT_LOGIN_CAPACITY:5}
+    login-window-seconds: ${RATE_LIMIT_LOGIN_WINDOW_SECONDS:60}
+    refresh-capacity: ${RATE_LIMIT_REFRESH_CAPACITY:10}
+    refresh-window-seconds: ${RATE_LIMIT_REFRESH_WINDOW_SECONDS:60}
+    high-risk-capacity: ${RATE_LIMIT_HIGH_RISK_CAPACITY:20}
+    high-risk-window-seconds: ${RATE_LIMIT_HIGH_RISK_WINDOW_SECONDS:60}
+
+management:
+  server:
+    port: ${MANAGEMENT_SERVER_PORT:18080}
+    address: ${MANAGEMENT_SERVER_ADDRESS:127.0.0.1}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: never
+    prometheus:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+sentry:
+  dsn: ${SENTRY_DSN:}
+  environment: ${SENTRY_ENVIRONMENT:${SPRING_PROFILES_ACTIVE:dev}}
+  traces-sample-rate: ${SENTRY_TRACES_SAMPLE_RATE:0.0}
+  send-default-pii: false
+
+logging:
+  file:
+    path: ${APP_LOG_DIR:./logs}
+
+info:
+  app:
+    name: ${spring.application.name}
+    profile: ${SPRING_PROFILES_ACTIVE:dev}

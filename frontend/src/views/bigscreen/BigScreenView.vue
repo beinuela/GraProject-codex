@@ -1,418 +1,668 @@
 <template>
-  <div class="big-screen-container">
-    <header class="header">
-      <div class="header-left">
-        <span class="time">{{ currentTime }}</span>
+  <div class="screen-shell">
+    <header class="screen-topbar">
+      <div class="screen-topbar__brand">
+        <span class="screen-topbar__eyebrow">Campus Material Command</span>
+        <h1>校园物资管理指挥中心</h1>
+        <p>统一观察库存、调拨、申领、预警与事件态势。</p>
       </div>
-      <div class="header-center">
-        <h1>校园应急物资指挥中心</h1>
-      </div>
-      <div class="header-right">
-        <el-button color="#1e40af" :dark="true" size="small" @click="goBack" class="back-btn">
-          <el-icon><Back /></el-icon> 返回后台
-        </el-button>
-        <el-button color="#1e40af" :dark="true" size="small" @click="toggleFullScreen">
-          <el-icon><FullScreen /></el-icon> 全屏切换
-        </el-button>
+
+      <div class="screen-topbar__meta">
+        <div class="screen-clock">
+          <span>系统时间</span>
+          <strong>{{ currentTime }}</strong>
+        </div>
+        <div class="inline-actions">
+          <el-button @click="goBack">
+            <el-icon><Back /></el-icon>
+            返回后台
+          </el-button>
+          <el-button type="primary" @click="toggleFullScreen">
+            <el-icon><FullScreen /></el-icon>
+            全屏切换
+          </el-button>
+        </div>
       </div>
     </header>
 
-    <main class="main-content">
-      <!-- 左侧内容 -->
-      <div class="side-panel left-panel">
-        <div class="panel-box">
-          <div class="panel-title">库存总览 (Stock)</div>
-          <div class="kpi-row">
-            <div class="kpi-item">
-              <div class="kpi-label">物资总数</div>
-              <div class="kpi-value text-cyan">{{ kpiData.totalItems || 0 }}</div>
-            </div>
-            <div class="kpi-item">
-              <div class="kpi-label">预警总数</div>
-              <div class="kpi-value text-red">{{ kpiData.activeWarnings || 0 }}</div>
-            </div>
-          </div>
-          <div class="chart-container" ref="pieChartRef"></div>
-        </div>
+    <section class="screen-summary">
+      <article v-for="card in overviewCards" :key="card.label" class="screen-metric" :class="`screen-metric--${card.tone}`">
+        <span class="screen-metric__label">{{ card.label }}</span>
+        <strong class="screen-metric__value">{{ card.value }}</strong>
+        <span class="screen-metric__helper">{{ card.helper }}</span>
+      </article>
+    </section>
 
-        <div class="panel-box">
-          <div class="panel-title">出入库趋势 (Trend)</div>
-          <div class="chart-container" ref="lineChartRef"></div>
-        </div>
+    <main class="screen-grid">
+      <div class="screen-column">
+        <section class="screen-panel">
+          <header class="screen-panel__header">
+            <div>
+              <span class="screen-panel__eyebrow">Inventory</span>
+              <h2>库存结构</h2>
+            </div>
+          </header>
+          <div ref="pieChartRef" class="screen-chart"></div>
+        </section>
+
+        <section class="screen-panel">
+          <header class="screen-panel__header">
+            <div>
+              <span class="screen-panel__eyebrow">Trend</span>
+              <h2>出入库趋势</h2>
+            </div>
+          </header>
+          <div ref="lineChartRef" class="screen-chart"></div>
+        </section>
       </div>
 
-      <!-- 中间内容 -->
-      <div class="center-panel">
-        <div class="map-container">
-          <!-- 模拟大屏中心发光效果图/或Echarts地图 -->
-          <div class="globe-mock">
-            <div class="glow-circle"></div>
-            <div class="glow-circle delay-1"></div>
-            <div class="glow-circle delay-2"></div>
-            <div class="center-text">
-              <div class="val">{{ kpiData.monthlyEvents || 0 }}</div>
-              <div class="lbl">本月应急事件</div>
+      <div class="screen-center">
+        <section class="screen-hero">
+          <div class="screen-hero__orb">
+            <div class="screen-hero__ring"></div>
+            <div class="screen-hero__ring screen-hero__ring--inner"></div>
+            <div class="screen-hero__core">
+              <strong>{{ monthlyEvents }}</strong>
+              <span>本月事件</span>
             </div>
           </div>
-        </div>
-        
-        <div class="panel-box bottom-box">
-          <div class="panel-title">实时动态 (Live Events)</div>
-          <div class="live-list">
-            <div class="live-item" v-for="i in 3" :key="i">
-              <span class="live-time">{{ currentTime }}</span>
-              <span class="live-text text-cyan">[系统广播]</span>
-              <span class="live-detail">中心仓库完成自动环境温湿度检测，状态正常。</span>
-            </div>
-             <div class="live-item" v-if="kpiData.pendingApprovals > 0">
-              <span class="live-time">{{ currentTime }}</span>
-              <span class="live-text text-yellow">[审批待办]</span>
-              <span class="live-detail">发现 {{ kpiData.pendingApprovals }} 个待审核申领单，请及时处理。</span>
-            </div>
+          <div class="screen-hero__stats">
+            <article>
+              <span>待审批流程</span>
+              <strong>{{ pendingApprovals }}</strong>
+            </article>
+            <article>
+              <span>仓储节点</span>
+              <strong>{{ warehouseCount }}</strong>
+            </article>
           </div>
-        </div>
+        </section>
+
+        <section class="screen-panel screen-panel--live">
+          <header class="screen-panel__header">
+            <div>
+              <span class="screen-panel__eyebrow">Live Feed</span>
+              <h2>实时动态</h2>
+            </div>
+          </header>
+          <div class="screen-feed">
+            <article v-for="item in liveFeed" :key="item.title" class="screen-feed__item">
+              <span class="screen-feed__time">{{ currentTime }}</span>
+              <div class="screen-feed__content">
+                <strong>{{ item.title }}</strong>
+                <p>{{ item.detail }}</p>
+              </div>
+            </article>
+          </div>
+        </section>
       </div>
 
-      <!-- 右侧内容 -->
-      <div class="side-panel right-panel">
-        <div class="panel-box">
-          <div class="panel-title">部门领用排行 (Top Depts)</div>
-          <div class="chart-container" ref="barChartRef"></div>
-        </div>
+      <div class="screen-column">
+        <section class="screen-panel">
+          <header class="screen-panel__header">
+            <div>
+              <span class="screen-panel__eyebrow">Departments</span>
+              <h2>部门领用排行</h2>
+            </div>
+          </header>
+          <div ref="barChartRef" class="screen-chart"></div>
+        </section>
 
-        <div class="panel-box">
-          <div class="panel-title">保质期监控 (Expiry)</div>
-          <div class="chart-container" ref="expiryChartRef"></div>
-        </div>
+        <section class="screen-panel">
+          <header class="screen-panel__header">
+            <div>
+              <span class="screen-panel__eyebrow">Expiry</span>
+              <h2>效期监控</h2>
+            </div>
+          </header>
+          <div ref="expiryChartRef" class="screen-chart"></div>
+        </section>
       </div>
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { FullScreen, Back } from '@element-plus/icons-vue'
+import { Back, FullScreen } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
-import { apiGet } from '../../api'
 import * as echarts from 'echarts'
+import { apiGet } from '../../api'
 
 const router = useRouter()
 const currentTime = ref('')
-let timer = null
+const overview = ref({})
+const charts = []
 
-const kpiData = ref({})
 const pieChartRef = ref(null)
 const lineChartRef = ref(null)
 const barChartRef = ref(null)
 const expiryChartRef = ref(null)
-const charts = []
 
-const goBack = () => {
-  router.push('/dashboard')
+let timer = null
+
+const totalItems = computed(() => overview.value.totalItems ?? overview.value.materialCount ?? 0)
+const activeWarnings = computed(() => overview.value.activeWarnings ?? overview.value.unhandledWarningCount ?? 0)
+const pendingApprovals = computed(() => overview.value.pendingApprovals ?? (overview.value.pendingApplyCount ?? 0) + (overview.value.pendingTransferCount ?? 0))
+const monthlyEvents = computed(() => overview.value.monthlyEvents ?? overview.value.eventCount ?? 0)
+const warehouseCount = computed(() => overview.value.warehouseCount ?? 0)
+
+const overviewCards = computed(() => [
+  { label: '物资总数', value: totalItems.value, helper: '已纳入总控台账', tone: 'accent' },
+  { label: '活跃预警', value: activeWarnings.value, helper: '待持续跟踪', tone: activeWarnings.value ? 'danger' : 'teal' },
+  { label: '待审批流程', value: pendingApprovals.value, helper: '申领与调拨待办', tone: 'warning' },
+  { label: '仓储节点', value: warehouseCount.value, helper: '当前在线仓库', tone: 'neutral' }
+])
+
+const liveFeed = computed(() => [
+  { title: '库存联动', detail: `当前纳管物资 ${totalItems.value} 项，仓储节点 ${warehouseCount.value} 个。` },
+  { title: '风险监测', detail: `系统检测到 ${activeWarnings.value} 条活跃预警，建议优先处理高风险事项。` },
+  { title: '流程待办', detail: `当前共有 ${pendingApprovals.value} 个流程待审批，建议在后台尽快闭环。` }
+])
+
+const chartText = '#9bb0d0'
+const chartGrid = '#18304d'
+
+const updateClock = () => {
+  currentTime.value = dayjs().format('YYYY-MM-DD HH:mm:ss')
 }
+
+const goBack = () => router.push('/dashboard')
 
 const toggleFullScreen = () => {
   if (!document.fullscreenElement) {
     document.documentElement.requestFullscreen()
-  } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen()
-    }
+    return
+  }
+  if (document.exitFullscreen) {
+    document.exitFullscreen()
   }
 }
 
-const initCharts = async () => {
+const buildCharts = async () => {
+  charts.forEach(chart => chart.dispose())
+  charts.length = 0
+
   try {
-    const overview = await apiGet('/api/analytics/overview')
-    kpiData.value = overview
+    overview.value = await apiGet('/api/analytics/overview')
 
-    const ratioData = await apiGet('/api/analytics/inventory-ratio')
-    const mcType = pieChartRef.value
-    if (mcType) {
-      const chart = echarts.init(mcType, 'dark')
+    const [ratioData, trendData, deptData, expiryData] = await Promise.all([
+      apiGet('/api/analytics/inventory-ratio'),
+      apiGet('/api/analytics/inbound-outbound-trend'),
+      apiGet('/api/analytics/department-ranking'),
+      apiGet('/api/analytics/expiry-stats')
+    ])
+
+    if (pieChartRef.value) {
+      const chart = echarts.init(pieChartRef.value)
       chart.setOption({
         backgroundColor: 'transparent',
-        tooltip: { trigger: 'item' },
-        series: [{
-          name: '占比', type: 'pie', radius: ['40%', '70%'],
-          itemStyle: { borderRadius: 4, borderColor: '#0b0f19', borderWidth: 2 },
-          data: ratioData.map(d => ({ name: d.name, value: Number(d.value) }))
-        }]
-      })
-      charts.push(chart)
-    }
-
-    const trendData = await apiGet('/api/analytics/inbound-outbound-trend')
-    const mcTrend = lineChartRef.value
-    if (mcTrend) {
-      const chart = echarts.init(mcTrend, 'dark')
-      chart.setOption({
-        backgroundColor: 'transparent',
-        tooltip: { trigger: 'axis' },
-        legend: { textStyle: { color: '#ccc' } },
-        grid: { left: 40, right: 10, top: 30, bottom: 20 },
-        xAxis: { type: 'category', data: trendData.map(d => d.monthKey || d.month_key), axisLabel: { color: '#8b9baf' } },
-        yAxis: { type: 'value', splitLine: { lineStyle: { color: '#1a2639' } }, axisLabel: { color: '#8b9baf' } },
-        color: ['#06b6d4', '#f43f5e'],
+        tooltip: { trigger: 'item', borderRadius: 14 },
+        color: ['#35d4c6', '#2670e9', '#7856ff', '#ff9f43', '#fa5252'],
+        legend: { bottom: 0, textStyle: { color: chartText } },
         series: [
-          { name: '入库', type: 'line', smooth: true, areaStyle: { opacity: 0.2 }, data: trendData.map(d => Number(d.inQty || d.in_qty || 0)) },
-          { name: '出库', type: 'line', smooth: true, areaStyle: { opacity: 0.2 }, data: trendData.map(d => Number(d.outQty || d.out_qty || 0)) }
-        ]
-      })
-      charts.push(chart)
-    }
-
-    const deptData = await apiGet('/api/analytics/department-ranking')
-    const mcBar = barChartRef.value
-    if (mcBar) {
-      const chart = echarts.init(mcBar, 'dark')
-      chart.setOption({
-        backgroundColor: 'transparent',
-        tooltip: { trigger: 'axis' },
-        grid: { left: 80, right: 10, top: 10, bottom: 20 },
-        xAxis: { type: 'value', splitLine: { show: false }, axisLabel: { color: '#8b9baf' } },
-        yAxis: { type: 'category', data: deptData.map(d => d.deptName), axisLabel: { color: '#cbd5e1' } },
-        series: [{
-          type: 'bar', data: deptData.map(d => Number(d.totalQty)),
-          itemStyle: {
-            color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [{ offset: 0, color: '#3b82f6' }, { offset: 1, color: '#06b6d4' }]),
-            borderRadius: [0, 4, 4, 0]
+          {
+            type: 'pie',
+            radius: ['38%', '68%'],
+            center: ['50%', '42%'],
+            itemStyle: { borderRadius: 10, borderColor: '#07111f', borderWidth: 3 },
+            label: { show: false },
+            data: ratioData.map(item => ({ name: item.name, value: Number(item.value) }))
           }
-        }]
-      })
-      charts.push(chart)
-    }
-
-    const expiryData = await apiGet('/api/analytics/expiry-stats')
-    const mcExp = expiryChartRef.value
-    if (mcExp) {
-      const chart = echarts.init(mcExp, 'dark')
-      chart.setOption({
-        backgroundColor: 'transparent',
-        tooltip: { trigger: 'axis' },
-        legend: { textStyle: { color: '#ccc' } },
-        grid: { left: 40, right: 10, top: 30, bottom: 40 },
-        xAxis: { type: 'category', data: expiryData.map(d => d.materialName), axisLabel: { color: '#8b9baf', rotate: 30, fontSize: 10 } },
-        yAxis: { type: 'value', splitLine: { lineStyle: { color: '#1a2639' } }, axisLabel: { color: '#8b9baf' } },
-        color: ['#ef4444', '#f59e0b'],
-        series: [
-          { name: '已过期', type: 'bar', stack: 'total', data: expiryData.map(d => Number(d.expiredQty)) },
-          { name: '将要过期', type: 'bar', stack: 'total', data: expiryData.map(d => Number(d.expiringSoonQty)) }
         ]
       })
       charts.push(chart)
     }
 
-  } catch (err) {
-    console.error('BigScreen load error', err)
+    if (lineChartRef.value) {
+      const chart = echarts.init(lineChartRef.value)
+      chart.setOption({
+        backgroundColor: 'transparent',
+        tooltip: { trigger: 'axis', borderRadius: 14 },
+        legend: { textStyle: { color: chartText } },
+        grid: { left: 42, right: 14, top: 34, bottom: 26 },
+        xAxis: {
+          type: 'category',
+          data: trendData.map(item => item.monthKey || item.month_key),
+          axisLabel: { color: chartText },
+          axisLine: { lineStyle: { color: chartGrid } }
+        },
+        yAxis: {
+          type: 'value',
+          axisLabel: { color: chartText },
+          splitLine: { lineStyle: { color: chartGrid } }
+        },
+        color: ['#35d4c6', '#fa5252'],
+        series: [
+          { name: '入库', type: 'line', smooth: true, symbolSize: 8, areaStyle: { opacity: 0.14 }, data: trendData.map(item => Number(item.inQty || item.in_qty || 0)) },
+          { name: '出库', type: 'line', smooth: true, symbolSize: 8, areaStyle: { opacity: 0.14 }, data: trendData.map(item => Number(item.outQty || item.out_qty || 0)) }
+        ]
+      })
+      charts.push(chart)
+    }
+
+    if (barChartRef.value) {
+      const chart = echarts.init(barChartRef.value)
+      chart.setOption({
+        backgroundColor: 'transparent',
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, borderRadius: 14 },
+        grid: { left: 92, right: 12, top: 14, bottom: 20 },
+        xAxis: { type: 'value', axisLabel: { color: chartText }, splitLine: { lineStyle: { color: chartGrid } } },
+        yAxis: { type: 'category', data: deptData.map(item => item.deptName), axisLabel: { color: chartText } },
+        series: [
+          {
+            type: 'bar',
+            barWidth: '56%',
+            data: deptData.map(item => Number(item.totalQty)),
+            itemStyle: {
+              borderRadius: [0, 10, 10, 0],
+              color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                { offset: 0, color: '#35d4c6' },
+                { offset: 1, color: '#2670e9' }
+              ])
+            }
+          }
+        ]
+      })
+      charts.push(chart)
+    }
+
+    if (expiryChartRef.value) {
+      const chart = echarts.init(expiryChartRef.value)
+      chart.setOption({
+        backgroundColor: 'transparent',
+        tooltip: { trigger: 'axis', borderRadius: 14 },
+        legend: { textStyle: { color: chartText } },
+        grid: { left: 44, right: 12, top: 34, bottom: 44 },
+        xAxis: {
+          type: 'category',
+          data: expiryData.map(item => item.materialName),
+          axisLabel: { color: chartText, rotate: 20, fontSize: 11 },
+          axisLine: { lineStyle: { color: chartGrid } }
+        },
+        yAxis: {
+          type: 'value',
+          axisLabel: { color: chartText },
+          splitLine: { lineStyle: { color: chartGrid } }
+        },
+        color: ['#fa5252', '#ff9f43'],
+        series: [
+          { name: '已过期', type: 'bar', stack: 'total', data: expiryData.map(item => Number(item.expiredQty || 0)) },
+          { name: '即将过期', type: 'bar', stack: 'total', data: expiryData.map(item => Number(item.expiringSoonQty || item.expiringQty || 0)) }
+        ]
+      })
+      charts.push(chart)
+    }
+  } catch (error) {
+    console.error('BigScreen load error', error)
   }
 }
 
 const handleResize = () => {
-  charts.forEach(c => c.resize())
+  charts.forEach(chart => chart.resize())
 }
 
 onMounted(() => {
-  timer = setInterval(() => {
-    currentTime.value = dayjs().format('YYYY-MM-DD HH:mm:ss')
-  }, 1000)
-  initCharts()
+  updateClock()
+  timer = window.setInterval(updateClock, 1000)
+  buildCharts()
   window.addEventListener('resize', handleResize)
 })
 
 onUnmounted(() => {
-  clearInterval(timer)
+  if (timer) {
+    window.clearInterval(timer)
+  }
   window.removeEventListener('resize', handleResize)
-  charts.forEach(c => c.dispose())
+  charts.forEach(chart => chart.dispose())
 })
 </script>
 
 <style scoped>
-.big-screen-container {
-  width: 100vw;
-  height: 100vh;
-  background: #0b0f19 radial-gradient(circle at center, #111827 0%, #0b0f19 100%);
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+.screen-shell {
+  min-height: 100vh;
+  padding: 18px;
+  background:
+    radial-gradient(circle at top center, rgba(38, 112, 233, 0.16), transparent 28%),
+    linear-gradient(180deg, #050b15 0%, #081121 100%);
+  color: rgba(240, 246, 255, 0.92);
 }
 
-.header {
-  height: 80px;
-  background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><path d="M0,80 L0,0 L100%,0 L100%,80 L80%,80 L75%,40 L25%,40 L20%,80 Z" fill="rgba(14, 165, 233, 0.05)" stroke="rgba(14, 165, 233, 0.3)" stroke-width="2"/></svg>') no-repeat center bottom;
-  background-size: 100% 100%;
+.screen-topbar {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
-  padding: 0 40px;
-  position: relative;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 24px;
+  border-radius: 28px;
+  border: 1px solid rgba(112, 160, 255, 0.1);
+  background: rgba(9, 18, 33, 0.82);
+  box-shadow: 0 28px 70px rgba(1, 4, 10, 0.38);
 }
 
-.header-left, .header-right {
-  width: 300px;
-  margin-top: 20px;
-  display: flex;
+.screen-topbar__eyebrow,
+.screen-panel__eyebrow {
+  display: inline-flex;
   align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(53, 212, 198, 0.12);
+  color: #7ee8de;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
-.header-right {
-  justify-content: flex-end;
-  gap: 10px;
+
+.screen-topbar__brand h1 {
+  margin: 12px 0 8px;
+  font-family: var(--font-display);
+  font-size: clamp(34px, 5vw, 54px);
+  line-height: 0.96;
+  letter-spacing: -0.05em;
 }
-.header-center h1 {
+
+.screen-topbar__brand p {
   margin: 0;
-  padding-top: 15px;
-  font-size: 28px;
-  font-weight: bold;
-  letter-spacing: 4px;
-  color: #e2e8f0;
-  text-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
-  text-align: center;
-}
-.time {
-  font-size: 20px;
-  color: #0ea5e9;
-  font-family: monospace;
+  color: rgba(173, 194, 224, 0.76);
 }
 
-.main-content {
-  flex: 1;
-  display: flex;
+.screen-topbar__meta {
+  display: grid;
+  gap: 14px;
+  justify-items: end;
+}
+
+.screen-clock {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.screen-clock span {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(173, 194, 224, 0.68);
+}
+
+.screen-clock strong {
+  font-family: var(--font-mono);
+  color: #fff;
+}
+
+.screen-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.screen-metric {
+  display: grid;
+  gap: 8px;
+  padding: 18px 20px;
+  border-radius: 24px;
+  border: 1px solid rgba(112, 160, 255, 0.1);
+  background: linear-gradient(180deg, rgba(9, 18, 33, 0.92), rgba(6, 12, 24, 0.94));
+}
+
+.screen-metric__label {
+  color: rgba(173, 194, 224, 0.68);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.screen-metric__value {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 3vw, 42px);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.screen-metric__helper {
+  color: rgba(173, 194, 224, 0.76);
+  font-size: 13px;
+}
+
+.screen-metric--accent .screen-metric__value {
+  color: #7cb4ff;
+}
+
+.screen-metric--teal .screen-metric__value {
+  color: #7ee8de;
+}
+
+.screen-metric--warning .screen-metric__value {
+  color: #ffcb7f;
+}
+
+.screen-metric--danger .screen-metric__value {
+  color: #ff9d9d;
+}
+
+.screen-metric--neutral .screen-metric__value {
+  color: #eef4ff;
+}
+
+.screen-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(360px, 1.15fr) minmax(280px, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+  min-height: calc(100vh - 240px);
+}
+
+.screen-column,
+.screen-center {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.screen-panel,
+.screen-hero {
+  display: grid;
+  gap: 14px;
+  border-radius: 28px;
+  border: 1px solid rgba(112, 160, 255, 0.1);
+  background: linear-gradient(180deg, rgba(9, 18, 33, 0.9), rgba(6, 12, 24, 0.94));
   padding: 20px;
-  gap: 20px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
 }
 
-.side-panel {
-  width: 400px;
+.screen-panel__header {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.center-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.screen-panel__header h2 {
+  margin: 10px 0 0;
+  font-size: 22px;
+  color: #eef4ff;
 }
 
-.panel-box {
-  flex: 1;
-  background: rgba(14, 25, 43, 0.6);
-  border: 1px solid rgba(14, 165, 233, 0.2);
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  padding: 15px;
+.screen-chart {
+  width: 100%;
+  height: 320px;
+}
+
+.screen-center {
+  grid-template-rows: minmax(320px, 1fr) minmax(240px, auto);
+}
+
+.screen-hero {
+  align-items: center;
+  justify-items: center;
+  background:
+    radial-gradient(circle at center, rgba(38, 112, 233, 0.18), transparent 34%),
+    linear-gradient(180deg, rgba(9, 18, 33, 0.92), rgba(5, 11, 22, 0.96));
+}
+
+.screen-hero__orb {
   position: relative;
-  box-shadow: 0 0 15px rgba(0,0,0,0.5) inset;
+  display: grid;
+  place-items: center;
+  width: min(64vw, 320px);
+  aspect-ratio: 1;
 }
-.panel-box::before, .panel-box::after {
-  content: '';
+
+.screen-hero__ring {
   position: absolute;
-  width: 15px; height: 15px;
-  border-color: #0ea5e9; border-style: solid;
-}
-.panel-box::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
-.panel-box::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
-
-.panel-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #38bdf8;
-  margin-bottom: 10px;
-  padding-left: 10px;
-  border-left: 3px solid #0ea5e9;
-  letter-spacing: 1px;
+  inset: 0;
+  border: 1px solid rgba(124, 180, 255, 0.34);
+  border-radius: 999px;
+  box-shadow: 0 0 40px rgba(38, 112, 233, 0.18);
+  animation: pulse 4s linear infinite;
 }
 
-.chart-container {
-  flex: 1;
+.screen-hero__ring--inner {
+  inset: 16%;
+  border-color: rgba(126, 232, 222, 0.5);
+  animation-duration: 3s;
+  animation-direction: reverse;
+}
+
+.screen-hero__core {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 6px;
+  place-items: center;
+  width: 52%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: radial-gradient(circle at center, rgba(38, 112, 233, 0.4), rgba(6, 12, 24, 0.94));
+  box-shadow: 0 0 60px rgba(38, 112, 233, 0.28);
+}
+
+.screen-hero__core strong {
+  font-family: var(--font-display);
+  font-size: clamp(42px, 5vw, 68px);
+  line-height: 1;
+  color: #fff;
+}
+
+.screen-hero__core span {
+  color: rgba(184, 204, 232, 0.78);
+}
+
+.screen-hero__stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
   width: 100%;
 }
 
-.kpi-row {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 10px;
+.screen-hero__stats article {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
 }
-.kpi-item {
-  flex: 1;
-  background: rgba(255,255,255,0.02);
-  padding: 10px;
-  border-radius: 4px;
-  text-align: center;
-}
-.kpi-label { font-size: 12px; color: #94a3b8; }
-.kpi-value { font-size: 28px; font-weight: bold; font-family: monospace; line-height: 1.2; }
 
-.text-cyan { color: #22d3ee; }
-.text-red { color: #f87171; }
-.text-yellow { color: #facc15; }
+.screen-hero__stats span {
+  color: rgba(173, 194, 224, 0.68);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 
-/* 中心地球模拟效果 */
-.map-container {
-  flex: 2;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.screen-hero__stats strong {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: #eef4ff;
 }
-.globe-mock {
-  width: 300px;
-  height: 300px;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+
+.screen-feed {
+  display: grid;
+  gap: 12px;
 }
-.glow-circle {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  border: 2px solid rgba(14, 165, 233, 0.4);
-  box-shadow: 0 0 20px rgba(14, 165, 233, 0.2) inset, 0 0 20px rgba(14, 165, 233, 0.2);
-  animation: pulse 3s infinite linear;
+
+.screen-feed__item {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
 }
-.delay-1 { animation-delay: -1s; width: 70%; height: 70%; border-color: rgba(56, 189, 248, 0.6); }
-.delay-2 { animation-delay: -2s; width: 40%; height: 40%; border-color: rgba(34, 211, 238, 0.8); }
+
+.screen-feed__time {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: rgba(173, 194, 224, 0.64);
+}
+
+.screen-feed__content {
+  display: grid;
+  gap: 4px;
+}
+
+.screen-feed__content strong {
+  color: #eef4ff;
+}
+
+.screen-feed__content p {
+  margin: 0;
+  color: rgba(173, 194, 224, 0.78);
+  line-height: 1.6;
+}
 
 @keyframes pulse {
-  0% { transform: scale(0.8) rotateX(60deg) rotateZ(0deg); opacity: 1; }
-  100% { transform: scale(1.5) rotateX(60deg) rotateZ(360deg); opacity: 0; }
+  from {
+    transform: scale(0.92);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(1.08);
+    opacity: 0.18;
+  }
 }
 
-.center-text {
-  text-align: center;
-  z-index: 10;
-  background: rgba(11, 15, 25, 0.8);
-  padding: 20px;
-  border-radius: 50%;
-  border: 1px solid rgba(14, 165, 233, 0.5);
-  box-shadow: 0 0 15px rgba(14, 165, 233, 0.5);
-}
-.center-text .val { font-size: 36px; font-weight: bold; color: #38bdf8; }
-.center-text .lbl { font-size: 14px; color: #e2e8f0; }
+@media (max-width: 1280px) {
+  .screen-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 
-.bottom-box { flex: 1; }
-.live-list {
-  flex: 1;
-  overflow-y: auto;
-  font-size: 13px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  .screen-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .screen-center {
+    grid-template-rows: auto;
+  }
 }
-.live-item {
-  background: rgba(255,255,255,0.03);
-  padding: 8px 12px;
-  border-radius: 4px;
-  display: flex;
-  gap: 10px;
+
+@media (max-width: 768px) {
+  .screen-shell {
+    padding: 12px;
+  }
+
+  .screen-topbar {
+    flex-direction: column;
+    padding: 18px;
+  }
+
+  .screen-topbar__meta {
+    width: 100%;
+    justify-items: start;
+  }
+
+  .screen-summary,
+  .screen-hero__stats {
+    grid-template-columns: 1fr;
+  }
+
+  .screen-feed__item {
+    grid-template-columns: 1fr;
+  }
 }
-.live-time { color: #64748b; font-family: monospace; }
-.live-detail { color: #cbd5e1; }
 </style>

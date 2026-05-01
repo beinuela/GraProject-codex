@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "title": "预警处置流程图",
+  "type": "academic-diagram",
+  "source": "generated",
+  "profile": "academic-paper",
+  "theme": "academic",
+  "layout": "vertical",
+  "counts": {
+    "nodes": 9,
+    "edges": 8,
+    "modules": 0
+  },
+  "nodes": [
+    {
+      "id": "start",
+      "label": "触发定时扫描",
+      "type": "terminal",
+      "size": "large"
+    },
+    {
+      "id": "scan",
+      "label": "检查库存与批次",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "risk",
+      "label": "发现异常？",
+      "type": "decision",
+      "size": "large"
+    },
+    {
+      "id": "record",
+      "label": "生成预警记录",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "view",
+      "label": "查看待处理预警",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "handle",
+      "label": "填写说明\n更新状态",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "notify",
+      "label": "按需发送通知",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "end",
+      "label": "进入统计分析",
+      "type": "terminal",
+      "size": "large"
+    },
+    {
+      "id": "noop",
+      "label": "无预警\n结束扫描",
+      "type": "process",
+      "size": "xl"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "from": "start",
+      "to": "scan",
+      "type": "primary"
+    },
+    {
+      "id": "edge-2",
+      "from": "scan",
+      "to": "risk",
+      "type": "primary"
+    },
+    {
+      "id": "edge-3",
+      "from": "risk",
+      "to": "record",
+      "type": "primary",
+      "label": "是"
+    },
+    {
+      "id": "edge-4",
+      "from": "risk",
+      "to": "noop",
+      "type": "primary",
+      "label": "否"
+    },
+    {
+      "id": "edge-5",
+      "from": "record",
+      "to": "view",
+      "type": "primary"
+    },
+    {
+      "id": "edge-6",
+      "from": "view",
+      "to": "handle",
+      "type": "primary"
+    },
+    {
+      "id": "edge-7",
+      "from": "handle",
+      "to": "notify",
+      "type": "primary"
+    },
+    {
+      "id": "edge-8",
+      "from": "notify",
+      "to": "end",
+      "type": "primary"
+    }
+  ],
+  "modules": []
+}

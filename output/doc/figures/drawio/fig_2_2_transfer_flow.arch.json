@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "title": "调拨执行流程图",
+  "type": "academic-diagram",
+  "source": "generated",
+  "profile": "academic-paper",
+  "theme": "academic",
+  "layout": "vertical",
+  "counts": {
+    "nodes": 9,
+    "edges": 8,
+    "modules": 0
+  },
+  "nodes": [
+    {
+      "id": "start",
+      "label": "创建调拨单",
+      "type": "terminal",
+      "size": "large"
+    },
+    {
+      "id": "recommend",
+      "label": "选择目标仓\n参考候选来源仓",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "submit",
+      "label": "提交调拨单",
+      "type": "process",
+      "size": "large"
+    },
+    {
+      "id": "approve",
+      "label": "审批人审核",
+      "type": "process",
+      "size": "large"
+    },
+    {
+      "id": "pass",
+      "label": "审批通过？",
+      "type": "decision",
+      "size": "large"
+    },
+    {
+      "id": "reject",
+      "label": "驳回并结束",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "execute",
+      "label": "执行调拨\n同步两端库存",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "receive",
+      "label": "调入仓签收",
+      "type": "process",
+      "size": "large"
+    },
+    {
+      "id": "end",
+      "label": "状态为 RECEIVED",
+      "type": "terminal",
+      "size": "large"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "from": "start",
+      "to": "recommend",
+      "type": "primary"
+    },
+    {
+      "id": "edge-2",
+      "from": "recommend",
+      "to": "submit",
+      "type": "primary"
+    },
+    {
+      "id": "edge-3",
+      "from": "submit",
+      "to": "approve",
+      "type": "primary"
+    },
+    {
+      "id": "edge-4",
+      "from": "approve",
+      "to": "pass",
+      "type": "primary"
+    },
+    {
+      "id": "edge-5",
+      "from": "pass",
+      "to": "reject",
+      "type": "primary",
+      "label": "否"
+    },
+    {
+      "id": "edge-6",
+      "from": "pass",
+      "to": "execute",
+      "type": "primary",
+      "label": "是"
+    },
+    {
+      "id": "edge-7",
+      "from": "execute",
+      "to": "receive",
+      "type": "primary"
+    },
+    {
+      "id": "edge-8",
+      "from": "receive",
+      "to": "end",
+      "type": "primary"
+    }
+  ],
+  "modules": []
+}

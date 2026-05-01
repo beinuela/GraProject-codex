@@ -1,0 +1,393 @@
+{
+  "version": 1,
+  "title": "库存与批次 E-R 图",
+  "type": "academic-diagram",
+  "source": "generated",
+  "profile": "academic-paper",
+  "theme": "academic",
+  "layout": "horizontal",
+  "counts": {
+    "nodes": 31,
+    "edges": 30,
+    "modules": 0
+  },
+  "nodes": [
+    {
+      "id": "category",
+      "label": "物资分类",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "category_attr_1",
+      "label": "编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "category_attr_2",
+      "label": "分类名称",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "category_attr_3",
+      "label": "备注",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "material",
+      "label": "物资档案",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "material_attr_1",
+      "label": "编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "material_attr_2",
+      "label": "物资编码",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "material_attr_3",
+      "label": "物资名称",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "material_attr_4",
+      "label": "安全库存",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "material_attr_5",
+      "label": "规格单位",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "warehouse",
+      "label": "仓库",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "warehouse_attr_1",
+      "label": "编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "warehouse_attr_2",
+      "label": "仓库名称",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "warehouse_attr_3",
+      "label": "所属校区",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "warehouse_attr_4",
+      "label": "负责人",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "inventory",
+      "label": "库存",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "inventory_attr_1",
+      "label": "编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "inventory_attr_2",
+      "label": "物资编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "inventory_attr_3",
+      "label": "仓库编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "inventory_attr_4",
+      "label": "当前库存",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "inventory_attr_5",
+      "label": "锁定库存",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "batch",
+      "label": "库存批次",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "batch_attr_1",
+      "label": "编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "batch_attr_2",
+      "label": "批次号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "batch_attr_3",
+      "label": "入库数量",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "batch_attr_4",
+      "label": "剩余数量",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "batch_attr_5",
+      "label": "过期日期",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "rel_cat_material",
+      "label": "归类",
+      "type": "decision",
+      "size": "medium"
+    },
+    {
+      "id": "rel_material_inventory",
+      "label": "形成",
+      "type": "decision",
+      "size": "medium"
+    },
+    {
+      "id": "rel_wh_inventory",
+      "label": "存放",
+      "type": "decision",
+      "size": "medium"
+    },
+    {
+      "id": "rel_inventory_batch",
+      "label": "细分",
+      "type": "decision",
+      "size": "medium"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "from": "category",
+      "to": "category_attr_1",
+      "type": "primary"
+    },
+    {
+      "id": "edge-2",
+      "from": "category",
+      "to": "category_attr_2",
+      "type": "primary"
+    },
+    {
+      "id": "edge-3",
+      "from": "category",
+      "to": "category_attr_3",
+      "type": "primary"
+    },
+    {
+      "id": "edge-4",
+      "from": "material",
+      "to": "material_attr_1",
+      "type": "primary"
+    },
+    {
+      "id": "edge-5",
+      "from": "material",
+      "to": "material_attr_2",
+      "type": "primary"
+    },
+    {
+      "id": "edge-6",
+      "from": "material",
+      "to": "material_attr_3",
+      "type": "primary"
+    },
+    {
+      "id": "edge-7",
+      "from": "material",
+      "to": "material_attr_4",
+      "type": "primary"
+    },
+    {
+      "id": "edge-8",
+      "from": "material",
+      "to": "material_attr_5",
+      "type": "primary"
+    },
+    {
+      "id": "edge-9",
+      "from": "warehouse",
+      "to": "warehouse_attr_1",
+      "type": "primary"
+    },
+    {
+      "id": "edge-10",
+      "from": "warehouse",
+      "to": "warehouse_attr_2",
+      "type": "primary"
+    },
+    {
+      "id": "edge-11",
+      "from": "warehouse",
+      "to": "warehouse_attr_3",
+      "type": "primary"
+    },
+    {
+      "id": "edge-12",
+      "from": "warehouse",
+      "to": "warehouse_attr_4",
+      "type": "primary"
+    },
+    {
+      "id": "edge-13",
+      "from": "inventory",
+      "to": "inventory_attr_1",
+      "type": "primary"
+    },
+    {
+      "id": "edge-14",
+      "from": "inventory",
+      "to": "inventory_attr_2",
+      "type": "primary"
+    },
+    {
+      "id": "edge-15",
+      "from": "inventory",
+      "to": "inventory_attr_3",
+      "type": "primary"
+    },
+    {
+      "id": "edge-16",
+      "from": "inventory",
+      "to": "inventory_attr_4",
+      "type": "primary"
+    },
+    {
+      "id": "edge-17",
+      "from": "inventory",
+      "to": "inventory_attr_5",
+      "type": "primary"
+    },
+    {
+      "id": "edge-18",
+      "from": "batch",
+      "to": "batch_attr_1",
+      "type": "primary"
+    },
+    {
+      "id": "edge-19",
+      "from": "batch",
+      "to": "batch_attr_2",
+      "type": "primary"
+    },
+    {
+      "id": "edge-20",
+      "from": "batch",
+      "to": "batch_attr_3",
+      "type": "primary"
+    },
+    {
+      "id": "edge-21",
+      "from": "batch",
+      "to": "batch_attr_4",
+      "type": "primary"
+    },
+    {
+      "id": "edge-22",
+      "from": "batch",
+      "to": "batch_attr_5",
+      "type": "primary"
+    },
+    {
+      "id": "edge-23",
+      "from": "category",
+      "to": "rel_cat_material",
+      "type": "primary",
+      "label": "1"
+    },
+    {
+      "id": "edge-24",
+      "from": "rel_cat_material",
+      "to": "material",
+      "type": "primary",
+      "label": "n"
+    },
+    {
+      "id": "edge-25",
+      "from": "material",
+      "to": "rel_material_inventory",
+      "type": "primary",
+      "label": "1"
+    },
+    {
+      "id": "edge-26",
+      "from": "rel_material_inventory",
+      "to": "inventory",
+      "type": "primary",
+      "label": "n"
+    },
+    {
+      "id": "edge-27",
+      "from": "warehouse",
+      "to": "rel_wh_inventory",
+      "type": "primary",
+      "label": "1"
+    },
+    {
+      "id": "edge-28",
+      "from": "rel_wh_inventory",
+      "to": "inventory",
+      "type": "primary",
+      "label": "n"
+    },
+    {
+      "id": "edge-29",
+      "from": "inventory",
+      "to": "rel_inventory_batch",
+      "type": "primary",
+      "label": "1"
+    },
+    {
+      "id": "edge-30",
+      "from": "rel_inventory_batch",
+      "to": "batch",
+      "type": "primary",
+      "label": "n"
+    }
+  ],
+  "modules": []
+}

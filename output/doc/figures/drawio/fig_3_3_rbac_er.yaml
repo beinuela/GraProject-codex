@@ -1,0 +1,705 @@
+meta:
+  profile: academic-paper
+  theme: academic
+  layout: horizontal
+  routing: straight
+  canvas: 1760x760
+  title: 用户角色与组织 E-R 图
+  description: 用户、部门、角色、刷新令牌与登录日志的实体关系图
+nodes:
+- id: dept
+  label: 部门
+  type: service
+  size: xl
+  position:
+    x: 180
+    y: 210
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 13
+    shape: shape=rectangle;rounded=0;whiteSpace=wrap;html=1;spacing=8
+- id: dept_attr_1
+  label: 部门编号
+  type: user
+  size: small
+  position:
+    x: 70
+    y: 95
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: dept_attr_2
+  label: 部门名称
+  type: user
+  size: small
+  position:
+    x: 200
+    y: 30
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: dept_attr_3
+  label: 上级部门
+  type: user
+  size: small
+  position:
+    x: 360
+    y: 90
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: dept_attr_4
+  label: 版本号
+  type: user
+  size: small
+  position:
+    x: 380
+    y: 180
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: user
+  label: 用户
+  type: service
+  size: xl
+  position:
+    x: 880
+    y: 200
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 13
+    shape: shape=rectangle;rounded=0;whiteSpace=wrap;html=1;spacing=8
+- id: user_attr_1
+  label: 用户编号
+  type: user
+  size: small
+  position:
+    x: 760
+    y: 70
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: user_attr_2
+  label: 用户账号
+  type: user
+  size: small
+  position:
+    x: 910
+    y: 20
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: user_attr_3
+  label: 姓名
+  type: user
+  size: small
+  position:
+    x: 1070
+    y: 70
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: user_attr_4
+  label: 状态
+  type: user
+  size: small
+  position:
+    x: 1180
+    y: 160
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: user_attr_5
+  label: 部门编号 / 角色编号
+  type: user
+  size: medium
+  position:
+    x: 660
+    y: 160
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: role
+  label: 角色
+  type: service
+  size: xl
+  position:
+    x: 1580
+    y: 210
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 13
+    shape: shape=rectangle;rounded=0;whiteSpace=wrap;html=1;spacing=8
+- id: role_attr_1
+  label: 角色编号
+  type: user
+  size: small
+  position:
+    x: 1470
+    y: 95
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: role_attr_2
+  label: 角色编码
+  type: user
+  size: small
+  position:
+    x: 1590
+    y: 30
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: role_attr_3
+  label: 角色名称
+  type: user
+  size: small
+  position:
+    x: 1740
+    y: 90
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: role_attr_4
+  label: 角色说明
+  type: user
+  size: small
+  position:
+    x: 1735
+    y: 180
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: token
+  label: 刷新令牌
+  type: service
+  size: xl
+  position:
+    x: 560
+    y: 500
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 13
+    shape: shape=rectangle;rounded=0;whiteSpace=wrap;html=1;spacing=8
+- id: token_attr_1
+  label: 令牌编号
+  type: user
+  size: small
+  position:
+    x: 390
+    y: 420
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: token_attr_2
+  label: 用户编号
+  type: user
+  size: small
+  position:
+    x: 540
+    y: 360
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: token_attr_3
+  label: 令牌摘要
+  type: user
+  size: small
+  position:
+    x: 700
+    y: 420
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: token_attr_4
+  label: 到期时间 / 吊销状态
+  type: user
+  size: medium
+  position:
+    x: 790
+    y: 560
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: log
+  label: 登录日志
+  type: service
+  size: xl
+  position:
+    x: 1200
+    y: 500
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 13
+    shape: shape=rectangle;rounded=0;whiteSpace=wrap;html=1;spacing=8
+- id: log_attr_1
+  label: 用户编号
+  type: user
+  size: small
+  position:
+    x: 1040
+    y: 420
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: log_attr_2
+  label: 用户账号
+  type: user
+  size: small
+  position:
+    x: 1200
+    y: 360
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: log_attr_3
+  label: 登录地址
+  type: user
+  size: small
+  position:
+    x: 1370
+    y: 420
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: log_attr_4
+  label: 登录状态 / 登录时间
+  type: user
+  size: medium
+  position:
+    x: 1460
+    y: 560
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 11
+- id: rel_dept_user
+  label: 隶属
+  type: decision
+  size: medium
+  position:
+    x: 500
+    y: 240
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 12
+- id: rel_user_role
+  label: 拥有
+  type: decision
+  size: medium
+  position:
+    x: 1245
+    y: 240
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 12
+- id: rel_user_token
+  label: 签发
+  type: decision
+  size: medium
+  position:
+    x: 720
+    y: 390
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 12
+- id: rel_user_log
+  label: 产生
+  type: decision
+  size: medium
+  position:
+    x: 1040
+    y: 390
+  style:
+    fillColor: '#FFFFFF'
+    strokeColor: '#000000'
+    fontColor: '#000000'
+    strokeWidth: 1.6
+    fontSize: 12
+edges:
+- from: dept
+  to: dept_attr_1
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: dept
+  to: dept_attr_2
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: dept
+  to: dept_attr_3
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: dept
+  to: dept_attr_4
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: user
+  to: user_attr_1
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: user
+  to: user_attr_2
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: user
+  to: user_attr_3
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: user
+  to: user_attr_4
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: user
+  to: user_attr_5
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: role
+  to: role_attr_1
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: role
+  to: role_attr_2
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: role
+  to: role_attr_3
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: role
+  to: role_attr_4
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: token
+  to: token_attr_1
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: token
+  to: token_attr_2
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: token
+  to: token_attr_3
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: token
+  to: token_attr_4
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: log
+  to: log_attr_1
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: log
+  to: log_attr_2
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: log
+  to: log_attr_3
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: log
+  to: log_attr_4
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+- from: dept
+  to: rel_dept_user
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+  label: '1'
+  labelPosition: end
+- from: rel_dept_user
+  to: user
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+  label: n
+  labelPosition: end
+- from: user
+  to: rel_user_role
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+  label: n
+  labelPosition: end
+- from: rel_user_role
+  to: role
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+  label: '1'
+  labelPosition: end
+- from: user
+  to: rel_user_token
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+    exitX: 0.38
+    exitY: 1
+    entryX: 0.5
+    entryY: 0
+  label: '1'
+  labelPosition: end
+  waypoints:
+  - x: 760
+    y: 330
+- from: rel_user_token
+  to: token
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+    exitX: 0.5
+    exitY: 1
+    entryX: 0.82
+    entryY: 0
+  label: n
+  labelPosition: end
+- from: user
+  to: rel_user_log
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+    exitX: 0.62
+    exitY: 1
+    entryX: 0.5
+    entryY: 0
+  label: '1'
+  labelPosition: end
+  waypoints:
+  - x: 1040
+    y: 330
+- from: rel_user_log
+  to: log
+  type: primary
+  style:
+    strokeColor: '#000000'
+    endArrow: none
+    strokeWidth: 1.4
+    fontColor: '#000000'
+    fontSize: 12
+    exitX: 0.5
+    exitY: 1
+    entryX: 0.18
+    entryY: 0
+  label: n
+  labelPosition: end
+modules: []

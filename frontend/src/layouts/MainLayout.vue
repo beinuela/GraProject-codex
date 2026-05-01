@@ -1,92 +1,117 @@
 <template>
-  <div class="layout">
-    <aside class="sidebar" :class="{ collapsed: sidebarCollapsed }">
-      <div class="sidebar-logo" @click="$router.push('/dashboard')" v-if="!sidebarCollapsed">
-        <div class="logo-shield">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28" style="color: #0ea5e9;">
-            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-3.13 8.9-7 10.02-3.87-1.12-7-5.35-7-10.02v-4.7l7-3.12zm-1 6.82V8h2v2h2v2h-2v2h-2v-2H9v-2h2z" />
-          </svg>
+  <div class="app-shell">
+    <transition name="shell-fade">
+      <div v-if="isMobile && mobileMenuOpen" class="shell-scrim" @click="mobileMenuOpen = false" />
+    </transition>
+
+    <aside
+      class="shell-sidebar"
+      :class="{
+        'shell-sidebar--collapsed': sidebarCollapsed && !isMobile,
+        'shell-sidebar--mobile': isMobile,
+        'shell-sidebar--open': mobileMenuOpen
+      }"
+    >
+      <div class="shell-brand" @click="$router.push('/dashboard')">
+        <div class="shell-brand__mark">
+          <span>CM</span>
         </div>
-        <div class="logo-text">
-          <strong style="font-size: 15px; color: #1e293b; letter-spacing: 1px;">应急物资管理</strong>
-          <span style="font-size: 13px; color: #0ea5e9; font-weight: bold;">Campus EMS</span>
+        <div v-if="!sidebarCollapsed || isMobile" class="shell-brand__text">
+          <strong>校园物资智控台</strong>
+          <span>Campus Material Operations</span>
         </div>
       </div>
-      <div class="sidebar-logo collapsed-logo" @click="$router.push('/dashboard')" v-else>
-         <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24" style="color: #0ea5e9;">
-            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-3.13 8.9-7 10.02-3.87-1.12-7-5.35-7-10.02v-4.7l7-3.12zm-1 6.82V8h2v2h2v2h-2v2h-2v-2H9v-2h2z" />
-         </svg>
-      </div>
-      <nav class="nav-menu">
-        <div v-for="group in menuGroups" :key="group.name">
-          <!-- 首页组：直接展示 -->
-          <template v-if="group.name === '首页'">
+
+      <div class="shell-sidebar__scroll">
+        <section v-for="group in menuGroups" :key="group.name" class="shell-group">
+          <button class="shell-group__header" type="button" @click="toggleGroup(group.name)">
+            <span class="shell-group__title-wrap">
+              <el-icon><component :is="groupIcons[group.name] || Setting" /></el-icon>
+              <span v-if="!sidebarCollapsed || isMobile" class="shell-group__title">{{ group.name }}</span>
+            </span>
+            <el-icon v-if="(!sidebarCollapsed || isMobile) && group.name !== '首页'" class="shell-group__arrow" :class="{ 'shell-group__arrow--open': expandedGroups[group.name] }">
+              <ArrowRight />
+            </el-icon>
+          </button>
+
+          <div v-show="group.name === '首页' || expandedGroups[group.name]" class="shell-group__items">
             <router-link
               v-for="item in group.items"
               :key="item.key"
               :to="item.path"
-              class="nav-item"
-              :class="{ active: $route.path === item.path }"
+              class="shell-nav-item"
+              :class="{ 'shell-nav-item--active': $route.path === item.path }"
+              :title="item.title"
+              @click="handleNavClick"
             >
-              <el-icon :size="16"><component :is="groupIcons[group.name]" /></el-icon>
-              <span class="nav-label">{{ item.title }}</span>
+              <span class="shell-nav-item__marker">{{ item.title.slice(0, 1) }}</span>
+              <span v-if="!sidebarCollapsed || isMobile" class="shell-nav-item__label">{{ item.title }}</span>
             </router-link>
-          </template>
-          <!-- 其他组：可折叠 -->
-          <template v-else>
-            <div class="nav-group-header" @click="toggleGroup(group.name)">
-              <div class="nav-group-left">
-                <el-icon :size="15"><component :is="groupIcons[group.name] || Setting" /></el-icon>
-                <span v-if="!sidebarCollapsed" class="nav-group-title">{{ group.name }}</span>
-              </div>
-              <el-icon v-if="!sidebarCollapsed" :size="12" class="nav-group-arrow" :class="{ expanded: expandedGroups[group.name] }">
-                <ArrowRight />
-              </el-icon>
-            </div>
-            <div class="nav-group-items" v-show="expandedGroups[group.name]">
-              <router-link
-                v-for="item in group.items"
-                :key="item.key"
-                :to="item.path"
-                class="nav-item sub-item"
-                :class="{ active: $route.path === item.path }"
-              >
-                <span class="nav-label">{{ item.title }}</span>
-              </router-link>
-            </div>
-          </template>
+          </div>
+        </section>
+      </div>
+
+      <div class="shell-sidebar__footer">
+        <div v-if="!sidebarCollapsed || isMobile" class="shell-sidebar__card">
+          <span class="shell-sidebar__card-label">当前身份</span>
+          <strong>{{ currentRole }}</strong>
+          <span>{{ currentSection }}</span>
         </div>
-      </nav>
-      <div class="sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed">
-        <span>{{ sidebarCollapsed ? '展开' : '< 收起' }}</span>
+        <button v-if="!isMobile" class="shell-collapse" type="button" @click="sidebarCollapsed = !sidebarCollapsed">
+          <el-icon><Expand v-if="sidebarCollapsed" /><Fold v-else /></el-icon>
+          <span v-if="!sidebarCollapsed">收起导航</span>
+        </button>
       </div>
     </aside>
-    <div class="content">
-      <header class="topbar">
-        <span class="greeting">你好，{{ realName || username }}</span>
-        <el-space>
-          <el-button color="#22d3ee" style="color: #0f172a; font-weight: 600" size="small" @click="$router.push('/bigscreen')">
-            <el-icon><DataLine /></el-icon> 实时数据大屏
+
+    <div class="shell-main">
+      <header class="shell-topbar">
+        <div class="shell-topbar__left">
+          <button class="shell-burger" type="button" @click="mobileMenuOpen = !mobileMenuOpen">
+            <el-icon><Operation /></el-icon>
+          </button>
+          <div class="shell-context">
+            <div class="shell-context__capsules">
+              <span class="shell-context__section">{{ currentSection }}</span>
+              <span class="shell-context__type">{{ currentTypeLabel }}</span>
+            </div>
+            <strong class="shell-context__title">{{ currentTitle }}</strong>
+            <p class="shell-context__description">{{ currentDescription }}</p>
+          </div>
+        </div>
+
+        <div class="shell-topbar__right">
+          <div class="shell-live">
+            <span class="shell-live__label">系统时间</span>
+            <strong class="shell-live__value">{{ currentTime }}</strong>
+          </div>
+          <el-button class="shell-ghost" @click="$router.push('/bigscreen')">
+            <el-icon><DataLine /></el-icon>
+            指挥大屏
           </el-button>
-          <el-button text @click="$router.push('/notification/list')">
+          <el-button class="shell-icon-button" circle @click="$router.push('/notification/list')">
             <el-badge :value="unreadCount" :hidden="!unreadCount" :max="99">
-              <el-icon size="20"><Bell /></el-icon>
+              <el-icon><Bell /></el-icon>
             </el-badge>
           </el-button>
           <el-dropdown @command="handleCommand">
-            <span class="avatar-area">
-              <el-avatar size="small">{{ (realName || username || 'U').charAt(0) }}</el-avatar>
-              <span class="username-text">{{ realName || username }}</span>
-            </span>
+            <div class="shell-user">
+              <el-avatar :size="38">{{ displayName.slice(0, 1) }}</el-avatar>
+              <div class="shell-user__meta">
+                <strong>{{ displayName }}</strong>
+                <span>{{ currentRole }}</span>
+              </div>
+            </div>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="logout">退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
-        </el-space>
+        </div>
       </header>
-      <main class="main-body">
+
+      <main class="shell-content">
         <router-view />
       </main>
     </div>
@@ -94,53 +119,103 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { HomeFilled, Bell, ArrowRight, Setting, User, DataBoard, Box, OfficeBuilding, Warning, Document, DataLine } from '@element-plus/icons-vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import {
+  ArrowRight,
+  Bell,
+  DataBoard,
+  DataLine,
+  Document,
+  Expand,
+  Fold,
+  HomeFilled,
+  Operation,
+  Setting,
+  User,
+  Warning,
+  Box
+} from '@element-plus/icons-vue'
 import { apiGet } from '../api'
 import { useAuthStore } from '../store/auth'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const menus = ref([])
-const sidebarCollapsed = ref(false)
-const username = ref(localStorage.getItem('username') || '')
-const realName = ref(localStorage.getItem('realName') || '')
 const unreadCount = ref(0)
-
-// 分组图标映射
-const groupIcons = {
-  '首页': HomeFilled,
-  '系统管理': User,
-  '基础数据': DataBoard,
-  '仓储管理': Box,
-  '业务操作': Document,
-  '安全监控': Warning,
-  '系统工具': Setting
-}
-
-// 分组展开状态 — 默认全部展开
+const sidebarCollapsed = ref(false)
+const mobileMenuOpen = ref(false)
+const isMobile = ref(false)
+const currentTime = ref('')
 const expandedGroups = reactive({})
 
-const toggleGroup = (name) => {
-  expandedGroups[name] = !expandedGroups[name]
+let clockTimer = null
+
+const groupIcons = {
+  首页: HomeFilled,
+  系统管理: User,
+  基础数据: DataBoard,
+  仓储管理: Box,
+  业务操作: Document,
+  业务流程: Document,
+  安全监控: Warning,
+  系统工具: Setting
 }
 
-// 将扁平菜单按 group 字段分组，保持原始顺序
+const pageTypeMap = {
+  dashboard: '驾驶舱',
+  analytics: '分析视图',
+  workflow: '流程页面',
+  monitor: '监控页面',
+  screen: '大屏视图',
+  auth: '认证页面',
+  standard: '业务页面'
+}
+
 const menuGroups = computed(() => {
   const map = new Map()
   for (const item of menus.value) {
-    const g = item.group || '其他'
-    if (!map.has(g)) map.set(g, [])
-    map.get(g).push(item)
+    const name = item.group || '其他'
+    if (!map.has(name)) map.set(name, [])
+    map.get(name).push(item)
   }
   return Array.from(map, ([name, items]) => ({ name, items }))
 })
 
+const currentTitle = computed(() => route.meta.title || '校园物资系统')
+const currentSection = computed(() => route.meta.section || '业务页面')
+const currentDescription = computed(() => route.meta.description || '统一管理校园物资、库存、事件与安全流程。')
+const currentTypeLabel = computed(() => pageTypeMap[route.meta.pageType] || pageTypeMap.standard)
+const displayName = computed(() => authStore.user?.realName || localStorage.getItem('realName') || authStore.user?.username || localStorage.getItem('username') || '访客')
+const currentRole = computed(() => authStore.user?.roleName || authStore.user?.roleCode || '系统用户')
+
+const syncViewport = () => {
+  isMobile.value = window.innerWidth < 1024
+  if (!isMobile.value) {
+    mobileMenuOpen.value = false
+  }
+}
+
+const syncClock = () => {
+  currentTime.value = new Date().toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
+}
+
+const toggleGroup = (name) => {
+  if (name === '首页') return
+  expandedGroups[name] = !expandedGroups[name]
+}
+
 const loadMenus = async () => {
   try {
     menus.value = await apiGet('/api/auth/menus')
-    // 默认展开所有组
     for (const item of menus.value) {
       if (item.group && !(item.group in expandedGroups)) {
         expandedGroups[item.group] = true
@@ -153,177 +228,471 @@ const loadMenus = async () => {
 
 const loadUnread = async () => {
   try {
-    const list = await apiGet('/api/notification')
-    unreadCount.value = list.filter(n => !n.isRead).length
+    unreadCount.value = await apiGet('/api/notification/unread-count')
   } catch {
     unreadCount.value = 0
   }
 }
 
-const handleCommand = (cmd) => {
-  if (cmd === 'logout') {
+const handleNavClick = () => {
+  if (isMobile.value) {
+    mobileMenuOpen.value = false
+  }
+}
+
+const handleCommand = (command) => {
+  if (command === 'logout') {
     authStore.logout()
     router.push('/login')
   }
 }
 
+watch(() => route.path, handleNavClick)
+
 onMounted(async () => {
+  syncViewport()
+  syncClock()
+  clockTimer = window.setInterval(syncClock, 1000)
+  window.addEventListener('resize', syncViewport)
   await loadMenus()
   await loadUnread()
+})
+
+onBeforeUnmount(() => {
+  if (clockTimer) {
+    window.clearInterval(clockTimer)
+  }
+  window.removeEventListener('resize', syncViewport)
 })
 </script>
 
 <style scoped>
-.layout {
+.app-shell {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   min-height: 100vh;
-  background: var(--bg-page, #f5f7fa);
+  gap: 22px;
+  padding: 18px;
 }
-.sidebar {
-  background: #fff;
-  border-right: 1px solid var(--divider, #e8e8e8);
-  display: flex;
-  flex-direction: column;
-  transition: width .2s;
+
+.shell-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 17, 33, 0.36);
+  backdrop-filter: blur(6px);
+  z-index: 20;
 }
-.sidebar.collapsed {
-  width: 64px;
+
+.shell-sidebar {
+  position: sticky;
+  top: 18px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: 292px;
+  max-height: calc(100vh - 36px);
+  border-radius: 32px;
+  padding: 16px;
+  background:
+    linear-gradient(180deg, rgba(10, 18, 33, 0.95), rgba(14, 23, 38, 0.92)),
+    radial-gradient(circle at top left, rgba(53, 212, 198, 0.08), transparent 34%);
+  color: rgba(238, 244, 255, 0.92);
+  border: 1px solid rgba(112, 160, 255, 0.12);
+  box-shadow: var(--shadow-sidebar);
+  overflow: hidden;
+  z-index: 30;
 }
-.sidebar.collapsed .nav-label,
-.sidebar.collapsed .logo-text {
-  display: none;
+
+.shell-sidebar--collapsed {
+  width: 92px;
 }
-.sidebar-logo {
+
+.shell-sidebar--mobile {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  bottom: 14px;
+  max-height: none;
+  transform: translateX(calc(-100% - 30px));
+  transition: transform var(--motion-base);
+}
+
+.shell-sidebar--mobile.shell-sidebar--open {
+  transform: translateX(0);
+}
+
+.shell-brand {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  height: 70px;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.04);
   cursor: pointer;
-  border-bottom: 2px solid #e2e8f0;
 }
-.collapsed-logo {
-  padding: 0;
+
+.shell-brand__mark {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(38, 112, 233, 0.92), rgba(53, 212, 198, 0.78));
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 800;
 }
-.logo-shield {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
+.shell-brand__text {
+  display: grid;
+  gap: 4px;
 }
-.logo-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
+
+.shell-brand__text strong {
+  font-size: 16px;
 }
-.nav-menu {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px 0;
+
+.shell-brand__text span {
+  color: rgba(195, 212, 235, 0.68);
+  font-size: 12px;
 }
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 20px;
-  color: #475569;
-  text-decoration: none;
-  font-size: 14px;
-  border-left: 4px solid transparent;
-  transition: all .2s;
+
+.shell-sidebar__scroll {
+  margin-top: 18px;
+  overflow: auto;
+  padding-right: 4px;
 }
-.nav-item.sub-item {
-  padding-left: 48px;
-  font-size: 13px;
-  color: #64748b;
+
+.shell-group {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
 }
-.nav-item:hover {
-  background: #f8fafc;
-  color: #0ea5e9;
-}
-.nav-item.active {
-  color: #0ea5e9;
-  background: #f0f9ff;
-  border-left-color: #0ea5e9;
-  font-weight: bold;
-}
-/* 分组头 */
-.nav-group-header {
+
+.shell-group__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px 12px 20px;
+  gap: 10px;
+  width: 100%;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 18px;
+  background: transparent;
+  color: inherit;
   cursor: pointer;
-  user-select: none;
-  color: #475569;
-  font-size: 13px;
-  font-weight: 600;
-  background: #f8fafc;
-  border-bottom: 1px solid #f1f5f9;
-  border-top: 1px solid #f1f5f9;
-  margin-top: 6px;
 }
-.nav-group-header:hover { color: #0ea5e9; }
-.nav-group-left {
+
+.shell-group__header:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.shell-group__title-wrap {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
-.nav-group-title { white-space: nowrap; }
-.nav-group-arrow {
-  transition: transform .2s ease;
+
+.shell-group__title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
-.nav-group-arrow.expanded {
+
+.shell-group__arrow {
+  transition: transform var(--motion-fast);
+}
+
+.shell-group__arrow--open {
   transform: rotate(90deg);
 }
-.nav-group-items {
-  overflow: hidden;
+
+.shell-group__items {
+  display: grid;
+  gap: 6px;
 }
-.sidebar-toggle {
-  padding: 12px 16px;
-  text-align: center;
+
+.shell-nav-item {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 18px;
+  color: rgba(222, 233, 250, 0.76);
+  transition: background var(--motion-base), color var(--motion-base), transform var(--motion-base);
+}
+
+.shell-nav-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  transform: translateX(2px);
+}
+
+.shell-nav-item--active {
+  background: linear-gradient(135deg, rgba(38, 112, 233, 0.24), rgba(53, 212, 198, 0.14));
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(135, 184, 255, 0.12);
+}
+
+.shell-nav-item__marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  font-family: var(--font-display);
   font-size: 12px;
-  color: #999;
-  cursor: pointer;
-  border-top: 1px solid #eee;
+  font-weight: 700;
 }
-.content {
-  display: flex;
-  flex-direction: column;
+
+.shell-nav-item__label {
   min-width: 0;
-  overflow-y: auto;
-  position: relative;
+  font-weight: 600;
 }
-.topbar {
+
+.shell-sidebar__footer {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.shell-sidebar__card {
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(135, 184, 255, 0.1);
+}
+
+.shell-sidebar__card-label {
+  color: rgba(195, 212, 235, 0.64);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.shell-collapse {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(135, 184, 255, 0.1);
+  border-radius: 18px;
+  min-height: 42px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(238, 244, 255, 0.9);
+  cursor: pointer;
+}
+
+.shell-main {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 18px;
+}
+
+.shell-topbar {
+  position: sticky;
+  top: 18px;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
-  height: 56px;
-  background: #fff;
-  border-bottom: 1px solid var(--divider, #e8e8e8);
-  flex-shrink: 0;
+  gap: 18px;
+  padding: 16px 20px;
+  border-radius: 28px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow-soft);
 }
-.greeting {
-  font-size: 14px;
-  color: var(--primary, #2563EB);
-}
-.avatar-area {
+
+.shell-topbar__left,
+.shell-topbar__right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 14px;
+}
+
+.shell-topbar__left {
+  min-width: 0;
+  flex: 1;
+}
+
+.shell-topbar__right {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.shell-burger {
+  display: none;
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(20, 54, 107, 0.06);
+  color: var(--accent-primary-strong);
   cursor: pointer;
 }
-.username-text {
+
+.shell-context {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.shell-context__capsules {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.shell-context__section,
+.shell-context__type {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.shell-context__section {
+  background: rgba(38, 112, 233, 0.08);
+  color: var(--accent-primary-strong);
+}
+
+.shell-context__type {
+  background: rgba(53, 212, 198, 0.1);
+  color: var(--accent-teal-strong);
+}
+
+.shell-context__title {
+  font-size: 20px;
+  color: var(--text-primary);
+}
+
+.shell-context__description {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.shell-live {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(20, 54, 107, 0.04);
+}
+
+.shell-live__label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.shell-live__value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.shell-ghost {
+  border-color: rgba(38, 112, 233, 0.12);
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.shell-icon-button {
+  width: 42px;
+  height: 42px;
+}
+
+.shell-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 18px;
+  cursor: pointer;
+  background: rgba(20, 54, 107, 0.04);
+}
+
+.shell-user__meta {
+  display: grid;
+  gap: 2px;
+}
+
+.shell-user__meta strong {
   font-size: 14px;
+  color: var(--text-primary);
 }
-.main-body {
-  flex: 1;
-  padding: 20px 24px;
+
+.shell-user__meta span {
+  color: var(--text-tertiary);
+  font-size: 12px;
 }
-/* ===== 响应式 ===== */
+
+.shell-content {
+  min-width: 0;
+  display: grid;
+  gap: 18px;
+}
+
+.shell-fade-enter-active,
+.shell-fade-leave-active {
+  transition: opacity var(--motion-base);
+}
+
+.shell-fade-enter-from,
+.shell-fade-leave-to {
+  opacity: 0;
+}
+
+@media (max-width: 1280px) {
+  .shell-live {
+    display: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .shell-topbar {
+    top: 14px;
+  }
+
+  .shell-burger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
 @media (max-width: 768px) {
-  .layout { grid-template-columns: 1fr; }
-  .sidebar { display: none; }
+  .shell-topbar {
+    padding: 14px;
+    border-radius: 24px;
+  }
+
+  .shell-context__description,
+  .shell-user__meta {
+    display: none;
+  }
+
+  .shell-topbar__right {
+    gap: 10px;
+  }
 }
 </style>

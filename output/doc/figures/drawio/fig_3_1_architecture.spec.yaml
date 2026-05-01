@@ -1,0 +1,204 @@
+meta:
+  profile: academic-paper
+  theme: academic
+  layout: vertical
+  routing: orthogonal
+  canvas: 980x1080
+  title: 系统总体架构图
+  description: 校园物资智能管理系统的 B/S 分层架构
+nodes:
+  - id: browser
+    label: 浏览器访问
+    type: service
+    size: xl
+    position:
+      x: 470
+      'y': 40
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+      shape: shape=rectangle;rounded=0
+  - id: frontend
+    label: 前端表示层
+    type: service
+    size: xl
+    position:
+      x: 470
+      'y': 180
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+      shape: shape=rectangle;rounded=0
+  - id: router
+    label: 路由与状态
+    type: service
+    size: xl
+    position:
+      x: 470
+      'y': 330
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+      shape: shape=rectangle;rounded=0
+  - id: gateway
+    label: 接口访问层
+    type: service
+    size: xl
+    position:
+      x: 470
+      'y': 490
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+      shape: shape=rectangle;rounded=0
+  - id: controller
+    label: 控制层
+    type: service
+    size: xl
+    position:
+      x: 120
+      'y': 690
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+      shape: shape=rectangle;rounded=0
+  - id: service
+    label: 服务层
+    type: service
+    size: xl
+    position:
+      x: 470
+      'y': 690
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+      shape: shape=rectangle;rounded=0
+  - id: persistence
+    label: 数据访问层
+    type: service
+    size: xl
+    position:
+      x: 820
+      'y': 690
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+      shape: shape=rectangle;rounded=0
+  - id: db
+    label: MySQL 数据库
+    type: service
+    size: xl
+    position:
+      x: 820
+      'y': 890
+    style:
+      fillColor: '#FFFFFF'
+      strokeColor: '#000000'
+      fontColor: '#000000'
+      strokeWidth: 1.6
+      fontSize: 16
+      shape: shape=rectangle;rounded=0
+edges:
+  - from: browser
+    to: frontend
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: frontend
+    to: router
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: router
+    to: gateway
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: gateway
+    to: controller
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: gateway
+    to: service
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: gateway
+    to: persistence
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: controller
+    to: service
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: service
+    to: persistence
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+  - from: persistence
+    to: db
+    type: primary
+    style:
+      strokeColor: '#000000'
+      endArrow: block
+      strokeWidth: 1.4
+      fontColor: '#000000'
+      fontSize: 12
+modules: []

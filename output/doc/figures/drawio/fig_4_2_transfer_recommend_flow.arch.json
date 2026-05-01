@@ -1,0 +1,147 @@
+{
+  "version": 1,
+  "title": "调拨执行与推荐流程图",
+  "type": "academic-diagram",
+  "source": "generated",
+  "profile": "academic-paper",
+  "theme": "academic",
+  "layout": "vertical",
+  "counts": {
+    "nodes": 11,
+    "edges": 10,
+    "modules": 0
+  },
+  "nodes": [
+    {
+      "id": "start",
+      "label": "发起调拨需求",
+      "type": "terminal",
+      "size": "large"
+    },
+    {
+      "id": "input",
+      "label": "输入目标校区\n物资与数量",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "calc",
+      "label": "计算最短路径",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "candidate",
+      "label": "筛选候选来源仓",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "rank",
+      "label": "按距离排序\n返回推荐结果",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "submit",
+      "label": "选择来源仓\n提交调拨单",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "approve",
+      "label": "审批通过？",
+      "type": "decision",
+      "size": "large"
+    },
+    {
+      "id": "reject",
+      "label": "驳回并结束",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "execute",
+      "label": "执行调拨\n迁移批次",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "receive",
+      "label": "调入仓签收",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "end",
+      "label": "状态为 RECEIVED",
+      "type": "terminal",
+      "size": "large"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "from": "start",
+      "to": "input",
+      "type": "primary"
+    },
+    {
+      "id": "edge-2",
+      "from": "input",
+      "to": "calc",
+      "type": "primary"
+    },
+    {
+      "id": "edge-3",
+      "from": "calc",
+      "to": "candidate",
+      "type": "primary"
+    },
+    {
+      "id": "edge-4",
+      "from": "candidate",
+      "to": "rank",
+      "type": "primary"
+    },
+    {
+      "id": "edge-5",
+      "from": "rank",
+      "to": "submit",
+      "type": "primary"
+    },
+    {
+      "id": "edge-6",
+      "from": "submit",
+      "to": "approve",
+      "type": "primary"
+    },
+    {
+      "id": "edge-7",
+      "from": "approve",
+      "to": "reject",
+      "type": "primary",
+      "label": "否"
+    },
+    {
+      "id": "edge-8",
+      "from": "approve",
+      "to": "execute",
+      "type": "primary",
+      "label": "是"
+    },
+    {
+      "id": "edge-9",
+      "from": "execute",
+      "to": "receive",
+      "type": "primary"
+    },
+    {
+      "id": "edge-10",
+      "from": "receive",
+      "to": "end",
+      "type": "primary"
+    }
+  ],
+  "modules": []
+}

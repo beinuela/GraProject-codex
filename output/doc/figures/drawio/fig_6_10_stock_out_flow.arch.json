@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "title": "出库业务流程图",
+  "type": "academic-diagram",
+  "source": "generated",
+  "profile": "academic-paper",
+  "theme": "academic",
+  "layout": "vertical",
+  "counts": {
+    "nodes": 7,
+    "edges": 6,
+    "modules": 0
+  },
+  "nodes": [
+    {
+      "id": "n1",
+      "label": "创建出库请求",
+      "type": "terminal",
+      "size": "xl"
+    },
+    {
+      "id": "n2",
+      "label": "校验申领单与仓库",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "n3",
+      "label": "检查库存与锁定量",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "n4",
+      "label": "按 expire_date 批次扣减",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "n5",
+      "label": "写入 stock_out_item",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "n6",
+      "label": "回写库存与实发数量",
+      "type": "process",
+      "size": "xl"
+    },
+    {
+      "id": "n7",
+      "label": "触发低库存检查",
+      "type": "terminal",
+      "size": "xl"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "from": "n1",
+      "to": "n2",
+      "type": "primary"
+    },
+    {
+      "id": "edge-2",
+      "from": "n2",
+      "to": "n3",
+      "type": "primary"
+    },
+    {
+      "id": "edge-3",
+      "from": "n3",
+      "to": "n4",
+      "type": "primary"
+    },
+    {
+      "id": "edge-4",
+      "from": "n4",
+      "to": "n5",
+      "type": "primary"
+    },
+    {
+      "id": "edge-5",
+      "from": "n5",
+      "to": "n6",
+      "type": "primary"
+    },
+    {
+      "id": "edge-6",
+      "from": "n6",
+      "to": "n7",
+      "type": "primary"
+    }
+  ],
+  "modules": []
+}

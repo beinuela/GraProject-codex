@@ -1,0 +1,381 @@
+{
+  "version": 1,
+  "title": "用户角色与组织 E-R 图",
+  "type": "academic-diagram",
+  "source": "generated",
+  "profile": "academic-paper",
+  "theme": "academic",
+  "layout": "horizontal",
+  "counts": {
+    "nodes": 30,
+    "edges": 29,
+    "modules": 0
+  },
+  "nodes": [
+    {
+      "id": "dept",
+      "label": "部门",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "dept_attr_1",
+      "label": "部门编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "dept_attr_2",
+      "label": "部门名称",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "dept_attr_3",
+      "label": "上级部门",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "dept_attr_4",
+      "label": "版本号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "user",
+      "label": "用户",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "user_attr_1",
+      "label": "用户编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "user_attr_2",
+      "label": "用户账号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "user_attr_3",
+      "label": "姓名",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "user_attr_4",
+      "label": "状态",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "user_attr_5",
+      "label": "部门编号 / 角色编号",
+      "type": "user",
+      "size": "medium"
+    },
+    {
+      "id": "role",
+      "label": "角色",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "role_attr_1",
+      "label": "角色编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "role_attr_2",
+      "label": "角色编码",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "role_attr_3",
+      "label": "角色名称",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "role_attr_4",
+      "label": "角色说明",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "token",
+      "label": "刷新令牌",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "token_attr_1",
+      "label": "令牌编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "token_attr_2",
+      "label": "用户编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "token_attr_3",
+      "label": "令牌摘要",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "token_attr_4",
+      "label": "到期时间 / 吊销状态",
+      "type": "user",
+      "size": "medium"
+    },
+    {
+      "id": "log",
+      "label": "登录日志",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "log_attr_1",
+      "label": "用户编号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "log_attr_2",
+      "label": "用户账号",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "log_attr_3",
+      "label": "登录地址",
+      "type": "user",
+      "size": "small"
+    },
+    {
+      "id": "log_attr_4",
+      "label": "登录状态 / 登录时间",
+      "type": "user",
+      "size": "medium"
+    },
+    {
+      "id": "rel_dept_user",
+      "label": "隶属",
+      "type": "decision",
+      "size": "medium"
+    },
+    {
+      "id": "rel_user_role",
+      "label": "拥有",
+      "type": "decision",
+      "size": "medium"
+    },
+    {
+      "id": "rel_user_token",
+      "label": "签发",
+      "type": "decision",
+      "size": "medium"
+    },
+    {
+      "id": "rel_user_log",
+      "label": "产生",
+      "type": "decision",
+      "size": "medium"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "from": "dept",
+      "to": "dept_attr_1",
+      "type": "primary"
+    },
+    {
+      "id": "edge-2",
+      "from": "dept",
+      "to": "dept_attr_2",
+      "type": "primary"
+    },
+    {
+      "id": "edge-3",
+      "from": "dept",
+      "to": "dept_attr_3",
+      "type": "primary"
+    },
+    {
+      "id": "edge-4",
+      "from": "dept",
+      "to": "dept_attr_4",
+      "type": "primary"
+    },
+    {
+      "id": "edge-5",
+      "from": "user",
+      "to": "user_attr_1",
+      "type": "primary"
+    },
+    {
+      "id": "edge-6",
+      "from": "user",
+      "to": "user_attr_2",
+      "type": "primary"
+    },
+    {
+      "id": "edge-7",
+      "from": "user",
+      "to": "user_attr_3",
+      "type": "primary"
+    },
+    {
+      "id": "edge-8",
+      "from": "user",
+      "to": "user_attr_4",
+      "type": "primary"
+    },
+    {
+      "id": "edge-9",
+      "from": "user",
+      "to": "user_attr_5",
+      "type": "primary"
+    },
+    {
+      "id": "edge-10",
+      "from": "role",
+      "to": "role_attr_1",
+      "type": "primary"
+    },
+    {
+      "id": "edge-11",
+      "from": "role",
+      "to": "role_attr_2",
+      "type": "primary"
+    },
+    {
+      "id": "edge-12",
+      "from": "role",
+      "to": "role_attr_3",
+      "type": "primary"
+    },
+    {
+      "id": "edge-13",
+      "from": "role",
+      "to": "role_attr_4",
+      "type": "primary"
+    },
+    {
+      "id": "edge-14",
+      "from": "token",
+      "to": "token_attr_1",
+      "type": "primary"
+    },
+    {
+      "id": "edge-15",
+      "from": "token",
+      "to": "token_attr_2",
+      "type": "primary"
+    },
+    {
+      "id": "edge-16",
+      "from": "token",
+      "to": "token_attr_3",
+      "type": "primary"
+    },
+    {
+      "id": "edge-17",
+      "from": "token",
+      "to": "token_attr_4",
+      "type": "primary"
+    },
+    {
+      "id": "edge-18",
+      "from": "log",
+      "to": "log_attr_1",
+      "type": "primary"
+    },
+    {
+      "id": "edge-19",
+      "from": "log",
+      "to": "log_attr_2",
+      "type": "primary"
+    },
+    {
+      "id": "edge-20",
+      "from": "log",
+      "to": "log_attr_3",
+      "type": "primary"
+    },
+    {
+      "id": "edge-21",
+      "from": "log",
+      "to": "log_attr_4",
+      "type": "primary"
+    },
+    {
+      "id": "edge-22",
+      "from": "dept",
+      "to": "rel_dept_user",
+      "type": "primary",
+      "label": "1"
+    },
+    {
+      "id": "edge-23",
+      "from": "rel_dept_user",
+      "to": "user",
+      "type": "primary",
+      "label": "n"
+    },
+    {
+      "id": "edge-24",
+      "from": "user",
+      "to": "rel_user_role",
+      "type": "primary",
+      "label": "n"
+    },
+    {
+      "id": "edge-25",
+      "from": "rel_user_role",
+      "to": "role",
+      "type": "primary",
+      "label": "1"
+    },
+    {
+      "id": "edge-26",
+      "from": "user",
+      "to": "rel_user_token",
+      "type": "primary",
+      "label": "1"
+    },
+    {
+      "id": "edge-27",
+      "from": "rel_user_token",
+      "to": "token",
+      "type": "primary",
+      "label": "n"
+    },
+    {
+      "id": "edge-28",
+      "from": "user",
+      "to": "rel_user_log",
+      "type": "primary",
+      "label": "1"
+    },
+    {
+      "id": "edge-29",
+      "from": "rel_user_log",
+      "to": "log",
+      "type": "primary",
+      "label": "n"
+    }
+  ],
+  "modules": []
+}

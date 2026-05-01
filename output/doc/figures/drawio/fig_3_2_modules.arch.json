@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "title": "系统功能模块图",
+  "type": "academic-diagram",
+  "source": "generated",
+  "profile": "academic-paper",
+  "theme": "academic",
+  "layout": "vertical",
+  "counts": {
+    "nodes": 9,
+    "edges": 8,
+    "modules": 0
+  },
+  "nodes": [
+    {
+      "id": "core",
+      "label": "校园物资智能管理系统",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "auth",
+      "label": "认证与权限",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "base",
+      "label": "基础数据",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "inventory",
+      "label": "仓储库存",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "apply",
+      "label": "申领审批",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "transfer",
+      "label": "调拨协同",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "warning",
+      "label": "预警与补货",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "analytics",
+      "label": "统计分析",
+      "type": "service",
+      "size": "xl"
+    },
+    {
+      "id": "support",
+      "label": "系统支撑",
+      "type": "service",
+      "size": "xl"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "from": "core",
+      "to": "auth",
+      "type": "primary"
+    },
+    {
+      "id": "edge-2",
+      "from": "core",
+      "to": "base",
+      "type": "primary"
+    },
+    {
+      "id": "edge-3",
+      "from": "core",
+      "to": "inventory",
+      "type": "primary"
+    },
+    {
+      "id": "edge-4",
+      "from": "core",
+      "to": "apply",
+      "type": "primary"
+    },
+    {
+      "id": "edge-5",
+      "from": "core",
+      "to": "transfer",
+      "type": "primary"
+    },
+    {
+      "id": "edge-6",
+      "from": "core",
+      "to": "warning",
+      "type": "primary"
+    },
+    {
+      "id": "edge-7",
+      "from": "core",
+      "to": "analytics",
+      "type": "primary"
+    },
+    {
+      "id": "edge-8",
+      "from": "core",
+      "to": "support",
+      "type": "primary"
+    }
+  ],
+  "modules": []
+}
