@@ -42,7 +42,7 @@ const props = defineProps({
 const typeMap = {
   auth: '系统入口',
   screen: '指挥大屏',
-  dashboard: '驾驶舱',
+  dashboard: '数据看板',
   analytics: '分析视图',
   workflow: '流程视图',
   monitor: '监控视图',

@@ -46,7 +46,7 @@
 
 先复制 `.env.example` 为 `.env`，至少填写以下变量：
 
-- `SPRING_PROFILES_ACTIVE=mysql`
+- `SPRING_PROFILES_ACTIVE=prod`
 - `DB_URL`
 - `DB_USERNAME`
 - `DB_PASSWORD`

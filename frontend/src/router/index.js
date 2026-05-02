@@ -25,7 +25,7 @@ const routes = [
     component: () => import('../layouts/MainLayout.vue'),
     redirect: '/dashboard',
     children: [
-      { path: 'dashboard', component: () => import('../views/DashboardView.vue'), meta: meta('运营总览', '运营驾驶舱', '聚合关键指标、近期动态与核心图表的首页总览。', 'dashboard') },
+      { path: 'dashboard', component: () => import('../views/DashboardView.vue'), meta: meta('系统首页', '首页概览', '汇总关键指标、近期动态与核心图表的首页概览。', 'dashboard') },
       { path: 'rbac/users', component: () => import('../views/rbac/UserView.vue'), meta: meta('用户管理', '系统管理', '维护账号、角色关联与启停状态。') },
       { path: 'rbac/roles', component: () => import('../views/rbac/RoleView.vue'), meta: meta('角色管理', '系统管理', '维护角色编码、名称和说明信息。') },
       { path: 'rbac/depts', component: () => import('../views/rbac/DeptView.vue'), meta: meta('部门管理', '系统管理', '维护组织单元与业务归属信息。') },

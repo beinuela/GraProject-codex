@@ -57,7 +57,7 @@
 2. 至少设置：
    - `SPRING_PROFILES_ACTIVE`
    - `JWT_SECRET`
-   - 如果使用 MySQL，再设置 `DB_URL` / `DB_USERNAME` / `DB_PASSWORD`
+   - 正式运行必须设置 `DB_URL` / `DB_USERNAME` / `DB_PASSWORD`
 
 PowerShell 示例：
 
@@ -67,10 +67,11 @@ Copy-Item .env.example .env
 
 ### 3.2 启动模式
 
-推荐两种模式：
+常用模式：
 
-- `screenshot`：使用 H2 演示数据，适合快速联调、截图和 E2E
-- `mysql`：连接真实 MySQL
+- `prod`：正式运行环境，连接真实 MySQL
+- `dev` / `mysql`：开发联调环境，连接真实 MySQL
+- `screenshot`：使用 H2 演示数据，仅适合截图和 E2E
 
 ### 3.3 启动后端
 
@@ -99,7 +100,7 @@ npm run dev
 
 ## 4. 初始化 MySQL
 
-仅 `mysql` profile 需要：
+`prod` / `dev` / `mysql` profile 需要：
 
 ```sql
 CREATE DATABASE IF NOT EXISTS campus_material

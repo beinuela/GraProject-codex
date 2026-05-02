@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
   forward-headers-strategy: framework
 
 spring:
@@ -8,7 +8,7 @@ spring:
   config:
     import: optional:file:.env[.properties],optional:file:../.env[.properties]
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev}
+    active: ${SPRING_PROFILES_ACTIVE:prod}
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
@@ -61,7 +61,7 @@ management:
 
 sentry:
   dsn: ${SENTRY_DSN:}
-  environment: ${SENTRY_ENVIRONMENT:${SPRING_PROFILES_ACTIVE:dev}}
+  environment: ${SENTRY_ENVIRONMENT:${SPRING_PROFILES_ACTIVE:prod}}
   traces-sample-rate: ${SENTRY_TRACES_SAMPLE_RATE:0.0}
   send-default-pii: false
 
@@ -72,4 +72,4 @@ logging:
 info:
   app:
     name: ${spring.application.name}
-    profile: ${SPRING_PROFILES_ACTIVE:dev}
+    profile: ${SPRING_PROFILES_ACTIVE:prod}
