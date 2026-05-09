@@ -164,7 +164,7 @@ const groupIcons = {
 }
 
 const pageTypeMap = {
-  dashboard: '驾驶舱',
+  dashboard: '数据看板',
   analytics: '分析视图',
   workflow: '流程页面',
   monitor: '监控页面',

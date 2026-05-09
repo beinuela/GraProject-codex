@@ -271,7 +271,7 @@ public class AuthService {
 
     private List<Map<String, String>> buildMenusByRole(String role) {
         List<Map<String, String>> all = new ArrayList<>();
-        addMenu(all, "dashboard", "仪表盘", "/dashboard", "首页");
+        addMenu(all, "dashboard", "系统首页", "/dashboard", "首页");
         if ("ADMIN".equals(role)) {
             // 系统管理
             addMenu(all, "users", "用户管理", "/rbac/users", "系统管理");

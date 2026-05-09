@@ -13,6 +13,7 @@ import java.util.Set;
 public class AppStartupValidator implements ApplicationRunner {
 
     private static final Set<String> EXCLUDED_PROFILES = Set.of("test");
+    private static final String PROD_PROFILE = "prod";
 
     private final JwtProperties jwtProperties;
     private final Environment environment;
@@ -24,7 +25,8 @@ public class AppStartupValidator implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        if (Arrays.stream(environment.getActiveProfiles()).anyMatch(EXCLUDED_PROFILES::contains)) {
+        String[] activeProfiles = environment.getActiveProfiles();
+        if (Arrays.stream(activeProfiles).anyMatch(EXCLUDED_PROFILES::contains)) {
             return;
         }
 
@@ -34,6 +36,29 @@ public class AppStartupValidator implements ApplicationRunner {
         }
         if (secret.getBytes(StandardCharsets.UTF_8).length < 32) {
             throw new IllegalStateException("JWT_SECRET 长度不足，至少需要 32 字节。");
+        }
+
+        if (Arrays.asList(activeProfiles).contains(PROD_PROFILE)) {
+            validateProdDatasource();
+        }
+    }
+
+    private void validateProdDatasource() {
+        String url = environment.getProperty("spring.datasource.url");
+        String username = environment.getProperty("spring.datasource.username");
+        String password = environment.getProperty("spring.datasource.password");
+
+        if (url == null || url.isBlank()) {
+            throw new IllegalStateException("prod 环境必须配置 DB_URL。");
+        }
+        if (!url.startsWith("jdbc:mysql:")) {
+            throw new IllegalStateException("prod 环境必须使用 MySQL 数据源，当前 spring.datasource.url=" + url);
+        }
+        if (username == null || username.isBlank()) {
+            throw new IllegalStateException("prod 环境必须配置 DB_USERNAME。");
+        }
+        if (password == null || password.isBlank()) {
+            throw new IllegalStateException("prod 环境必须配置 DB_PASSWORD。");
         }
     }
 }
