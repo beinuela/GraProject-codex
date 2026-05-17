@@ -84,6 +84,9 @@ public class MaterialService {
             throw new BizException(409, "分类名称已存在，请勿重复添加");
         }
         category.setCategoryName(categoryName);
+        if (category.getCategoryCode() != null) {
+            category.setCategoryCode(category.getCategoryCode().trim());
+        }
     }
 
     private void validateMaterial(MaterialInfo info) {

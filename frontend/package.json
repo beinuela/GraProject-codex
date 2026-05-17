@@ -11,7 +11,9 @@
     "test:unit": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "node ./scripts/run-e2e.mjs",
-    "test:e2e:headed": "node ./scripts/run-e2e.mjs --headed"
+    "test:e2e:headed": "node ./scripts/run-e2e.mjs --headed",
+    "test:prod-regression": "node ./scripts/run-prod-regression.mjs",
+    "test:prod-regression:headless": "node ./scripts/run-prod-regression.mjs --headless"
   },
   "dependencies": {
     "@sentry/vue": "^10.21.0",

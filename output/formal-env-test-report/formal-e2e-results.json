@@ -1,0 +1,519 @@
+{
+  "stamp": "20260510015437",
+  "results": [
+    {
+      "module": "登录与认证",
+      "action": "错误密码登录",
+      "expected": "停留登录页并提示错误",
+      "actual": "出现“用户名或密码错误”提示",
+      "pass": true,
+      "screenshot": "screenshots/02-login-wrong-password.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "登录与认证",
+      "action": "管理员登录",
+      "expected": "进入首页并写入 token/refreshToken",
+      "actual": "登录成功且本地会话存在",
+      "pass": true,
+      "screenshot": "screenshots/03-admin-dashboard.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "首页/仪表盘",
+      "action": "首页 KPI 与图表加载",
+      "expected": "显示 KPI、库存分布、趋势图和日志",
+      "actual": "页面显示物资种类、仓库数量、库存记录、未处理预警及图表区域",
+      "pass": true,
+      "screenshot": "screenshots/04-dashboard-refreshed.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "数据看板",
+      "action": "指挥大屏加载",
+      "expected": "库存结构、趋势、动态、排行、效期监控正常显示",
+      "actual": "大屏页面正常显示多个图表容器和实时动态区域",
+      "pass": true,
+      "screenshot": "screenshots/05-bigscreen.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "用户管理",
+      "action": "新增用户",
+      "expected": "新增演示账号并出现在列表",
+      "actual": "新增账号已显示",
+      "pass": true,
+      "screenshot": "screenshots/06-user-created.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "用户管理",
+      "action": "编辑与启停用户",
+      "expected": "演示用户可禁用并重新启用",
+      "actual": "状态字段可通过编辑弹窗切换；系统未提供独立重置密码按钮",
+      "pass": true,
+      "screenshot": "screenshots/07-user-enabled.png",
+      "problem": "未发现重置密码入口",
+      "suggestion": "补充单独的重置密码操作或在报告中说明通过编辑密码完成"
+    },
+    {
+      "module": "角色与权限",
+      "action": "角色列表查看",
+      "expected": "展示角色编码和说明",
+      "actual": "角色列表包含 ADMIN、WAREHOUSE_ADMIN、DEPT_USER、APPROVER；未实现 PURCHASER、DISPATCHER、USER 角色",
+      "pass": true,
+      "screenshot": "screenshots/08-role-list.png",
+      "problem": "无角色权限矩阵查看页面",
+      "suggestion": "增加角色-菜单/接口权限映射视图"
+    },
+    {
+      "module": "物资分类管理",
+      "action": "新增分类",
+      "expected": "新增演示分类并显示",
+      "actual": "分类已显示",
+      "pass": true,
+      "screenshot": "screenshots/09-category-created.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "物资信息管理",
+      "action": "新增物资",
+      "expected": "新增演示物资并显示单位、分类和安全库存",
+      "actual": "物资已显示",
+      "pass": true,
+      "screenshot": "screenshots/10-material-created.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "仓库管理",
+      "action": "新增仓库",
+      "expected": "新增演示仓库并显示",
+      "actual": "仓库已显示",
+      "pass": true,
+      "screenshot": "screenshots/11-warehouse-created.png",
+      "problem": "未发现仓库状态管理字段或按钮",
+      "suggestion": "如任务书要求仓库启停，需要补充状态字段与启停操作"
+    },
+    {
+      "module": "入库管理",
+      "action": "提交入库",
+      "expected": "生成入库记录并增加库存/批次",
+      "actual": "入库记录已生成",
+      "pass": true,
+      "screenshot": "screenshots/13-stock-in-result.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "批次管理",
+      "action": "查看批次",
+      "expected": "入库批次可在库存批次明细中查看",
+      "actual": "批次号可见",
+      "pass": true,
+      "screenshot": "screenshots/14-batch-dialog.png",
+      "problem": "系统没有独立批次新增/编辑页面，批次由入库单生成",
+      "suggestion": "如需满足批次编辑要求，应增加批次台账维护页面"
+    },
+    {
+      "module": "出库管理",
+      "action": "提交出库",
+      "expected": "生成出库记录并扣减库存",
+      "actual": "出库记录未在当前页显示",
+      "pass": false,
+      "screenshot": "screenshots/16-stock-out-result.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "调拨协同模块",
+      "action": "新建调拨与智能推荐",
+      "expected": "生成调拨单并提交审批，推荐候选仓可展示",
+      "actual": "调拨单ID=3，已提交",
+      "pass": true,
+      "screenshot": "screenshots/41-transfer-submitted.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "调拨协同模块",
+      "action": "审批、执行、签收",
+      "expected": "完成调拨状态流转和跨仓库存同步",
+      "actual": "调拨单完成 SUBMITTED -> APPROVED -> OUTBOUND -> RECEIVED",
+      "pass": true,
+      "screenshot": "screenshots/42-transfer-received.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "预警管理模块",
+      "action": "手动扫描预警",
+      "expected": "刷新库存不足、积压、临期、过期和异常消耗预警",
+      "actual": "预警列表已刷新，页面可见多类预警状态",
+      "pass": true,
+      "screenshot": "screenshots/43-warning-scan.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "预警管理模块",
+      "action": "处理预警",
+      "expected": "处理备注保存后状态更新",
+      "actual": "一条未处理预警完成处理动作",
+      "pass": true,
+      "screenshot": "screenshots/44-warning-handled.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "事件管理模块",
+      "action": "上报事件",
+      "expected": "事件创建并通知相关角色",
+      "actual": "事件已显示",
+      "pass": true,
+      "screenshot": "screenshots/46-event-created.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "通知日志模块",
+      "action": "通知查询",
+      "expected": "通知列表、内容、类型、状态可查看",
+      "actual": "通知中心列表正常加载；事件上报会向相关角色生成通知",
+      "pass": true,
+      "screenshot": "screenshots/47-notification-list.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "操作日志模块",
+      "action": "操作日志查询",
+      "expected": "业务操作后可查询日志",
+      "actual": "操作日志列表正常显示模块、操作、详情、时间",
+      "pass": true,
+      "screenshot": "screenshots/48-operation-log.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "操作日志模块",
+      "action": "登录日志查询",
+      "expected": "成功/失败登录有记录",
+      "actual": "登录日志显示 SUCCESS/FAILURE 记录",
+      "pass": true,
+      "screenshot": "screenshots/49-login-log.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "统计分析模块",
+      "action": "统计图表刷新",
+      "expected": "图表来自正式接口并正常渲染",
+      "actual": "统计分析页面可见库存分布、仓库分布、趋势、排行、效期、补货参考等区域",
+      "pass": true,
+      "screenshot": "screenshots/50-analytics.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "角色与权限",
+      "action": "部门用户菜单差异",
+      "expected": "部门用户只显示授权菜单",
+      "actual": "菜单差异符合设计",
+      "pass": true,
+      "screenshot": "screenshots/51-dept-menu.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "角色与权限",
+      "action": "非管理员访问安全策略",
+      "expected": "跳回首页",
+      "actual": "已重定向首页",
+      "pass": true,
+      "screenshot": "screenshots/52-non-admin-security-redirect.png",
+      "problem": "",
+      "suggestion": ""
+    },
+    {
+      "module": "角色与权限",
+      "action": "非管理员直达用户管理 URL",
+      "expected": "应无权限",
+      "actual": "部门用户可直达用户管理页面",
+      "pass": false,
+      "screenshot": "screenshots/53-non-admin-direct-users.png",
+      "problem": "仅隐藏菜单，未对前端路由/接口做角色级拦截",
+      "suggestion": "敏感路由和接口增加角色授权"
+    },
+    {
+      "module": "登录与认证",
+      "action": "退出登录",
+      "expected": "清理会话并返回登录页",
+      "actual": "退出后停留在 http://127.0.0.1:4173/dashboard",
+      "pass": false,
+      "screenshot": "screenshots/54-logout.png",
+      "problem": "退出后未稳定跳转登录页",
+      "suggestion": "确认下拉菜单点击区域与 logout 接口 401 时的前端跳转处理"
+    },
+    {
+      "module": "登录与认证",
+      "action": "未登录访问受保护页面",
+      "expected": "跳转登录页",
+      "actual": "已跳转登录页",
+      "pass": true,
+      "screenshot": "screenshots/55-unauth-redirect.png",
+      "problem": "",
+      "suggestion": ""
+    }
+  ],
+  "issues": [
+    {
+      "module": "自动化执行",
+      "description": "locator.innerText: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('row').filter({ hasText: '正式环境闭环申领-20260510015437' }).first()\u001b[22m\n",
+      "stack": "locator.innerText: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('row').filter({ hasText: '正式环境闭环申领-20260510015437' }).first()\u001b[22m\n\n    at rowIdFromText (D:\\idea+\\project\\GraProject-codex\\tmp\\formal-env-e2e.mjs:88:26)\n    at D:\\idea+\\project\\GraProject-codex\\tmp\\formal-env-e2e.mjs:224:25"
+    },
+    {
+      "module": "后续自动化执行",
+      "description": "page.waitForURL: Timeout 12000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================",
+      "stack": "page.waitForURL: Timeout 12000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================\n    at D:\\idea+\\project\\GraProject-codex\\tmp\\formal-env-continuation.mjs:159:14"
+    }
+  ],
+  "apiFailures": [
+    {
+      "url": "http://127.0.0.1:4173/api/auth/login",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"用户名或密码错误\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/inventory/stock-out",
+      "status": 409,
+      "body": "{\"code\":409,\"message\":\"批次库存不足，无法完成出库操作\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/warehouse/list",
+      "status": 403,
+      "body": "{\"code\":403,\"message\":\"无权限访问该资源\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/warning/list?page=1&size=10&status=UNHANDLED",
+      "status": 403,
+      "body": "{\"code\":403,\"message\":\"无权限访问该资源\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/inventory/list?page=1&size=1",
+      "status": 403,
+      "body": "{\"code\":403,\"message\":\"无权限访问该资源\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/log/list?page=1&size=10",
+      "status": 403,
+      "body": "{\"code\":403,\"message\":\"无权限访问该资源\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/apply/list?page=1&size=10",
+      "status": 500,
+      "body": "{\"code\":500,\"message\":\"服务器内部错误\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/apply",
+      "status": 500,
+      "body": "{\"code\":500,\"message\":\"服务器内部错误\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/auth/menus",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/auth/logout",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/inventory/list?page=1&size=1",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/warning/list?page=1&size=10&status=UNHANDLED",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/auth/menus",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/warehouse/list",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/material/info",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/log/list?page=1&size=10",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/notification/unread-count",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/analytics/inventory-ratio",
+      "status": 401,
+      "body": ""
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/auth/menus",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/auth/logout",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/warning/list?page=1&size=10&status=UNHANDLED",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/inventory/list?page=1&size=1",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/warehouse/list",
+      "status": 401,
+      "body": ""
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/material/info",
+      "status": 401,
+      "body": ""
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/auth/menus",
+      "status": 401,
+      "body": ""
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/login-log?page=1&size=10",
+      "status": 403,
+      "body": "{\"code\":403,\"message\":\"无权限访问该资源\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/auth/menus",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/auth/logout",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/inventory/list?page=1&size=1",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/warning/list?page=1&size=10&status=UNHANDLED",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/warehouse/list",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/auth/menus",
+      "status": 401,
+      "body": "{\"code\":401,\"message\":\"未认证或token已失效\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/material/info",
+      "status": 401,
+      "body": ""
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/warehouse/list",
+      "status": 403,
+      "body": "{\"code\":403,\"message\":\"无权限访问该资源\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/inventory/list?page=1&size=1",
+      "status": 403,
+      "body": "{\"code\":403,\"message\":\"无权限访问该资源\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/warning/list?page=1&size=10&status=UNHANDLED",
+      "status": 403,
+      "body": "{\"code\":403,\"message\":\"无权限访问该资源\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/log/list?page=1&size=10",
+      "status": 403,
+      "body": "{\"code\":403,\"message\":\"无权限访问该资源\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/warehouse/list",
+      "status": 403,
+      "body": "{\"code\":403,\"message\":\"无权限访问该资源\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/warning/list?page=1&size=10&status=UNHANDLED",
+      "status": 403,
+      "body": "{\"code\":403,\"message\":\"无权限访问该资源\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/inventory/list?page=1&size=1",
+      "status": 403,
+      "body": "{\"code\":403,\"message\":\"无权限访问该资源\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/log/list?page=1&size=10",
+      "status": 403,
+      "body": "{\"code\":403,\"message\":\"无权限访问该资源\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/rbac/users",
+      "status": 403,
+      "body": "{\"code\":403,\"message\":\"无权限访问该资源\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/warning/list?page=1&size=10&status=UNHANDLED",
+      "status": 403,
+      "body": "{\"code\":403,\"message\":\"无权限访问该资源\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/inventory/list?page=1&size=1",
+      "status": 403,
+      "body": "{\"code\":403,\"message\":\"无权限访问该资源\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/warehouse/list",
+      "status": 403,
+      "body": "{\"code\":403,\"message\":\"无权限访问该资源\",\"data\":null}"
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/log/list?page=1&size=10",
+      "status": 403,
+      "body": "{\"code\":403,\"message\":\"无权限访问该资源\",\"data\":null}"
+    }
+  ]
+}

@@ -22,10 +22,11 @@
             <StatusBadge :label="row.status === 1 ? '启用' : '禁用'" :tone="row.status === 1 ? 'success' : 'danger'" />
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
+        <el-table-column label="操作" width="260" fixed="right">
           <template #default="{ row }">
             <div class="inline-actions">
               <el-button size="small" @click="openEdit(row)">编辑</el-button>
+              <el-button size="small" type="warning" @click="resetPassword(row)">重置密码</el-button>
               <el-popconfirm title="确认删除该用户？" @confirm="remove(row.id)">
                 <template #reference>
                   <el-button size="small" type="danger">删除</el-button>
@@ -80,6 +81,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Lock, OfficeBuilding, User, UserFilled } from '@element-plus/icons-vue'
 import { apiDelete, apiGet, apiPost } from '../../api'
 import DialogShell from '../../components/ui/DialogShell.vue'
@@ -123,6 +125,22 @@ const save = async () => {
 const remove = async (id) => {
   await apiDelete(`/api/rbac/users/${id}`)
   await load()
+}
+
+const resetPassword = async (row) => {
+  try {
+    const { value } = await ElMessageBox.prompt(`为账号 ${row.username} 设置新密码`, '重置密码', {
+      confirmButtonText: '确认重置',
+      cancelButtonText: '取消',
+      inputType: 'password',
+      inputPattern: /^.{6,}$/,
+      inputErrorMessage: '密码长度至少6位'
+    })
+    await apiPost(`/api/rbac/users/${row.id}/reset-password`, { password: value })
+    ElMessage.success('密码已重置')
+  } catch (_) {
+    // 用户取消时不提示错误。
+  }
 }
 
 onMounted(load)

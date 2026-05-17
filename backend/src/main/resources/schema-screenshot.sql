@@ -2,6 +2,8 @@
 
 DROP TABLE IF EXISTS notification;
 DROP TABLE IF EXISTS login_log;
+DROP TABLE IF EXISTS ai_call_log;
+DROP TABLE IF EXISTS ai_analysis_task;
 DROP TABLE IF EXISTS system_config;
 DROP TABLE IF EXISTS event_record;
 DROP TABLE IF EXISTS supplier;
@@ -9,6 +11,7 @@ DROP TABLE IF EXISTS storage_location;
 DROP TABLE IF EXISTS campus;
 DROP TABLE IF EXISTS operation_log;
 DROP TABLE IF EXISTS warning_record;
+DROP TABLE IF EXISTS delivery_task;
 DROP TABLE IF EXISTS transfer_order_item;
 DROP TABLE IF EXISTS transfer_order;
 DROP TABLE IF EXISTS apply_order_item;
@@ -83,6 +86,7 @@ CREATE TABLE auth_refresh_token (
 CREATE TABLE material_category (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     category_name VARCHAR(100) NOT NULL,
+    category_code VARCHAR(50),
     remark VARCHAR(255),
     deleted TINYINT NOT NULL DEFAULT 0,
     version INT NOT NULL DEFAULT 0,
@@ -112,10 +116,15 @@ CREATE TABLE material_info (
 
 CREATE TABLE warehouse (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    warehouse_code VARCHAR(50),
     warehouse_name VARCHAR(100) NOT NULL,
+    campus_id BIGINT,
     campus VARCHAR(100),
     address VARCHAR(255),
     manager VARCHAR(100),
+    contact_phone VARCHAR(50),
+    status VARCHAR(20) NOT NULL DEFAULT 'NORMAL',
+    remark VARCHAR(255),
     deleted TINYINT NOT NULL DEFAULT 0,
     version INT NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -292,6 +301,26 @@ CREATE TABLE warning_record (
     INDEX idx_warning_type_material_warehouse_status (warning_type, material_id, warehouse_id, handle_status)
 );
 
+CREATE TABLE delivery_task (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    apply_order_id BIGINT,
+    stock_out_id BIGINT,
+    receiver_name VARCHAR(100) NOT NULL,
+    receiver_phone VARCHAR(50),
+    delivery_address VARCHAR(255) NOT NULL,
+    dispatcher_id BIGINT,
+    status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+    remark VARCHAR(255),
+    signed_at DATETIME,
+    deleted TINYINT NOT NULL DEFAULT 0,
+    version INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_delivery_status (status),
+    INDEX idx_delivery_apply (apply_order_id),
+    INDEX idx_delivery_stock_out (stock_out_id)
+);
+
 CREATE TABLE operation_log (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     operator_id BIGINT,
@@ -305,6 +334,47 @@ CREATE TABLE operation_log (
     INDEX idx_log_operator (operator_id),
     INDEX idx_log_module (module),
     INDEX idx_log_created_at (created_at)
+);
+
+CREATE TABLE ai_analysis_task (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    biz_type VARCHAR(50) NOT NULL,
+    biz_id BIGINT NOT NULL,
+    request_snapshot TEXT NOT NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+    result_source VARCHAR(30) NOT NULL DEFAULT 'RULE_FALLBACK',
+    result_json TEXT,
+    error_message VARCHAR(500),
+    created_by BIGINT,
+    started_at DATETIME,
+    finished_at DATETIME,
+    deleted TINYINT NOT NULL DEFAULT 0,
+    version INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_ai_task_biz (biz_type, biz_id),
+    INDEX idx_ai_task_status (status),
+    INDEX idx_ai_task_created (created_at)
+);
+
+CREATE TABLE ai_call_log (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    task_id BIGINT NOT NULL,
+    provider_name VARCHAR(50) NOT NULL,
+    model_name VARCHAR(100) NOT NULL,
+    prompt_template_code VARCHAR(100) NOT NULL,
+    prompt_tokens INT NOT NULL DEFAULT 0,
+    completion_tokens INT NOT NULL DEFAULT 0,
+    total_tokens INT NOT NULL DEFAULT 0,
+    latency_ms BIGINT NOT NULL DEFAULT 0,
+    success_flag TINYINT NOT NULL DEFAULT 0,
+    error_message VARCHAR(500),
+    deleted TINYINT NOT NULL DEFAULT 0,
+    version INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_ai_call_task (task_id),
+    INDEX idx_ai_call_created (created_at)
 );
 
 -- ===================== 校区管理 =====================

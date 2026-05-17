@@ -1,0 +1,749 @@
+[
+  {
+    "route": "/dashboard",
+    "headings": [
+      "系统首页(h1)",
+      "库存占比分布(h3)",
+      "近六个月出入库趋势(h3)",
+      "最近操作日志(h3)",
+      "未处理预警(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "刷新概览",
+      "进入分析中心"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/bigscreen",
+    "headings": [
+      "校园物资管理指挥中心(h1)",
+      "库存结构(h2)",
+      "出入库趋势(h2)",
+      "实时动态(h2)",
+      "部门领用排行(h2)",
+      "效期监控(h2)"
+    ],
+    "buttons": [
+      "返回后台",
+      "全屏切换"
+    ],
+    "alerts": [],
+    "hasTable": false,
+    "excerpt": "- banner:\n  - generic: Campus Material Command\n  - heading \"校园物资管理指挥中心\" [level=1]\n  - paragraph: 统一观察库存、调拨、申领、预警与事件态势。\n  - generic: 系统时间\n  - strong: 2026-05-10 09:41:56\n  - button \"返回后台\":\n    - text: 返回后台\n  - button \"全屏切换\":\n    - text: 全屏切换\n- article:\n  - generic: 物资总数\n  - strong: \"5\"\n  - generic: 已纳入总控台账\n- article:\n  - generic: 活跃预警\n  - strong: \"6\"\n  - generic: 待持续跟踪\n- article:\n  - generic: 待审批流程\n  - strong: \"1\"\n  - generic: 申领与调拨待办\n- article:\n  - generic: 仓储节点\n  - strong: \"3\"\n  - generic: 当前在线仓库\n- main:\n  - generic: Inventory\n  - heading \"库存结构\" [level=2]\n  - generic: Trend\n  - heading \"出入库趋势\" [level=2]\n  - strong: \"0\"\n  - generic: 本月事件\n  - article:\n    - generic: 待审批流程\n    - strong: \"1\"\n  - article:\n    - generic: 仓储节点\n    - strong: \"3\"\n  - generic: Live Feed\n  - heading \"实时动态\" [level=2]\n  - article:\n    - generic: 2026-05-10 09:41:56\n    - strong: 库存联动\n    - paragraph: 当前纳管物资 5 项，仓储节点"
+  },
+  {
+    "route": "/rbac/users",
+    "headings": [
+      "用户管理(h1)",
+      "用户列表(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "新增用户",
+      "刷新",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/rbac/roles",
+    "headings": [
+      "角色管理(h1)",
+      "角色台账(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "新增角色",
+      "刷新",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/rbac/depts",
+    "headings": [
+      "部门管理(h1)",
+      "部门台账(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "新增部门",
+      "刷新",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/campus/list",
+    "headings": [
+      "校区管理(h1)",
+      "校区台账(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "新增校区",
+      "刷新",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/material/category",
+    "headings": [
+      "分类管理(h1)",
+      "分类列表(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "新增分类",
+      "刷新",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/material/info",
+    "headings": [
+      "物资档案(h1)",
+      "物资档案(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "新增物资",
+      "刷新",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/supplier/list",
+    "headings": [
+      "供应商管理(h1)",
+      "供应商列表(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "新增供应商",
+      "刷新",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/warehouse/list",
+    "headings": [
+      "仓库管理(h1)",
+      "仓库列表(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "新增仓库",
+      "刷新",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/warehouse/location",
+    "headings": [
+      "库位管理(h1)",
+      "库位管理(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "新增库位",
+      "刷新",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/inventory/list",
+    "headings": [
+      "库存查询(h1)",
+      "库存台账(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "刷新",
+      "查看批次",
+      "Go to previous page",
+      "Go to next page",
+      "Page"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/inventory/stock-in",
+    "headings": [
+      "入库管理(h1)",
+      "入库记录(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "新建入库单",
+      "刷新",
+      "Go to previous page",
+      "Go to next page",
+      "Page"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/inventory/stock-out",
+    "headings": [
+      "出库管理(h1)",
+      "出库记录(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "新建出库单",
+      "刷新",
+      "Go to previous page",
+      "Go to next page",
+      "Page"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/apply/list",
+    "headings": [
+      "申领审批(h1)",
+      "申领单列表(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "新建申领",
+      "刷新",
+      "Go to previous page",
+      "Go to next page",
+      "Page"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/transfer/list",
+    "headings": [
+      "调拨管理(h1)",
+      "调拨单列表(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "新建调拨",
+      "刷新",
+      "详情",
+      "执行",
+      "详情",
+      "Go to previous page",
+      "Go to next page",
+      "Page"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/warning/list",
+    "headings": [
+      "预警中心(h1)",
+      "预警中心(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "刷新",
+      "手动扫描",
+      "处理",
+      "处理",
+      "处理",
+      "处理",
+      "处理",
+      "处理",
+      "Go to previous page",
+      "Go to next page",
+      "Page"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/event/list",
+    "headings": [
+      "事件管理(h1)",
+      "事件列表(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "上报事件",
+      "刷新",
+      "处理",
+      "关闭"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/analytics/charts",
+    "headings": [
+      "统计分析(h1)",
+      "库存占比分布(h3)",
+      "仓库库存分布(h3)",
+      "出入库趋势(h3)",
+      "部门领用排行(h3)",
+      "物资效期风险(h3)",
+      "应急消耗趋势(h3)",
+      "补货参考(h3)",
+      "出库趋势参考(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "刷新分析",
+      "打开大屏"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/log/operation",
+    "headings": [
+      "操作日志(h1)",
+      "操作日志(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "刷新",
+      "Go to previous page",
+      "Go to next page",
+      "Page"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/log/login",
+    "headings": [
+      "登录日志(h1)",
+      "登录日志(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "刷新",
+      "Go to previous page",
+      "Go to next page",
+      "Page"
+    ],
+    "alerts": [
+      "登录成功",
+      "当前页成功状态记录数",
+      "登录失败",
+      "当前页失败状态记录数",
+      "成功",
+      "失败",
+      "成功",
+      "成功",
+      "成功",
+      "成功"
+    ],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/notification/list",
+    "headings": [
+      "通知中心(h1)",
+      "通知中心(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "全部已读",
+      "刷新",
+      "删除",
+      "Go to previous page",
+      "Go to next page",
+      "Page"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/config/list",
+    "headings": [
+      "系统配置(h1)",
+      "系统配置(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "新增配置",
+      "刷新",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除",
+      "编辑",
+      "删除"
+    ],
+    "alerts": [],
+    "hasTable": true,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  },
+  {
+    "route": "/security/policy",
+    "headings": [
+      "安全策略(h1)",
+      "管理员提示(h3)",
+      "上次手动清理(h3)",
+      "Token 策略概览(h3)"
+    ],
+    "buttons": [
+      "首页",
+      "系统管理",
+      "基础数据",
+      "仓储管理",
+      "业务操作",
+      "安全监控",
+      "系统工具",
+      "(icon)",
+      "指挥大屏",
+      "(icon)",
+      "系",
+      "刷新策略",
+      "一键手动清理"
+    ],
+    "alerts": [],
+    "hasTable": false,
+    "excerpt": "- complementary:\n  - generic: CM\n  - strong: 校园物资智控台\n  - generic: Campus Material Operations\n  - button \"首页\":\n    - generic: 首页\n  - link \"仪 仪表盘\":\n    - /url: /dashboard\n    - generic: 仪\n    - generic: 仪表盘\n  - button \"系统管理\":\n    - generic: 系统管理\n  - link \"用 用户管理\":\n    - /url: /rbac/users\n    - generic: 用\n    - generic: 用户管理\n  - link \"角 角色管理\":\n    - /url: /rbac/roles\n    - generic: 角\n    - generic: 角色管理\n  - link \"部 部门管理\":\n    - /url: /rbac/depts\n    - generic: 部\n    - generic: 部门管理\n  - button \"基础数据\":\n    - generic: 基础数据\n  - link \"校 校区管理\":\n    - /url: /campus/list\n    - generic: 校\n    - generic: 校区管理\n  - link \"物 物资分类\":\n    - /url: /material/category\n    - generic: 物\n    - generic: 物资分类\n  - link \"物 物资信息\":\n    - /url: /material/info\n    - generic: 物\n    - generic: 物资信息\n  - link \"供 供应商管理\":\n    - /url: /supplier/list\n    - generic: 供\n    - generic: 供应商管理\n  - button \"仓储管理\":\n    - generic: 仓储管理\n  "
+  }
+]

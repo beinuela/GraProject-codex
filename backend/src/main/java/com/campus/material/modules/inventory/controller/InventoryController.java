@@ -28,7 +28,7 @@ public class InventoryController {
     }
 
     @GetMapping("/list")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','PURCHASER','DISPATCHER')")
     public ApiResponse<PageResult<Map<String, Object>>> list(@Valid PageQuery pageQuery,
                                                              @RequestParam(required = false) Long materialId,
                                                              @RequestParam(required = false) Long warehouseId) {
@@ -36,26 +36,32 @@ public class InventoryController {
     }
 
     @GetMapping("/batches")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','PURCHASER','DISPATCHER')")
     public ApiResponse<List<InventoryBatch>> batches(@RequestParam(required = false) Long materialId,
                                                      @RequestParam(required = false) Long warehouseId) {
         return ApiResponse.ok(inventoryService.batches(materialId, warehouseId));
     }
 
+    @PostMapping("/batches")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN')")
+    public ApiResponse<InventoryBatch> saveBatch(@RequestBody InventoryBatch batch) {
+        return ApiResponse.ok(inventoryService.saveBatch(batch));
+    }
+
     @GetMapping("/stock-in")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER','PURCHASER')")
     public ApiResponse<PageResult<StockIn>> listStockIn(@Valid PageQuery pageQuery) {
         return ApiResponse.ok(inventoryService.listStockIn(pageQuery));
     }
 
     @GetMapping("/stock-out")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER','USER','DISPATCHER')")
     public ApiResponse<PageResult<StockOut>> listStockOut(@Valid PageQuery pageQuery) {
         return ApiResponse.ok(inventoryService.listStockOut(pageQuery));
     }
 
     @PostMapping("/stock-in")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','PURCHASER')")
     public ApiResponse<Void> stockIn(@Valid @RequestBody StockInRequest request) {
         inventoryService.stockIn(request);
         return ApiResponse.ok(null);

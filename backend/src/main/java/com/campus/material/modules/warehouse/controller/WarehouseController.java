@@ -19,7 +19,7 @@ public class WarehouseController {
     }
 
     @GetMapping("/list")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','PURCHASER','DISPATCHER','DEPT_USER','USER')")
     public ApiResponse<List<Warehouse>> list() {
         return ApiResponse.ok(warehouseService.list());
     }

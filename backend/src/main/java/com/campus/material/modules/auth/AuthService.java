@@ -291,6 +291,7 @@ public class AuthService {
             // 业务操作
             addMenu(all, "apply", "申领审批", "/apply/list", "业务操作");
             addMenu(all, "transfer", "调拨管理", "/transfer/list", "业务操作");
+            addMenu(all, "delivery", "配送派单", "/delivery/list", "业务操作");
             // 安全监控
             addMenu(all, "warning", "预警管理", "/warning/list", "安全监控");
             addMenu(all, "event", "事件管理", "/event/list", "安全监控");
@@ -312,6 +313,7 @@ public class AuthService {
             addMenu(all, "stockin", "入库管理", "/inventory/stock-in", "仓储管理");
             addMenu(all, "stockout", "出库管理", "/inventory/stock-out", "仓储管理");
             addMenu(all, "transfer", "调拨管理", "/transfer/list", "业务操作");
+            addMenu(all, "delivery", "配送派单", "/delivery/list", "业务操作");
             addMenu(all, "warning", "预警管理", "/warning/list", "安全监控");
             addMenu(all, "event", "事件管理", "/event/list", "安全监控");
             addMenu(all, "analytics", "统计分析", "/analytics/charts", "安全监控");
@@ -321,12 +323,43 @@ public class AuthService {
         if ("APPROVER".equals(role)) {
             addMenu(all, "apply", "申领审批", "/apply/list", "业务操作");
             addMenu(all, "transfer", "调拨管理", "/transfer/list", "业务操作");
+            addMenu(all, "delivery", "配送派单", "/delivery/list", "业务操作");
             addMenu(all, "warning", "预警管理", "/warning/list", "安全监控");
+            addMenu(all, "event", "事件管理", "/event/list", "安全监控");
             addMenu(all, "analytics", "统计分析", "/analytics/charts", "安全监控");
+            addMenu(all, "notification", "消息通知", "/notification/list", "系统工具");
+            return all;
+        }
+        if ("PURCHASER".equals(role)) {
+            addMenu(all, "material", "物资信息", "/material/info", "基础数据");
+            addMenu(all, "supplier", "供应商管理", "/supplier/list", "基础数据");
+            addMenu(all, "inventory", "库存查询", "/inventory/list", "仓储管理");
+            addMenu(all, "stockin", "入库管理", "/inventory/stock-in", "仓储管理");
+            addMenu(all, "analytics", "统计分析", "/analytics/charts", "安全监控");
+            addMenu(all, "notification", "消息通知", "/notification/list", "系统工具");
+            return all;
+        }
+        if ("DISPATCHER".equals(role)) {
+            addMenu(all, "inventory", "库存查询", "/inventory/list", "仓储管理");
+            addMenu(all, "apply", "申领审批", "/apply/list", "业务操作");
+            addMenu(all, "delivery", "配送派单", "/delivery/list", "业务操作");
+            addMenu(all, "transfer", "调拨管理", "/transfer/list", "业务操作");
+            addMenu(all, "analytics", "统计分析", "/analytics/charts", "安全监控");
+            addMenu(all, "notification", "消息通知", "/notification/list", "系统工具");
+            return all;
+        }
+        if ("DEPT_USER".equals(role)) {
+            addMenu(all, "apply", "申领审批", "/apply/list", "业务操作");
+            addMenu(all, "delivery", "配送派单", "/delivery/list", "业务操作");
+            addMenu(all, "analytics", "统计分析", "/analytics/charts", "安全监控");
+            addMenu(all, "event", "事件管理", "/event/list", "安全监控");
+            addMenu(all, "notification", "消息通知", "/notification/list", "系统工具");
             return all;
         }
         addMenu(all, "apply", "申领审批", "/apply/list", "业务操作");
+        addMenu(all, "delivery", "配送派单", "/delivery/list", "业务操作");
         addMenu(all, "analytics", "统计分析", "/analytics/charts", "安全监控");
+        addMenu(all, "notification", "消息通知", "/notification/list", "系统工具");
         return all;
     }
 

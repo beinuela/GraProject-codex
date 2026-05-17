@@ -105,6 +105,33 @@ public class InventoryService {
                 .orderByAsc(InventoryBatch::getId));
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public InventoryBatch saveBatch(InventoryBatch batch) {
+        validateBatch(batch);
+        normalizeBatch(batch);
+
+        if (batch.getId() == null) {
+            batchMapper.insert(batch);
+            updateInventoryQuantity(batch.getMaterialId(), batch.getWarehouseId(), safeQty(batch.getRemainQty()));
+            operationLogService.log(AuthUtil.currentUserId(), "INVENTORY", "CREATE_BATCH", "批次:" + batch.getBatchNo());
+            return batchMapper.selectById(batch.getId());
+        }
+
+        InventoryBatch old = batchMapper.selectById(batch.getId());
+        if (old == null) {
+            throw new BizException("批次记录不存在");
+        }
+        ensureUpdated(batchMapper.updateById(batch), "批次信息更新失败，请重试");
+        if (Objects.equals(old.getMaterialId(), batch.getMaterialId()) && Objects.equals(old.getWarehouseId(), batch.getWarehouseId())) {
+            updateInventoryQuantity(batch.getMaterialId(), batch.getWarehouseId(), safeQty(batch.getRemainQty()) - safeQty(old.getRemainQty()));
+        } else {
+            updateInventoryQuantity(old.getMaterialId(), old.getWarehouseId(), -safeQty(old.getRemainQty()));
+            updateInventoryQuantity(batch.getMaterialId(), batch.getWarehouseId(), safeQty(batch.getRemainQty()));
+        }
+        operationLogService.log(AuthUtil.currentUserId(), "INVENTORY", "UPDATE_BATCH", "批次:" + batch.getBatchNo());
+        return batchMapper.selectById(batch.getId());
+    }
+
     public PageResult<StockIn> listStockIn(PageQuery pageQuery) {
         Page<StockIn> page = stockInMapper.selectPage(
                 new Page<>(pageQuery.getPage(), pageQuery.getSize()),
@@ -201,7 +228,9 @@ public class InventoryService {
                     .eq(InventoryBatch::getMaterialId, item.getMaterialId())
                     .eq(InventoryBatch::getWarehouseId, request.getWarehouseId())
                     .gt(InventoryBatch::getRemainQty, 0)
-                    .ge(InventoryBatch::getExpireDate, LocalDate.now())
+                    .and(wrapper -> wrapper.isNull(InventoryBatch::getExpireDate)
+                            .or()
+                            .ge(InventoryBatch::getExpireDate, LocalDate.now()))
                     .orderByAsc(InventoryBatch::getExpireDate)
                     .orderByAsc(InventoryBatch::getId));
 
@@ -265,7 +294,9 @@ public class InventoryService {
                 .eq(InventoryBatch::getMaterialId, materialId)
                 .eq(InventoryBatch::getWarehouseId, warehouseId)
                 .gt(InventoryBatch::getRemainQty, 0)
-                .ge(InventoryBatch::getExpireDate, LocalDate.now())
+                .and(wrapper -> wrapper.isNull(InventoryBatch::getExpireDate)
+                        .or()
+                        .ge(InventoryBatch::getExpireDate, LocalDate.now()))
                 .orderByAsc(InventoryBatch::getExpireDate)
                 .orderByAsc(InventoryBatch::getId));
     }
@@ -464,6 +495,45 @@ public class InventoryService {
 
     private boolean isApplyOutbound(StockOutRequest request) {
         return request.getApplyOrderId() != null;
+    }
+
+    private void validateBatch(InventoryBatch batch) {
+        if (batch.getMaterialId() == null) {
+            throw new BizException(400, "物资不能为空");
+        }
+        if (batch.getWarehouseId() == null) {
+            throw new BizException(400, "仓库不能为空");
+        }
+        if (batch.getBatchNo() == null || batch.getBatchNo().isBlank()) {
+            throw new BizException(400, "批次号不能为空");
+        }
+    }
+
+    private void normalizeBatch(InventoryBatch batch) {
+        batch.setBatchNo(batch.getBatchNo().trim());
+        int inQty = safeQty(batch.getInQty());
+        int remainQty = batch.getRemainQty() == null ? inQty : safeQty(batch.getRemainQty());
+        if (inQty < 0 || remainQty < 0) {
+            throw new BizException(400, "批次数量不能小于0");
+        }
+        if (remainQty > inQty) {
+            throw new BizException(400, "剩余数量不能大于入库数量");
+        }
+        batch.setInQty(inQty);
+        batch.setRemainQty(remainQty);
+    }
+
+    private void updateInventoryQuantity(Long materialId, Long warehouseId, int delta) {
+        if (delta == 0) {
+            return;
+        }
+        Inventory inventory = getOrInitInventory(materialId, warehouseId);
+        int nextQty = safeQty(inventory.getCurrentQty()) + delta;
+        if (nextQty < 0 || nextQty < safeQty(inventory.getLockedQty())) {
+            throw new BizException("库存汇总数量不足，无法同步批次变更");
+        }
+        inventory.setCurrentQty(nextQty);
+        ensureUpdated(inventoryMapper.updateById(inventory), "库存汇总更新失败，请重试");
     }
 
     private int safeQty(Integer quantity) {

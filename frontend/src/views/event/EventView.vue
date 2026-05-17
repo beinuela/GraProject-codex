@@ -29,8 +29,8 @@
         <el-table-column label="操作" width="190" fixed="right">
           <template #default="{ row }">
             <div class="inline-actions">
-              <el-button v-if="row.status === 'OPEN'" size="small" type="primary" @click="handleEvent(row.id)">处理</el-button>
-              <el-button v-if="row.status === 'IN_PROGRESS'" size="small" type="success" @click="closeEvent(row.id)">关闭</el-button>
+              <el-button v-if="canHandleEvent && row.status === 'OPEN'" size="small" type="primary" @click="handleEvent(row.id)">处理</el-button>
+              <el-button v-if="canCloseEvent && row.status === 'IN_PROGRESS'" size="small" type="success" @click="closeEvent(row.id)">关闭</el-button>
             </div>
           </template>
         </el-table-column>
@@ -88,11 +88,17 @@ import FilterActionBar from '../../components/ui/FilterActionBar.vue'
 import PageScaffold from '../../components/ui/PageScaffold.vue'
 import StatusBadge from '../../components/ui/StatusBadge.vue'
 import TableShell from '../../components/ui/TableShell.vue'
+import { hasAnyRole, roleGroups } from '../../roles'
+import { useAuthStore } from '../../store/auth'
 
+const authStore = useAuthStore()
 const list = ref([])
 const filterStatus = ref('')
 const createVisible = ref(false)
 const form = reactive({ eventTitle: '', eventType: 'OTHER', eventLevel: '4', description: '', location: '' })
+const currentRoleCode = computed(() => authStore.user?.roleCode || localStorage.getItem('roleCode') || '')
+const canHandleEvent = computed(() => hasAnyRole(currentRoleCode.value, roleGroups.warehouse))
+const canCloseEvent = computed(() => hasAnyRole(currentRoleCode.value, ['ADMIN', 'WAREHOUSE_ADMIN', 'APPROVER']))
 
 const currentLocalDateTime = () => new Date().toISOString().slice(0, 19)
 

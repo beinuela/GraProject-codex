@@ -8,7 +8,8 @@
       </template>
       <template #actions>
         <el-button @click="load">刷新</el-button>
-        <el-button type="primary" @click="loadBatches">查看批次</el-button>
+        <el-button @click="loadBatches">查看批次</el-button>
+        <el-button type="primary" @click="openBatchCreate">新增批次</el-button>
       </template>
     </FilterActionBar>
 
@@ -35,14 +36,52 @@
     />
 
     <DialogShell v-model="batchVisible" title="批次明细" eyebrow="Batch Detail" subtitle="查看同一筛选条件下的库存批次与效期信息。" width="860">
+      <el-form :model="batchForm" label-position="top" class="form-grid form-grid--3">
+        <el-form-item label="物资">
+          <el-select v-model="batchForm.materialId" filterable placeholder="选择物资">
+            <el-option v-for="material in materials" :key="material.id" :label="material.materialName" :value="material.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="仓库">
+          <el-select v-model="batchForm.warehouseId" filterable placeholder="选择仓库">
+            <el-option v-for="warehouse in warehouses" :key="warehouse.id" :label="warehouse.warehouseName" :value="warehouse.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="批次号">
+          <el-input v-model="batchForm.batchNo" />
+        </el-form-item>
+        <el-form-item label="入库数量">
+          <el-input-number v-model="batchForm.inQty" :min="0" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="剩余数量">
+          <el-input-number v-model="batchForm.remainQty" :min="0" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="生产日期">
+          <el-date-picker v-model="batchForm.productionDate" value-format="YYYY-MM-DD" type="date" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="过期日期">
+          <el-date-picker v-model="batchForm.expireDate" value-format="YYYY-MM-DD" type="date" style="width: 100%" />
+        </el-form-item>
+        <el-form-item class="form-actions">
+          <el-button @click="resetBatchForm()">清空</el-button>
+          <el-button type="primary" @click="saveBatch">{{ batchForm.id ? '保存批次' : '新增批次' }}</el-button>
+        </el-form-item>
+      </el-form>
+      <el-divider />
       <el-table :data="batches" class="list-table">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="batchNo" label="批次号" min-width="160" />
         <el-table-column prop="materialId" label="物资ID" width="100" />
+        <el-table-column prop="warehouseId" label="仓库ID" width="100" />
         <el-table-column prop="inQty" label="入库数量" width="110" />
         <el-table-column prop="remainQty" label="剩余数量" width="110" />
         <el-table-column prop="productionDate" label="生产日期" width="140" />
         <el-table-column prop="expireDate" label="过期日期" width="140" />
+        <el-table-column label="操作" width="100" fixed="right">
+          <template #default="{ row }">
+            <el-button size="small" @click="openBatchEdit(row)">编辑</el-button>
+          </template>
+        </el-table-column>
         <template #empty>
           <EmptyState glyph="BT" title="暂无批次明细" description="当前仓库下没有可展示的批次信息。" />
         </template>
@@ -56,8 +95,9 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
+import { ElMessage } from 'element-plus'
 import { Box, Coin, Lock, Warning } from '@element-plus/icons-vue'
-import { apiGet } from '../../api'
+import { apiGet, apiPost } from '../../api'
 import DialogShell from '../../components/ui/DialogShell.vue'
 import EmptyState from '../../components/ui/EmptyState.vue'
 import FilterActionBar from '../../components/ui/FilterActionBar.vue'
@@ -68,9 +108,20 @@ import TableShell from '../../components/ui/TableShell.vue'
 const list = ref([])
 const batches = ref([])
 const warehouses = ref([])
+const materials = ref([])
 const warehouseFilter = ref(null)
 const batchVisible = ref(false)
 const pagination = reactive({ page: 1, size: 10, total: 0 })
+const batchForm = reactive({
+  id: null,
+  materialId: null,
+  warehouseId: null,
+  batchNo: '',
+  inQty: 0,
+  remainQty: 0,
+  productionDate: '',
+  expireDate: ''
+})
 
 const metrics = computed(() => [
   { label: '库存记录', value: pagination.total, helper: '当前筛选条件下总量', icon: Box, tone: 'accent' },
@@ -83,6 +134,10 @@ const loadWarehouses = async () => {
   warehouses.value = await apiGet('/api/warehouse/list')
 }
 
+const loadMaterials = async () => {
+  materials.value = await apiGet('/api/material/info')
+}
+
 const load = async () => {
   const result = await apiGet('/api/inventory/list', {
     page: pagination.page,
@@ -93,11 +148,43 @@ const load = async () => {
   pagination.total = Number(result.total || 0)
 }
 
-const loadBatches = async () => {
+const loadBatches = async (showDialog = true) => {
   batches.value = await apiGet('/api/inventory/batches', {
     warehouseId: warehouseFilter.value || undefined
   })
-  batchVisible.value = true
+  if (showDialog) {
+    batchVisible.value = true
+  }
+}
+
+const resetBatchForm = (row = {}) => {
+  Object.assign(batchForm, {
+    id: row.id || null,
+    materialId: row.materialId || null,
+    warehouseId: row.warehouseId || warehouseFilter.value || null,
+    batchNo: row.batchNo || '',
+    inQty: Number(row.inQty || 0),
+    remainQty: Number(row.remainQty || 0),
+    productionDate: row.productionDate || '',
+    expireDate: row.expireDate || ''
+  })
+}
+
+const openBatchCreate = async () => {
+  resetBatchForm()
+  await loadBatches()
+}
+
+const openBatchEdit = (row) => {
+  resetBatchForm(row)
+}
+
+const saveBatch = async () => {
+  await apiPost('/api/inventory/batches', batchForm)
+  ElMessage.success(batchForm.id ? '批次已更新' : '批次已新增')
+  resetBatchForm()
+  await loadBatches(false)
+  await load()
 }
 
 const handlePageChange = async (page) => {
@@ -118,6 +205,7 @@ const handleWarehouseFilterChange = async () => {
 
 onMounted(async () => {
   await loadWarehouses()
+  await loadMaterials()
   await load()
 })
 </script>

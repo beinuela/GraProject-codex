@@ -67,6 +67,19 @@ public class RbacService {
         operationLogService.log(AuthUtil.currentUserId(), "RBAC", "DELETE_USER", String.valueOf(id));
     }
 
+    public void resetPassword(Long id, String password) {
+        if (password == null || password.isBlank()) {
+            throw new BizException(400, "新密码不能为空");
+        }
+        SysUser user = userMapper.selectById(id);
+        if (user == null) {
+            throw new BizException(404, "用户不存在");
+        }
+        user.setPassword(passwordEncoder.encode(password));
+        userMapper.updateById(user);
+        operationLogService.log(AuthUtil.currentUserId(), "RBAC", "RESET_PASSWORD", user.getUsername());
+    }
+
     public List<SysRole> listRoles() {
         return roleMapper.selectList(new LambdaQueryWrapper<SysRole>().orderByAsc(SysRole::getId));
     }

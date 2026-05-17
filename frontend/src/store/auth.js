@@ -39,6 +39,9 @@ export const useAuthStore = defineStore('auth', {
       this.menus = []
       localStorage.removeItem('token')
       localStorage.removeItem('refreshToken')
+      localStorage.removeItem('roleCode')
+      localStorage.removeItem('username')
+      localStorage.removeItem('realName')
     },
     async loadProfile() {
       if (!this.token) return

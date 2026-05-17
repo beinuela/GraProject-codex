@@ -242,8 +242,9 @@ const handleNavClick = () => {
 
 const handleCommand = (command) => {
   if (command === 'logout') {
-    authStore.logout()
-    router.push('/login')
+    return authStore.logout().finally(() => {
+      router.replace('/login')
+    })
   }
 }
 
