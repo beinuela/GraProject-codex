@@ -21,43 +21,43 @@ public class AnalyticsController {
     }
 
     @GetMapping("/overview")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER','USER','PURCHASER','DISPATCHER')")
     public ApiResponse<Map<String, Object>> overview() {
         return ApiResponse.ok(analyticsService.overview());
     }
 
     @GetMapping("/inventory-ratio")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER','USER','PURCHASER','DISPATCHER')")
     public ApiResponse<List<Map<String, Object>>> inventoryRatio() {
         return ApiResponse.ok(analyticsService.inventoryRatio());
     }
 
     @GetMapping("/inbound-outbound-trend")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER','USER','PURCHASER','DISPATCHER')")
     public ApiResponse<List<Map<String, Object>>> inboundOutboundTrend() {
         return ApiResponse.ok(analyticsService.inboundOutboundTrend());
     }
 
     @GetMapping("/department-ranking")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER','USER','PURCHASER','DISPATCHER')")
     public ApiResponse<List<Map<String, Object>>> departmentRanking() {
         return ApiResponse.ok(analyticsService.departmentRanking());
     }
 
     @GetMapping("/expiry-stats")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER','USER','PURCHASER','DISPATCHER')")
     public ApiResponse<List<Map<String, Object>>> expiryStats() {
         return ApiResponse.ok(analyticsService.expiryStats());
     }
 
     @GetMapping("/warehouse-distribution")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER','USER','PURCHASER','DISPATCHER')")
     public ApiResponse<List<Map<String, Object>>> warehouseDistribution() {
         return ApiResponse.ok(analyticsService.warehouseDistribution());
     }
 
     @GetMapping("/emergency-consumption")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER','USER','PURCHASER','DISPATCHER')")
     public ApiResponse<List<Map<String, Object>>> emergencyConsumption() {
         return ApiResponse.ok(analyticsService.emergencyConsumption());
     }

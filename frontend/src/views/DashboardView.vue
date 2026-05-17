@@ -14,8 +14,12 @@
       </DataPanel>
     </div>
 
-    <div class="surface-grid surface-grid--2">
-      <TableShell title="最近操作日志" description="最近 10 条关键操作记录。" :badge="`${recentLogs.length} 条`">
+    <div
+      v-if="canViewLogs || canViewWarnings"
+      class="surface-grid"
+      :style="{ gridTemplateColumns: canViewLogs && canViewWarnings ? 'repeat(2, minmax(0, 1fr))' : 'minmax(0, 1fr)' }"
+    >
+      <TableShell v-if="canViewLogs" title="最近操作日志" description="最近 10 条关键操作记录。" :badge="`${recentLogs.length} 条`">
         <el-table :data="recentLogs" class="list-table">
           <el-table-column prop="module" label="模块" width="120" />
           <el-table-column prop="action" label="操作" width="140" />
@@ -27,7 +31,7 @@
         </el-table>
       </TableShell>
 
-      <TableShell title="未处理预警" description="需要优先关注的库存和效期风险。" :badge="`${unhandledWarnings.length} 条`">
+      <TableShell v-if="canViewWarnings" title="未处理预警" description="需要优先关注的库存和效期风险。" :badge="`${unhandledWarnings.length} 条`">
         <el-table :data="unhandledWarnings" class="list-table">
           <el-table-column prop="warningType" label="类型" width="140">
             <template #default="{ row }">
@@ -56,8 +60,11 @@ import EmptyState from '../components/ui/EmptyState.vue'
 import PageScaffold from '../components/ui/PageScaffold.vue'
 import StatusBadge from '../components/ui/StatusBadge.vue'
 import TableShell from '../components/ui/TableShell.vue'
+import { hasAnyRole, roleGroups } from '../roles'
+import { useAuthStore } from '../store/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 const chartColors = ['#2670e9', '#35d4c6', '#7856ff', '#ff9f43', '#fa5252', '#12b886']
 
@@ -71,13 +78,24 @@ const recentLogs = ref([])
 const unhandledWarnings = ref([])
 const inventoryRatio = ref([])
 const trendData = ref([])
+const currentRoleCode = computed(() => authStore.user?.roleCode || localStorage.getItem('roleCode') || '')
+const canViewInventory = computed(() => hasAnyRole(currentRoleCode.value, roleGroups.stockViewer))
+const canViewWarnings = computed(() => hasAnyRole(currentRoleCode.value, roleGroups.warningViewer))
+const canViewLogs = computed(() => hasAnyRole(currentRoleCode.value, roleGroups.logViewer))
 
-const dashboardMetrics = computed(() => [
-  { label: '物资种类', value: summary.value.materials, helper: '已建档物资类型', icon: Box, tone: 'accent' },
-  { label: '仓库数量', value: summary.value.warehouses, helper: '参与调度的仓储节点', icon: OfficeBuilding, tone: 'teal' },
-  { label: '库存记录', value: summary.value.inventoryRecords, helper: '当前库存台账条数', icon: DataAnalysis, tone: 'neutral' },
-  { label: '未处理预警', value: summary.value.warnings, helper: '待跟进风险数量', icon: Warning, tone: summary.value.warnings ? 'danger' : 'warning' }
-])
+const dashboardMetrics = computed(() => {
+  const metrics = [
+    { label: '物资种类', value: summary.value.materials, helper: '已建档物资类型', icon: Box, tone: 'accent' },
+    { label: '仓库数量', value: summary.value.warehouses, helper: '参与调度的仓储节点', icon: OfficeBuilding, tone: 'teal' }
+  ]
+  if (canViewInventory.value) {
+    metrics.push({ label: '库存记录', value: summary.value.inventoryRecords, helper: '当前库存台账条数', icon: DataAnalysis, tone: 'neutral' })
+  }
+  if (canViewWarnings.value) {
+    metrics.push({ label: '未处理预警', value: summary.value.warnings, helper: '待跟进风险数量', icon: Warning, tone: summary.value.warnings ? 'danger' : 'warning' })
+  }
+  return metrics
+})
 
 const typeLabel = (type) => ({
   STOCK_LOW: '库存不足',
@@ -159,29 +177,48 @@ const lineOptions = computed(() => {
 useChart(lineChartRef, lineOptions)
 
 const load = async () => {
-  try {
-    const [inventory, warnings, materials, warehouses] = await Promise.all([
-      apiGet('/api/inventory/list', { page: 1, size: 1 }),
-      apiGet('/api/warning/list', { page: 1, size: 10, status: 'UNHANDLED' }),
-      apiGet('/api/material/info'),
-      apiGet('/api/warehouse/list')
-    ])
-    summary.value = {
-      materials: materials.length,
-      warehouses: warehouses.length,
-      inventoryRecords: Number(inventory.total || 0),
-      warnings: Number(warnings.total || 0)
+  const [materialsResult, warehousesResult] = await Promise.allSettled([
+    apiGet('/api/material/info'),
+    apiGet('/api/warehouse/list')
+  ])
+
+  summary.value = {
+    materials: materialsResult.status === 'fulfilled' ? materialsResult.value.length : 0,
+    warehouses: warehousesResult.status === 'fulfilled' ? warehousesResult.value.length : 0,
+    inventoryRecords: 0,
+    warnings: 0
+  }
+
+  if (canViewInventory.value) {
+    try {
+      const inventory = await apiGet('/api/inventory/list', { page: 1, size: 1 })
+      summary.value.inventoryRecords = Number(inventory.total || 0)
+    } catch {
+      summary.value.inventoryRecords = 0
     }
-    unhandledWarnings.value = warnings.records || []
-  } catch {
-    summary.value = { materials: 0, warehouses: 0, inventoryRecords: 0, warnings: 0 }
+  }
+
+  if (canViewWarnings.value) {
+    try {
+      const warnings = await apiGet('/api/warning/list', { page: 1, size: 10, status: 'UNHANDLED' })
+      summary.value.warnings = Number(warnings.total || 0)
+      unhandledWarnings.value = warnings.records || []
+    } catch {
+      summary.value.warnings = 0
+      unhandledWarnings.value = []
+    }
+  } else {
     unhandledWarnings.value = []
   }
 
-  try {
-    const logs = await apiGet('/api/log/list', { page: 1, size: 10 })
-    recentLogs.value = logs.records || []
-  } catch {
+  if (canViewLogs.value) {
+    try {
+      const logs = await apiGet('/api/log/list', { page: 1, size: 10 })
+      recentLogs.value = logs.records || []
+    } catch {
+      recentLogs.value = []
+    }
+  } else {
     recentLogs.value = []
   }
 

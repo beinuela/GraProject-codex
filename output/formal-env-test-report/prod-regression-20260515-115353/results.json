@@ -1,0 +1,136 @@
+{
+  "timestamp": "20260515-115353",
+  "frontendUrl": "http://127.0.0.1:5173",
+  "backendUrl": "http://127.0.0.1:8080",
+  "healthUrl": "http://127.0.0.1:18080/actuator/health",
+  "browserInfo": {
+    "engine": "chrome",
+    "headed": true
+  },
+  "results": [
+    {
+      "name": "加载真实环境基础数据",
+      "status": "passed",
+      "durationMs": 510,
+      "detail": ""
+    },
+    {
+      "name": "管理员登录与全局路由冒烟",
+      "status": "passed",
+      "durationMs": 18187,
+      "detail": ""
+    },
+    {
+      "name": "普通申领角色越权跳转校验",
+      "status": "passed",
+      "durationMs": 1353,
+      "detail": ""
+    },
+    {
+      "name": "采购基础数据与入库校验",
+      "status": "failed",
+      "durationMs": 22760,
+      "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByText('PROD-20260515-115353-分类')\nExpected: visible\nTimeout: 20000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"to.be.visible\" with timeout 20000ms\n  - waiting for getByText('PROD-20260515-115353-分类')\n\n    at Proxy.<anonymous> (D:\\idea+\\project\\GraProject-codex\\frontend\\node_modules\\playwright\\lib\\matchers\\expect.js:213:24)\n    at runPurchaserCrudAndStockInCheck (file:///D:/idea+/project/GraProject-codex/frontend/scripts/run-prod-regression.mjs:447:61)\n    at async runCase (file:///D:/idea+/project/GraProject-codex/frontend/scripts/run-prod-regression.mjs:170:20)\n    at async file:///D:/idea+/project/GraProject-codex/frontend/scripts/run-prod-regression.mjs:829:3"
+    },
+    {
+      "name": "申领审批与出库签收闭环",
+      "status": "failed",
+      "durationMs": 22361,
+      "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: locator('.el-table__row').filter({ hasText: 'PROD-20260515-115353-apply' }).first().getByText('SUBMITTED')\nExpected: visible\nTimeout: 20000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"to.be.visible\" with timeout 20000ms\n  - waiting for locator('.el-table__row').filter({ hasText: 'PROD-20260515-115353-apply' }).first().getByText('SUBMITTED')\n\n    at Proxy.<anonymous> (D:\\idea+\\project\\GraProject-codex\\frontend\\node_modules\\playwright\\lib\\matchers\\expect.js:213:24)\n    at runApplyApproveStockOutReceiveFlow (file:///D:/idea+/project/GraProject-codex/frontend/scripts/run-prod-regression.mjs:478:87)\n    at async runCase (file:///D:/idea+/project/GraProject-codex/frontend/scripts/run-prod-regression.mjs:170:20)\n    at async file:///D:/idea+/project/GraProject-codex/frontend/scripts/run-prod-regression.mjs:830:3"
+    },
+    {
+      "name": "调拨推荐与执行签收闭环",
+      "status": "passed",
+      "durationMs": 9805,
+      "detail": ""
+    },
+    {
+      "name": "配送派单与签收闭环",
+      "status": "skipped",
+      "reason": "缺少申领单或出库单，跳过配送流程"
+    },
+    {
+      "name": "预警扫描与 AI 分析",
+      "status": "passed",
+      "durationMs": 8764,
+      "detail": ""
+    },
+    {
+      "name": "事件闭环与统计分析校验",
+      "status": "passed",
+      "durationMs": 7749,
+      "detail": ""
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "login-dashboard",
+      "note": "管理员登录后首页",
+      "path": "D:\\idea+\\project\\GraProject-codex\\output\\formal-env-test-report\\prod-regression-20260515-115353\\screenshots\\01-login-dashboard.png"
+    },
+    {
+      "name": "inventory-overview",
+      "note": "库存查询页面",
+      "path": "D:\\idea+\\project\\GraProject-codex\\output\\formal-env-test-report\\prod-regression-20260515-115353\\screenshots\\02-inventory-overview.png"
+    },
+    {
+      "name": "bigscreen",
+      "note": "指挥大屏",
+      "path": "D:\\idea+\\project\\GraProject-codex\\output\\formal-env-test-report\\prod-regression-20260515-115353\\screenshots\\03-bigscreen.png"
+    },
+    {
+      "name": "security-policy",
+      "note": "安全策略页面",
+      "path": "D:\\idea+\\project\\GraProject-codex\\output\\formal-env-test-report\\prod-regression-20260515-115353\\screenshots\\04-security-policy.png"
+    },
+    {
+      "name": "transfer-recommendation",
+      "note": "调拨智能推荐结果",
+      "path": "D:\\idea+\\project\\GraProject-codex\\output\\formal-env-test-report\\prod-regression-20260515-115353\\screenshots\\05-transfer-recommendation.png"
+    },
+    {
+      "name": "transfer-received",
+      "note": "调拨执行并签收完成",
+      "path": "D:\\idea+\\project\\GraProject-codex\\output\\formal-env-test-report\\prod-regression-20260515-115353\\screenshots\\06-transfer-received.png"
+    },
+    {
+      "name": "warning-ai-analysis",
+      "note": "DeepSeek 预警分析弹窗",
+      "path": "D:\\idea+\\project\\GraProject-codex\\output\\formal-env-test-report\\prod-regression-20260515-115353\\screenshots\\07-warning-ai-analysis.png"
+    },
+    {
+      "name": "event-closed",
+      "note": "事件管理闭环记录",
+      "path": "D:\\idea+\\project\\GraProject-codex\\output\\formal-env-test-report\\prod-regression-20260515-115353\\screenshots\\08-event-closed.png"
+    },
+    {
+      "name": "analytics-dashboard",
+      "note": "统计分析与智能建议",
+      "path": "D:\\idea+\\project\\GraProject-codex\\output\\formal-env-test-report\\prod-regression-20260515-115353\\screenshots\\09-analytics-dashboard.png"
+    }
+  ],
+  "createdRecords": {
+    "categoryName": "PROD-20260515-115353-分类",
+    "supplierName": "PROD-20260515-115353-供应商",
+    "stockInRemark": "",
+    "applyId": 4,
+    "applyReason": "PROD-20260515-115353-apply",
+    "stockOutId": null,
+    "stockOutRemark": "",
+    "transferId": 3,
+    "transferReason": "PROD-20260515-115353-transfer",
+    "deliveryId": null,
+    "deliveryReceiver": "",
+    "eventId": 4,
+    "eventTitle": "PROD-20260515-115353-event",
+    "aiWarningId": 7,
+    "aiSource": "LLM",
+    "aiRiskLevel": "高风险"
+  },
+  "dbVerification": {
+    "status": "passed",
+    "taskCount": 1,
+    "logCount": 1,
+    "latestSource": "LLM"
+  }
+}

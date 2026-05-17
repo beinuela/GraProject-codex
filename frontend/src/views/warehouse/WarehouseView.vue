@@ -16,9 +16,15 @@
         <el-table-column prop="warehouseCode" label="仓库编码" min-width="140" />
         <el-table-column prop="warehouseName" label="仓库名称" min-width="160" />
         <el-table-column prop="campusId" label="校区ID" width="100" />
+        <el-table-column prop="campus" label="校区名称" min-width="140" />
         <el-table-column prop="address" label="地址" min-width="220" show-overflow-tooltip />
         <el-table-column prop="manager" label="负责人" width="140" />
         <el-table-column prop="contactPhone" label="联系电话" width="160" />
+        <el-table-column prop="status" label="状态" width="110">
+          <template #default="{ row }">
+            <StatusBadge :label="row.status === 'DISABLED' ? '停用' : '正常'" :tone="row.status === 'DISABLED' ? 'danger' : 'success'" />
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <div class="inline-actions">
@@ -48,8 +54,17 @@
         <el-form-item label="所属校区ID">
           <el-input-number v-model="form.campusId" :min="1" />
         </el-form-item>
+        <el-form-item label="校区名称">
+          <el-input v-model="form.campus" />
+        </el-form-item>
         <el-form-item label="负责人">
           <el-input v-model="form.manager" />
+        </el-form-item>
+        <el-form-item label="仓库状态">
+          <el-select v-model="form.status">
+            <el-option label="正常" value="NORMAL" />
+            <el-option label="停用" value="DISABLED" />
+          </el-select>
         </el-form-item>
         <el-form-item label="地址" style="grid-column: 1 / -1;">
           <el-input v-model="form.address" />
@@ -77,11 +92,12 @@ import DialogShell from '../../components/ui/DialogShell.vue'
 import EmptyState from '../../components/ui/EmptyState.vue'
 import FilterActionBar from '../../components/ui/FilterActionBar.vue'
 import PageScaffold from '../../components/ui/PageScaffold.vue'
+import StatusBadge from '../../components/ui/StatusBadge.vue'
 import TableShell from '../../components/ui/TableShell.vue'
 
 const list = ref([])
 const visible = ref(false)
-const form = reactive({ id: null, warehouseCode: '', warehouseName: '', campusId: null, address: '', manager: '', contactPhone: '', remark: '' })
+const form = reactive({ id: null, warehouseCode: '', warehouseName: '', campusId: null, campus: '', address: '', manager: '', contactPhone: '', status: 'NORMAL', remark: '' })
 
 const metrics = computed(() => [
   { label: '仓库总数', value: list.value.length, helper: '当前已登记仓库', icon: OfficeBuilding, tone: 'accent' },
@@ -95,7 +111,7 @@ const load = async () => {
 }
 
 const openCreate = () => {
-  Object.assign(form, { id: null, warehouseCode: '', warehouseName: '', campusId: null, address: '', manager: '', contactPhone: '', remark: '' })
+  Object.assign(form, { id: null, warehouseCode: '', warehouseName: '', campusId: null, campus: '', address: '', manager: '', contactPhone: '', status: 'NORMAL', remark: '' })
   visible.value = true
 }
 

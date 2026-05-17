@@ -20,7 +20,7 @@ public class MaterialController {
     }
 
     @GetMapping("/category")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','PURCHASER')")
     public ApiResponse<List<MaterialCategory>> categoryList() {
         return ApiResponse.ok(materialService.listCategory());
     }
@@ -39,13 +39,13 @@ public class MaterialController {
     }
 
     @GetMapping("/info")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER','USER','PURCHASER','DISPATCHER')")
     public ApiResponse<List<MaterialInfo>> materialList(@RequestParam(required = false) String keyword) {
         return ApiResponse.ok(materialService.listMaterial(keyword));
     }
 
     @PostMapping("/info")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','PURCHASER')")
     public ApiResponse<MaterialInfo> saveMaterial(@RequestBody MaterialInfo materialInfo) {
         return ApiResponse.ok(materialService.saveMaterial(materialInfo));
     }

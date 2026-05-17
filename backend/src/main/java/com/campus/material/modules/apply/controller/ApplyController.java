@@ -27,25 +27,25 @@ public class ApplyController {
     }
 
     @GetMapping("/list")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER','USER','DISPATCHER')")
     public ApiResponse<PageResult<ApplyOrder>> list(@Valid PageQuery pageQuery) {
         return ApiResponse.ok(applyService.list(pageQuery));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER','USER','DISPATCHER')")
     public ApiResponse<Map<String, Object>> detail(@PathVariable Long id) {
         return ApiResponse.ok(applyService.detail(id));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','DEPT_USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','DEPT_USER','USER')")
     public ApiResponse<Map<String, Object>> create(@Valid @RequestBody ApplyCreateRequest request) {
         return ApiResponse.ok(applyService.create(request));
     }
 
     @PostMapping("/{id}/submit")
-    @PreAuthorize("hasAnyRole('ADMIN','DEPT_USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','DEPT_USER','USER')")
     public ApiResponse<Void> submit(@PathVariable Long id) {
         applyService.submit(id);
         return ApiResponse.ok(null);
@@ -70,14 +70,14 @@ public class ApplyController {
     }
 
     @PostMapping("/{id}/receive")
-    @PreAuthorize("hasAnyRole('ADMIN','DEPT_USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','DEPT_USER','USER')")
     public ApiResponse<Void> receive(@PathVariable Long id) {
         applyService.receive(id);
         return ApiResponse.ok(null);
     }
 
     @GetMapping("/{id}/timeline")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DEPT_USER','USER','DISPATCHER')")
     public ApiResponse<List<com.campus.material.modules.log.entity.OperationLog>> timeline(@PathVariable Long id) {
         return ApiResponse.ok(operationLogService.getTimeline("APPLY", id));
     }

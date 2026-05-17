@@ -55,5 +55,11 @@ public class WarehouseService {
             throw new BizException(409, "仓库名称已存在，请勿重复添加");
         }
         warehouse.setWarehouseName(warehouseName);
+        if (warehouse.getWarehouseCode() != null) {
+            warehouse.setWarehouseCode(warehouse.getWarehouseCode().trim());
+        }
+        if (warehouse.getStatus() == null || warehouse.getStatus().isBlank()) {
+            warehouse.setStatus("NORMAL");
+        }
     }
 }

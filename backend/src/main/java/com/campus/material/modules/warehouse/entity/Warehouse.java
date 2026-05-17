@@ -9,8 +9,13 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @TableName("warehouse")
 public class Warehouse extends BaseEntity {
+    private String warehouseCode;
     private String warehouseName;
+    private Long campusId;
     private String campus;
     private String address;
     private String manager;
+    private String contactPhone;
+    private String status;
+    private String remark;
 }

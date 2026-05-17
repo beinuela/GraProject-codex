@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/rbac")
@@ -39,8 +40,15 @@ public class RbacController {
         return ApiResponse.ok(null);
     }
 
+    @PostMapping("/users/{id}/reset-password")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Void> resetPassword(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        rbacService.resetPassword(id, request == null ? null : request.get("password"));
+        return ApiResponse.ok(null);
+    }
+
     @GetMapping("/roles")
-    @PreAuthorize("hasAnyRole('ADMIN','APPROVER')")
+    @PreAuthorize("hasAnyRole('ADMIN','APPROVER','WAREHOUSE_ADMIN')")
     public ApiResponse<List<SysRole>> roles() {
         return ApiResponse.ok(rbacService.listRoles());
     }
@@ -59,7 +67,7 @@ public class RbacController {
     }
 
     @GetMapping("/depts")
-    @PreAuthorize("hasAnyRole('ADMIN','APPROVER','DEPT_USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','APPROVER','DEPT_USER','USER')")
     public ApiResponse<List<SysDept>> depts() {
         return ApiResponse.ok(rbacService.listDepts());
     }

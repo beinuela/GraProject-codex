@@ -19,13 +19,13 @@ public class SupplierController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','PURCHASER')")
     public ApiResponse<List<Supplier>> list(@RequestParam(required = false) String keyword) {
         return ApiResponse.ok(supplierService.list(keyword));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','PURCHASER')")
     public ApiResponse<Void> save(@RequestBody Supplier supplier) {
         supplierService.save(supplier);
         return ApiResponse.ok(null);

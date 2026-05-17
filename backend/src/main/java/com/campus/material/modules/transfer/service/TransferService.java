@@ -147,7 +147,9 @@ public class TransferService {
                     .eq(InventoryBatch::getMaterialId, item.getMaterialId())
                     .eq(InventoryBatch::getWarehouseId, order.getFromWarehouseId())
                     .gt(InventoryBatch::getRemainQty, 0)
-                    .ge(InventoryBatch::getExpireDate, LocalDate.now())
+                    .and(wrapper -> wrapper.isNull(InventoryBatch::getExpireDate)
+                            .or()
+                            .ge(InventoryBatch::getExpireDate, LocalDate.now()))
                     .orderByAsc(InventoryBatch::getExpireDate)
                     .orderByAsc(InventoryBatch::getId));
 

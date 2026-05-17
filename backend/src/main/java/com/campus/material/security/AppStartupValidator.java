@@ -41,6 +41,8 @@ public class AppStartupValidator implements ApplicationRunner {
         if (Arrays.asList(activeProfiles).contains(PROD_PROFILE)) {
             validateProdDatasource();
         }
+
+        validateDeepSeek();
     }
 
     private void validateProdDatasource() {
@@ -59,6 +61,27 @@ public class AppStartupValidator implements ApplicationRunner {
         }
         if (password == null || password.isBlank()) {
             throw new IllegalStateException("prod 环境必须配置 DB_PASSWORD。");
+        }
+    }
+
+    private void validateDeepSeek() {
+        boolean enabled = Boolean.parseBoolean(environment.getProperty("llm.deepseek.enabled", "false"));
+        if (!enabled) {
+            return;
+        }
+
+        String baseUrl = environment.getProperty("llm.deepseek.base-url");
+        String apiKey = environment.getProperty("llm.deepseek.api-key");
+        String model = environment.getProperty("llm.deepseek.model");
+
+        if (baseUrl == null || baseUrl.isBlank()) {
+            throw new IllegalStateException("启用大模型能力时必须配置 DEEPSEEK_BASE_URL。");
+        }
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new IllegalStateException("启用大模型能力时必须配置 DEEPSEEK_API_KEY。");
+        }
+        if (model == null || model.isBlank()) {
+            throw new IllegalStateException("启用大模型能力时必须配置 DEEPSEEK_MODEL。");
         }
     }
 }

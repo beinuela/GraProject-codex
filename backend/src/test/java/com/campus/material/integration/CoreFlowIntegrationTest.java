@@ -264,7 +264,7 @@ class CoreFlowIntegrationTest {
             int firstCode = firstResult.get(10, TimeUnit.SECONDS);
             int secondCode = secondResult.get(10, TimeUnit.SECONDS);
 
-            long successCount = Stream.of(firstCode, secondCode).filter(code -> code == 200).count();
+            long successCount = Stream.of(firstCode, secondCode).filter(code -> code == 0).count();
             long businessFailureCount = Stream.of(firstCode, secondCode).filter(code -> code == 409).count();
             assertEquals(1, successCount);
             assertEquals(1, businessFailureCount);

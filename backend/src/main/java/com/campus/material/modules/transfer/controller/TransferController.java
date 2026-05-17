@@ -25,13 +25,13 @@ public class TransferController {
     }
 
     @GetMapping("/list")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DISPATCHER')")
     public ApiResponse<PageResult<TransferOrder>> list(@Valid PageQuery pageQuery) {
         return ApiResponse.ok(transferService.list(pageQuery));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER')")
+    @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE_ADMIN','APPROVER','DISPATCHER')")
     public ApiResponse<Map<String, Object>> detail(@PathVariable Long id) {
         return ApiResponse.ok(transferService.detail(id));
     }

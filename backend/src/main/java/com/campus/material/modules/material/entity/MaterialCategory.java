@@ -10,5 +10,6 @@ import lombok.EqualsAndHashCode;
 @TableName("material_category")
 public class MaterialCategory extends BaseEntity {
     private String categoryName;
+    private String categoryCode;
     private String remark;
 }

@@ -1,0 +1,171 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2360" height="1360" viewBox="0 0 2360 1360">
+<defs>
+<marker id="depArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+<path d="M 0 0 L 10 5 L 0 10" fill="#FFFFFF" stroke="#6B84A3" stroke-width="1.6"/>
+</marker>
+</defs>
+<rect width="2360" height="1360" fill="#FFFFFF"/>
+<text x="80" y="34" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="24" font-weight="700" fill="#4B617D">认证与安全</text>
+<text x="80" y="374" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="24" font-weight="700" fill="#4B617D">库存与流程协同</text>
+<text x="1120" y="34" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="24" font-weight="700" fill="#4B617D">预警、统计与智能分析</text>
+<rect x="80" y="72" width="500" height="224" rx="4" fill="#FFFFFF" stroke="#7B92B0" stroke-width="2"/>
+<rect x="80" y="72" width="500" height="42" rx="4" fill="#5B9BD5" stroke="#5B9BD5" stroke-width="2"/>
+<text x="330.0" y="99" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">AuthService</text>
+<line x1="80" y1="114" x2="580" y2="114" stroke="#C8D2E0" stroke-width="1.2"/>
+<text x="94" y="146" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- jwtTokenProvider: JwtTokenProvider</text>
+<text x="94" y="170" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- loginLogService: LoginLogService</text>
+<text x="94" y="194" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- authRefreshTokenMapper: Mapper</text>
+<line x1="80" y1="208" x2="580" y2="208" stroke="#C8D2E0" stroke-width="1.2"/>
+<text x="94" y="236" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ login(LoginRequest): LoginResponse</text>
+<text x="94" y="260" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ refresh(String): LoginResponse</text>
+<text x="94" y="284" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ me(): Map&lt;String,Object&gt;</text>
+<rect x="1120" y="72" width="470" height="224" rx="4" fill="#FFFFFF" stroke="#7B92B0" stroke-width="2"/>
+<rect x="1120" y="72" width="470" height="42" rx="4" fill="#5B9BD5" stroke="#5B9BD5" stroke-width="2"/>
+<text x="1355.0" y="99" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">WarningService</text>
+<line x1="1120" y1="114" x2="1590" y2="114" stroke="#C8D2E0" stroke-width="1.2"/>
+<text x="1134" y="146" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- warningRecordMapper: WarningRecordMapper</text>
+<text x="1134" y="170" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- inventoryMapper: InventoryMapper</text>
+<text x="1134" y="194" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- operationLogService: OperationLogService</text>
+<line x1="1120" y1="208" x2="1590" y2="208" stroke="#C8D2E0" stroke-width="1.2"/>
+<text x="1134" y="236" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ list(PageQuery,...): PageResult</text>
+<text x="1134" y="260" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ scan(): void</text>
+<text x="1134" y="284" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ handle(Long,String): void</text>
+<rect x="1660" y="72" width="560" height="224" rx="4" fill="#FFFFFF" stroke="#7B92B0" stroke-width="2"/>
+<rect x="1660" y="72" width="560" height="42" rx="4" fill="#5B9BD5" stroke="#5B9BD5" stroke-width="2"/>
+<text x="1940.0" y="99" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">AiAnalysisService</text>
+<line x1="1660" y1="114" x2="2220" y2="114" stroke="#C8D2E0" stroke-width="1.2"/>
+<text x="1674" y="146" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- promptTemplateService: PromptTemplateService</text>
+<text x="1674" y="170" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- deepSeekLlmClient: DeepSeekLlmClient</text>
+<text x="1674" y="194" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- warningRecordMapper: WarningRecordMapper</text>
+<line x1="1660" y1="208" x2="2220" y2="208" stroke="#C8D2E0" stroke-width="1.2"/>
+<text x="1674" y="236" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ analyzeWarning(Long): AiTaskResponse</text>
+<text x="1674" y="260" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- buildWarningSnapshot(...): Map</text>
+<text x="1674" y="284" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- buildFallbackResult(...): Result</text>
+<rect x="80" y="410" width="460" height="200" rx="4" fill="#FFFFFF" stroke="#7B92B0" stroke-width="2"/>
+<rect x="80" y="410" width="460" height="42" rx="4" fill="#5B9BD5" stroke="#5B9BD5" stroke-width="2"/>
+<text x="310.0" y="437" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">ApplyService</text>
+<line x1="80" y1="452" x2="540" y2="452" stroke="#C8D2E0" stroke-width="1.2"/>
+<text x="94" y="484" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- inventoryService: InventoryService</text>
+<text x="94" y="508" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- operationLogService: OperationLogService</text>
+<line x1="80" y1="522" x2="540" y2="522" stroke="#C8D2E0" stroke-width="1.2"/>
+<text x="94" y="550" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ create(ApplyCreateRequest): Map</text>
+<text x="94" y="574" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ submit(Long): void</text>
+<text x="94" y="598" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ approve(Long,String): void</text>
+<rect x="600" y="392" width="520" height="224" rx="4" fill="#FFFFFF" stroke="#7B92B0" stroke-width="2"/>
+<rect x="600" y="392" width="520" height="42" rx="4" fill="#5B9BD5" stroke="#5B9BD5" stroke-width="2"/>
+<text x="860.0" y="419" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">InventoryService</text>
+<line x1="600" y1="434" x2="1120" y2="434" stroke="#C8D2E0" stroke-width="1.2"/>
+<text x="614" y="466" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- inventoryMapper: InventoryMapper</text>
+<text x="614" y="490" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- batchMapper: InventoryBatchMapper</text>
+<text x="614" y="514" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- operationLogService: OperationLogService</text>
+<line x1="600" y1="528" x2="1120" y2="528" stroke="#C8D2E0" stroke-width="1.2"/>
+<text x="614" y="556" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ list(PageQuery,...): PageResult</text>
+<text x="614" y="580" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ stockIn(StockInRequest): void</text>
+<text x="614" y="604" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ stockOut(StockOutRequest): void</text>
+<rect x="1180" y="410" width="520" height="224" rx="4" fill="#FFFFFF" stroke="#7B92B0" stroke-width="2"/>
+<rect x="1180" y="410" width="520" height="42" rx="4" fill="#5B9BD5" stroke="#5B9BD5" stroke-width="2"/>
+<text x="1440.0" y="437" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">TransferService</text>
+<line x1="1180" y1="452" x2="1700" y2="452" stroke="#C8D2E0" stroke-width="1.2"/>
+<text x="1194" y="484" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- inventoryMapper: InventoryMapper</text>
+<text x="1194" y="508" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- batchMapper: InventoryBatchMapper</text>
+<text x="1194" y="532" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- operationLogService: OperationLogService</text>
+<line x1="1180" y1="546" x2="1700" y2="546" stroke="#C8D2E0" stroke-width="1.2"/>
+<text x="1194" y="574" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ create(TransferCreateRequest): Map</text>
+<text x="1194" y="598" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ execute(Long): void</text>
+<text x="1194" y="622" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ recommendTransfer(...): List</text>
+<rect x="1760" y="430" width="420" height="176" rx="4" fill="#FFFFFF" stroke="#7B92B0" stroke-width="2"/>
+<rect x="1760" y="430" width="420" height="42" rx="4" fill="#5B9BD5" stroke="#5B9BD5" stroke-width="2"/>
+<text x="1970.0" y="457" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">AnalyticsService</text>
+<line x1="1760" y1="472" x2="2180" y2="472" stroke="#C8D2E0" stroke-width="1.2"/>
+<text x="1774" y="504" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- jdbcTemplate: JdbcTemplate</text>
+<line x1="1760" y1="518" x2="2180" y2="518" stroke="#C8D2E0" stroke-width="1.2"/>
+<text x="1774" y="546" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ overview(): Map</text>
+<text x="1774" y="570" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ inboundOutboundTrend(): List</text>
+<text x="1774" y="594" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ expiryStats(): List</text>
+<rect x="1760" y="700" width="420" height="152" rx="4" fill="#FFFFFF" stroke="#7B92B0" stroke-width="2"/>
+<rect x="1760" y="700" width="420" height="42" rx="4" fill="#5B9BD5" stroke="#5B9BD5" stroke-width="2"/>
+<text x="1970.0" y="727" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">SmartService</text>
+<line x1="1760" y1="742" x2="2180" y2="742" stroke="#C8D2E0" stroke-width="1.2"/>
+<text x="1774" y="774" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">- jdbcTemplate: JdbcTemplate</text>
+<line x1="1760" y1="788" x2="2180" y2="788" stroke="#C8D2E0" stroke-width="1.2"/>
+<text x="1774" y="816" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ forecast(Long,int): Map</text>
+<text x="1774" y="840" font-family="Consolas, Microsoft YaHei, SimSun, monospace" font-size="16" fill="#3F5877">+ replenishmentSuggestions(Integer): List</text>
+<rect x="670" y="102" width="260" height="76" rx="4" fill="#FFFFFF" stroke="#7B92B0" stroke-width="2"/>
+<rect x="670" y="102" width="260" height="42" rx="4" fill="#5B9BD5" stroke="#5B9BD5" stroke-width="2"/>
+<text x="800.0" y="129" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">JwtTokenProvider</text>
+<rect x="670" y="214" width="260" height="76" rx="4" fill="#FFFFFF" stroke="#7B92B0" stroke-width="2"/>
+<rect x="670" y="214" width="260" height="42" rx="4" fill="#5B9BD5" stroke="#5B9BD5" stroke-width="2"/>
+<text x="800.0" y="241" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">LoginLogService</text>
+<rect x="670" y="326" width="300" height="76" rx="4" fill="#FFFFFF" stroke="#7B92B0" stroke-width="2"/>
+<rect x="670" y="326" width="300" height="42" rx="4" fill="#5B9BD5" stroke="#5B9BD5" stroke-width="2"/>
+<text x="820.0" y="353" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">AuthRefreshTokenMapper</text>
+<rect x="650" y="760" width="260" height="76" rx="4" fill="#FFFFFF" stroke="#7B92B0" stroke-width="2"/>
+<rect x="650" y="760" width="260" height="42" rx="4" fill="#5B9BD5" stroke="#5B9BD5" stroke-width="2"/>
+<text x="780.0" y="787" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">InventoryMapper</text>
+<rect x="960" y="760" width="320" height="76" rx="4" fill="#FFFFFF" stroke="#7B92B0" stroke-width="2"/>
+<rect x="960" y="760" width="320" height="42" rx="4" fill="#5B9BD5" stroke="#5B9BD5" stroke-width="2"/>
+<text x="1120.0" y="787" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">InventoryBatchMapper</text>
+<rect x="1320" y="760" width="320" height="76" rx="4" fill="#FFFFFF" stroke="#7B92B0" stroke-width="2"/>
+<rect x="1320" y="760" width="320" height="42" rx="4" fill="#5B9BD5" stroke="#5B9BD5" stroke-width="2"/>
+<text x="1480.0" y="787" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">WarningRecordMapper</text>
+<rect x="930" y="1090" width="320" height="76" rx="4" fill="#FFFFFF" stroke="#7B92B0" stroke-width="2"/>
+<rect x="930" y="1090" width="320" height="42" rx="4" fill="#5B9BD5" stroke="#5B9BD5" stroke-width="2"/>
+<text x="1090.0" y="1117" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">OperationLogService</text>
+<rect x="1600" y="1020" width="340" height="76" rx="4" fill="#FFFFFF" stroke="#7B92B0" stroke-width="2"/>
+<rect x="1600" y="1020" width="340" height="42" rx="4" fill="#5B9BD5" stroke="#5B9BD5" stroke-width="2"/>
+<text x="1770.0" y="1047" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">PromptTemplateService</text>
+<rect x="1980" y="1020" width="260" height="76" rx="4" fill="#FFFFFF" stroke="#7B92B0" stroke-width="2"/>
+<rect x="1980" y="1020" width="260" height="42" rx="4" fill="#5B9BD5" stroke="#5B9BD5" stroke-width="2"/>
+<text x="2110.0" y="1047" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">DeepSeekLlmClient</text>
+<rect x="1820" y="1210" width="300" height="76" rx="4" fill="#FFFFFF" stroke="#7B92B0" stroke-width="2"/>
+<rect x="1820" y="1210" width="300" height="42" rx="4" fill="#5B9BD5" stroke="#5B9BD5" stroke-width="2"/>
+<text x="1970.0" y="1237" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">JdbcTemplate</text>
+<polyline points="580,134.72 670,140.0" fill="none" stroke="#6B84A3" stroke-width="2.2" stroke-dasharray="8 6" marker-end="url(#depArrow)"/>
+<rect x="580.0" y="119.36000000000001" width="90" height="28" rx="4" fill="#FFFFFF" stroke="none"/>
+<text x="625.0" y="138.36" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="15" fill="#5B6F89">签发/解析</text>
+<polyline points="580,197.44 620,250 670,252.0" fill="none" stroke="#6B84A3" stroke-width="2.2" stroke-dasharray="8 6" marker-end="url(#depArrow)"/>
+<rect x="579.1522375357686" y="225.6300401219999" width="72" height="28" rx="4" fill="#FFFFFF" stroke="none"/>
+<text x="615.1522375357686" y="244.6300401219999" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="15" fill="#5B6F89">登录留痕</text>
+<polyline points="580,255.67999999999998 620,370 670,364.0" fill="none" stroke="#6B84A3" stroke-width="2.2" stroke-dasharray="8 6" marker-end="url(#depArrow)"/>
+<rect x="572.3157886362702" y="318.6065239224603" width="72" height="28" rx="4" fill="#FFFFFF" stroke="none"/>
+<text x="608.3157886362702" y="337.6065239224603" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="15" fill="#5B6F89">令牌轮换</text>
+<polyline points="540,486.0 600,477.12" fill="none" stroke="#6B84A3" stroke-width="2.2" stroke-dasharray="8 6" marker-end="url(#depArrow)"/>
+<rect x="525.0" y="463.56" width="90" height="28" rx="4" fill="#FFFFFF" stroke="none"/>
+<text x="570.0" y="482.56" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="15" fill="#5B6F89">锁定/释放</text>
+<polyline points="735.2,616 735,730 780.0,760" fill="none" stroke="#6B84A3" stroke-width="2.2" stroke-dasharray="8 6" marker-end="url(#depArrow)"/>
+<rect x="699.0525586088584" y="682.0415929507566" width="72" height="28" rx="4" fill="#FFFFFF" stroke="none"/>
+<text x="735.0525586088584" y="701.0415929507566" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="15" fill="#5B6F89">汇总库存</text>
+<polyline points="932.8,616 1040,730 1104.0,760" fill="none" stroke="#6B84A3" stroke-width="2.2" stroke-dasharray="8 6" marker-end="url(#depArrow)"/>
+<rect x="974.6103331162475" y="680.7460632019796" width="72" height="28" rx="4" fill="#FFFFFF" stroke="none"/>
+<text x="1010.6103331162475" y="699.7460632019796" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="15" fill="#5B6F89">批次扣减</text>
+<polyline points="1068.0,616 1090,940 1090,1090 1042.0,1090" fill="none" stroke="#6B84A3" stroke-width="2.2" stroke-dasharray="8 6" marker-end="url(#depArrow)"/>
+<rect x="1061.7067789398036" y="858.7725625680159" width="48" height="28" rx="4" fill="#FFFFFF" stroke="none"/>
+<text x="1085.7067789398036" y="877.7725625680159" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="15" fill="#5B6F89">日志</text>
+<polyline points="365.2,610 365,910 365,1140 930,1140 930,1128.0" fill="none" stroke="#6B84A3" stroke-width="2.2" stroke-dasharray="8 6" marker-end="url(#depArrow)"/>
+<polyline points="1304.8,634 1305,730 1235.2,760" fill="none" stroke="#6B84A3" stroke-width="2.2" stroke-dasharray="8 6" marker-end="url(#depArrow)"/>
+<rect x="1268.9791393521125" y="701.9868890140131" width="72" height="28" rx="4" fill="#FFFFFF" stroke="none"/>
+<text x="1304.9791393521125" y="720.9868890140131" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="15" fill="#5B6F89">镜像批次</text>
+<polyline points="1429.6,634 1435,730 1435,1090 1192.4,1090" fill="none" stroke="#6B84A3" stroke-width="2.2" stroke-dasharray="8 6" marker-end="url(#depArrow)"/>
+<rect x="1399.0" y="965.2241224729074" width="72" height="28" rx="4" fill="#FFFFFF" stroke="none"/>
+<text x="1435.0" y="984.2241224729074" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="15" fill="#5B6F89">执行留痕</text>
+<polyline points="1378.5,296 1378,730 1464.0,760" fill="none" stroke="#6B84A3" stroke-width="2.2" stroke-dasharray="8 6" marker-end="url(#depArrow)"/>
+<rect x="1342.1975332258937" y="540.5411599241567" width="72" height="28" rx="4" fill="#FFFFFF" stroke="none"/>
+<text x="1378.1975332258937" y="559.5411599241567" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="15" fill="#5B6F89">生成预警</text>
+<polyline points="1486.6,296 1500,940 1500,1090 1250.0,1090" fill="none" stroke="#6B84A3" stroke-width="2.2" stroke-dasharray="8 6" marker-end="url(#depArrow)"/>
+<polyline points="1794.4,296 1795,980 1753.0,1020" fill="none" stroke="#6B84A3" stroke-width="2.2" stroke-dasharray="8 6" marker-end="url(#depArrow)"/>
+<rect x="1749.7254385867043" y="648.9999888427272" width="90" height="28" rx="4" fill="#FFFFFF" stroke="none"/>
+<text x="1794.7254385867043" y="667.9999888427272" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="15" fill="#5B6F89">组装提示词</text>
+<polyline points="1973.6,296 1995,980 2097.0,1020" fill="none" stroke="#6B84A3" stroke-width="2.2" stroke-dasharray="8 6" marker-end="url(#depArrow)"/>
+<rect x="1962.013082265489" y="674.754592037122" width="48" height="28" rx="4" fill="#FFFFFF" stroke="none"/>
+<text x="1986.013082265489" y="693.754592037122" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="15" fill="#5B6F89">调用</text>
+<polyline points="2130.4,296 2125,780 1600,780 1640,794.2" fill="none" stroke="#6B84A3" stroke-width="2.2" stroke-dasharray="8 6" marker-end="url(#depArrow)"/>
+<rect x="2038.2921964866969" y="762.0" width="90" height="28" rx="4" fill="#FFFFFF" stroke="none"/>
+<text x="2083.292196486697" y="781.0" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="15" fill="#5B6F89">读取上下文</text>
+<polyline points="1991.0,606 1990,1180 1940.0,1210" fill="none" stroke="#6B84A3" stroke-width="2.2" stroke-dasharray="8 6" marker-end="url(#depArrow)"/>
+<rect x="1966.4492078131877" y="904.1547152301949" width="48" height="28" rx="4" fill="#FFFFFF" stroke="none"/>
+<text x="1990.4492078131877" y="923.1547152301949" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="15" fill="#5B6F89">聚合</text>
+<polyline points="1970.0,852 2036.0,1210" fill="none" stroke="#6B84A3" stroke-width="2.2" stroke-dasharray="8 6" marker-end="url(#depArrow)"/>
+<rect x="1979.0" y="1013.0" width="48" height="28" rx="4" fill="#FFFFFF" stroke="none"/>
+<text x="2003.0" y="1032.0" text-anchor="middle" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="15" fill="#5B6F89">预测</text>
+<text x="80" y="1318" font-family="Microsoft YaHei, SimSun, Arial, sans-serif" font-size="18" fill="#6A7C93">注：虚线箭头表示关键类之间的主要依赖或调用关系，类名与方法签名均来源于项目实际代码。</text>
+</svg>

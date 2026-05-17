@@ -2,7 +2,10 @@ INSERT INTO sys_role (id, role_code, role_name, description, deleted, version, c
 (1, 'ADMIN', '系统管理员', '全局管理', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
 (2, 'WAREHOUSE_ADMIN', '仓库管理员', '仓库与库存管理', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
 (3, 'DEPT_USER', '部门用户', '物资申请与签收', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
-(4, 'APPROVER', '审批人员', '审核申请与调拨', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00');
+(4, 'APPROVER', '审批人员', '审核申请与调拨', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
+(5, 'PURCHASER', '采购人员', '供应商与入库管理', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
+(6, 'DISPATCHER', '调度人员', '配送派单与签收跟踪', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
+(7, 'USER', '普通用户', '物资申领与签收', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00');
 
 INSERT INTO sys_dept (id, dept_name, parent_id, deleted, version, created_at, updated_at) VALUES
 (1, '学校本部', NULL, 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
@@ -15,13 +18,16 @@ INSERT INTO sys_user (id, username, password, real_name, dept_id, role_id, statu
 (1, 'admin', '$2a$10$HF0xvRR/pa3b2XcZ2t.DqumBrQCdHWtNN2SUgd/xYhrPjglgru28O', '系统管理员', 2, 1, 1, 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
 (2, 'warehouse', '$2a$10$HF0xvRR/pa3b2XcZ2t.DqumBrQCdHWtNN2SUgd/xYhrPjglgru28O', '仓库管理员', 2, 2, 1, 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
 (3, 'dept', '$2a$10$HF0xvRR/pa3b2XcZ2t.DqumBrQCdHWtNN2SUgd/xYhrPjglgru28O', '部门申请员', 5, 3, 1, 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
-(4, 'approver', '$2a$10$HF0xvRR/pa3b2XcZ2t.DqumBrQCdHWtNN2SUgd/xYhrPjglgru28O', '审批负责人', 2, 4, 1, 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00');
+(4, 'approver', '$2a$10$HF0xvRR/pa3b2XcZ2t.DqumBrQCdHWtNN2SUgd/xYhrPjglgru28O', '审批负责人', 2, 4, 1, 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
+(5, 'purchaser', '$2a$10$HF0xvRR/pa3b2XcZ2t.DqumBrQCdHWtNN2SUgd/xYhrPjglgru28O', '采购专员', 2, 5, 1, 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
+(6, 'dispatcher', '$2a$10$HF0xvRR/pa3b2XcZ2t.DqumBrQCdHWtNN2SUgd/xYhrPjglgru28O', '配送调度员', 2, 6, 1, 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
+(7, 'user', '$2a$10$HF0xvRR/pa3b2XcZ2t.DqumBrQCdHWtNN2SUgd/xYhrPjglgru28O', '普通申领人', 5, 7, 1, 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00');
 
-INSERT INTO material_category (id, category_name, remark, deleted, version, created_at, updated_at) VALUES
-(1, '防疫类', '口罩与消杀物资', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
-(2, '医疗急救类', '急救包与药械', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
-(3, '食品饮水类', '饮用水与应急食品', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
-(4, '照明通信类', '夜间照明与通信设备', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00');
+INSERT INTO material_category (id, category_name, category_code, remark, deleted, version, created_at, updated_at) VALUES
+(1, '防疫类', 'CAT-FY', '口罩与消杀物资', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
+(2, '医疗急救类', 'CAT-YL', '急救包与药械', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
+(3, '食品饮水类', 'CAT-SP', '饮用水与应急食品', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
+(4, '照明通信类', 'CAT-ZM', '夜间照明与通信设备', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00');
 
 INSERT INTO material_info (id, material_code, material_name, category_id, spec, unit, safety_stock, shelf_life_days, supplier, unit_price, remark, deleted, version, created_at, updated_at) VALUES
 (1, 'M001', '医用口罩', 1, '50只/盒', '盒', 200, 1095, '华安防护', 35.00, '日常防疫储备', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
@@ -30,10 +36,10 @@ INSERT INTO material_info (id, material_code, material_name, category_id, spec, 
 (4, 'M004', '瓶装饮用水', 3, '550ml*24', '箱', 120, 540, '清泉食品', 30.00, '集中疏散保障', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
 (5, 'M005', '强光手电', 4, '可充电', '个', 40, 1825, '明锐电子', 65.00, '停电与夜间巡查', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00');
 
-INSERT INTO warehouse (id, warehouse_name, campus, address, manager, deleted, version, created_at, updated_at) VALUES
-(1, '科学校区总仓', '科学校区', '后勤楼B1层', '张老师', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
-(2, '东风校区分仓', '东风校区', '体育馆北侧', '李老师', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
-(3, '医务室物资仓', '科学校区', '医务室一层', '王医生', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00');
+INSERT INTO warehouse (id, warehouse_code, warehouse_name, campus_id, campus, address, manager, contact_phone, status, remark, deleted, version, created_at, updated_at) VALUES
+(1, 'WH-KX-ZC', '科学校区总仓', 1, '科学校区', '后勤楼B1层', '张老师', '0371-86601201', 'NORMAL', '主校区应急物资总仓', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
+(2, 'WH-DF-FC', '东风校区分仓', 2, '东风校区', '体育馆北侧', '李老师', '0371-63556701', 'NORMAL', '东风校区保障仓', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00'),
+(3, 'WH-YW', '医务室物资仓', 1, '科学校区', '医务室一层', '王医生', '0371-86601220', 'NORMAL', '医疗急救物资仓', 0, 0, '2026-01-01 09:00:00', '2026-01-01 09:00:00');
 
 INSERT INTO inventory (id, material_id, warehouse_id, current_qty, locked_qty, deleted, version, created_at, updated_at) VALUES
 (1, 1, 1, 520, 0, 0, 0, '2026-01-02 10:00:00', '2026-04-10 10:00:00'),
@@ -85,6 +91,10 @@ INSERT INTO stock_out_item (id, stock_out_id, material_id, quantity, deleted, ve
 (1, 1, 1, 80, 0, 0, '2026-02-11 10:30:00', '2026-02-11 10:30:00'),
 (2, 1, 2, 10, 0, 0, '2026-02-11 10:30:00', '2026-02-11 10:30:00'),
 (3, 2, 5, 8, 0, 0, '2026-03-01 09:00:00', '2026-03-01 09:00:00');
+
+INSERT INTO delivery_task (id, apply_order_id, stock_out_id, receiver_name, receiver_phone, delivery_address, dispatcher_id, status, remark, signed_at, deleted, version, created_at, updated_at) VALUES
+(1, 1, 1, '计算机学院李老师', '13800006666', '科学校区计算机学院楼', 6, 'SIGNED', '学院活动物资配送', '2026-02-12 18:00:00', 0, 0, '2026-02-11 11:00:00', '2026-02-12 18:00:00'),
+(2, 2, 2, '保卫处值班室', '13800007777', '东风校区学生宿舍区', 6, 'IN_TRANSIT', '暴雨巡查保障配送', NULL, 0, 0, '2026-03-01 09:30:00', '2026-03-01 10:00:00');
 
 INSERT INTO transfer_order (id, from_warehouse_id, to_warehouse_id, status, reason, applicant_id, approver_id, approve_remark, approve_time, deleted, version, created_at, updated_at) VALUES
 (1, 1, 2, 'RECEIVED', '东校区储备不足补充', 2, 4, '同意调拨', '2026-02-20 09:00:00', 0, 0, '2026-02-19 10:00:00', '2026-02-20 14:00:00'),
